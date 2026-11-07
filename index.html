@@ -921,6 +921,35 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .syncov>div{display:flex;align-items:center;gap:12px;padding:16px 24px;border-radius:14px;background:#fdf1e3;color:#3a1428;font-size:15px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
 .sdot{width:12px;height:12px;border-radius:50%;border:2px solid #c9a24e;border-top-color:transparent;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.fdraft{margin:0;font-size:13px;color:#7a4a52;background:#fff4e2;border:1px solid rgba(201,162,78,.5);border-radius:10px;padding:8px 12px}
+.chat-h{margin-bottom:6px}.tr-lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9a6f22;margin:8px 0 2px}
+#fLock{display:flex;align-items:center;justify-content:space-between;gap:14px}
+#fLock[hidden]{display:none}
+#fLock .btn{flex:none}
+#paydlg{z-index:47}
+@media (max-width:560px){#fLock{flex-direction:column;align-items:stretch}}
+.finbox{margin:6px 0 4px;padding:14px 16px;border-radius:12px;background:#fff6ea;border:1px solid rgba(201,162,78,.55);display:grid;gap:8px}
+.finbox .lab small{text-transform:none;letter-spacing:0;font-size:12px;color:#a08a7a;margin-left:6px}
+.fin-t{margin:0;white-space:pre-wrap;font-size:14.5px;color:#3a1428}.fin-d{color:#9a7a6a;font-size:12px}
+.finbox textarea{min-height:90px}
+.lockhint{margin:0;font-size:12.5px}
+.finbox>.link,.finbox>.btn{justify-self:start}
+.qbox{width:min(560px,100%);display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px}
+.qctx{margin:-4px 0 0;font-size:13.5px;color:#7a4a52}
+#qT{min-height:130px}
+#qLock{display:flex;align-items:center;justify-content:space-between;gap:14px}#qLock[hidden]{display:none}
+.askbox p{font-size:13.5px;color:var(--mute);margin:6px 0 12px}
+.addcard.ask{border-style:dashed}
+.ph-fake.qq i{font-size:46px;width:auto;height:auto;padding:14px 26px;font-family:var(--serif)}
+.chat-tools{display:inline-flex;gap:8px;flex-wrap:wrap}
+.cimg{display:flex;align-items:center;gap:12px;padding:8px;border:1px solid rgba(201,162,78,.45);border-radius:12px;background:#fffaf3}
+.cimg img{width:84px;height:84px;object-fit:cover;border-radius:8px}
+.msg-img{display:block;max-width:min(260px,100%);max-height:260px;border-radius:10px;margin:6px 0;cursor:zoom-in;object-fit:cover}
+.zoomov{position:fixed;inset:0;z-index:90;background:rgba(20,8,14,.88);display:grid;place-items:center;padding:24px}
+.zoomov[hidden]{display:none}.zoomov img{max-width:100%;max-height:100%;border-radius:10px}.zoomov .dx{position:absolute;top:16px;right:20px;color:#fff}
+.chatbox.qchat{grid-template-columns:minmax(0,1fr)!important;width:min(760px,100%)}
+.chatbox.qchat>div:first-child{display:none}
+.demo-note{margin:0;font-size:12.5px;color:#7a4a52;background:#fff4e2;border:1px dashed rgba(201,162,78,.6);border-radius:10px;padding:8px 12px}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -1058,6 +1087,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
         <ul class="mlist" id="lList"></ul>
       </div>
       <div class="box" id="lDone"></div>
+      <div class="box askbox"><div class="lab"><i></i>Вопрос по лекции</div><p>Что-то непонятно? Спроси Лену: вопрос придёт ей вместе с названием лекции.</p><button class="btn ghost" type="button" id="lAsk">Спросить Лену</button></div>
     </aside>
   </div>
 </section>
@@ -1077,7 +1107,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
   <div class="chipsrow" id="mChips"></div>
   <div class="filt qf">
     <div class="fld"><label for="qWho">Ученица</label><select id="qWho"><option value="all">Все ученицы</option></select></div>
-    <div class="fld"><label for="qType">Что</label><select id="qType"><option value="all">Всё</option><option value="spread">Расклады</option><option value="quest">Квесты</option><option value="exam">Посвящения</option></select></div>
+    <div class="fld"><label for="qType">Что</label><select id="qType"><option value="all">Всё</option><option value="spread">Расклады</option><option value="quest">Квесты</option><option value="exam">Посвящения</option><option value="question">Вопросы</option></select></div>
     <div class="fld"><label for="qFrom">Прислано с</label><input type="date" id="qFrom"></div>
     <div class="fld"><label for="qTo">по</label><input type="date" id="qTo"></div>
     <div class="fld"><label for="qSort">Порядок</label><select id="qSort"><option value="old">Сначала давние</option><option value="new">Сначала новые</option></select></div>
@@ -1324,10 +1354,11 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
         <div class="fld"><div class="fld-h"><label for="fDesc">Моя трактовка</label><button type="button" class="micbtn" id="fMic"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="fMicTxt">Надиктовать</span></button></div><textarea id="fDesc" placeholder="Первый образ, сюжет расклада, что чувствуешь, в чём сомневаешься… Можно надиктовать голосом: текст расшифруется сам."></textarea>
         <div class="vrec" id="fRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="fRecT">0:00</span><span class="interim" id="fInterim" aria-live="polite"></span><button type="button" class="btn sm" id="fStop">Готово</button></div>
         <div class="vclip" id="fClip" hidden><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое</span><audio id="fAudio" controls preload="metadata"></audio><button type="button" class="link danger" id="fClipDel">Удалить</button></div></div>
+        <p class="fdraft" id="fDraft" hidden>Восстановили черновик, который ты не отправила. <button type="button" class="link" id="fDraftClr">Начать заново</button></p>
         <p class="ferr" id="fErr" hidden></p>
       </div>
     </div>
-    <div class="lockline" id="fLock" hidden>Отправка на проверку доступна на тарифе <b>с обратной связью · 7 777 ₽/мес</b>. Пока расклад сохранится в твой журнал.</div>
+    <div class="lockline" id="fLock" hidden><span>Отправка на проверку доступна на тарифе <b>с обратной связью · 7 777 ₽/мес</b>. Пока расклад сохранится в твой журнал.</span><button type="button" class="btn sm" id="fLockPay">Оплатить</button></div>
     <div class="drow"><button class="btn" id="fSend">Отправить на проверку</button><button class="btn ghost" id="fSave">Сохранить в журнал</button><small id="fHint">Мастер отвечает пн–пт с 10 до 18 мск</small></div>
   </div>
 </div>
@@ -1426,6 +1457,20 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
   </div>
 </div>
 <div class="syncov" id="syncOv" hidden role="status" aria-live="polite"><div><span class="sdot"></span>Загружаю данные платформы…</div></div>
+<div class="dlg" id="qdlg" hidden role="dialog" aria-modal="true" aria-labelledby="qTitle">
+  <div class="dbox qbox">
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><div class="lab"><i></i>Вопрос Лене</div><h3 id="qTitle" style="font-size:1.7rem;margin-top:8px">Спросить Лену</h3></div><button class="dx" id="qClose" aria-label="Закрыть">×</button></div>
+    <p class="qctx" id="qCtx"></p>
+    <div class="fld"><span class="flab">Тема</span><div class="cats sm" id="qCats" role="radiogroup"></div></div>
+    <div class="fld"><div class="fld-h"><label for="qT">Твой вопрос</label><button type="button" class="micbtn" id="qMic"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="qMicTxt">Надиктовать</span></button></div>
+      <textarea id="qT" placeholder="Например: не поняла, чем Паж отличается от Рыцаря. Или: можно ли делать расклад на себя?"></textarea>
+      <div class="vrec" id="qRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="qRecT">0:00</span><span class="interim" id="qInterim" aria-live="polite"></span><button type="button" class="btn sm" id="qStop">Готово</button></div>
+      <div class="vclip" id="qClip" hidden><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое</span><audio id="qAudio" controls preload="metadata"></audio><button type="button" class="link danger" id="qClipDel">Удалить</button></div></div>
+    <div class="lockline" id="qLock" hidden><span>Вопросы Лене доступны на тарифе <b>с обратной связью · 7 777 ₽/мес</b>.</span><button type="button" class="btn sm" id="qLockPay">Оплатить</button></div>
+    <p class="ferr" id="qErr" hidden></p>
+    <div class="drow"><button class="btn" id="qSend">Отправить Лене</button><small>Ответ пн–пт с 10 до 18 мск</small></div>
+  </div>
+</div>
 <div class="dlg" id="dayDlg" hidden role="dialog" aria-modal="true" aria-labelledby="dayTitle">
   <div class="dbox daybox">
     <button class="dx" id="dayClose" aria-label="Закрыть">×</button>
@@ -1554,7 +1599,7 @@ function priceOfRaw(it){return it.kind==="stage"?BASE[it.n-1].price:it.kind==="f
 let DB;
 const CLOUD=!window.__NO_SB&&!/claude/.test(location.hostname);
 try{DB=CLOUD?emptyDB():JSON.parse(localStorage.getItem(STORE))}catch(e){DB=null}
-if(!DB||!DB.users||!DB.program){DB=emptyDB();
+if(!DB||!DB.users||!DB.program){DB=window.__DEMO?demoDB():emptyDB();
  /* перенос того, что ввели руками в прошлой версии: всё, кроме демо */
  try{const o=JSON.parse(localStorage.getItem("tarot-proto-v3")||"null");
   if(o&&o.users){const d=demoDB(),dq=new Set(Object.values(d.users).flatMap(u=>u.spreads.map(x=>x.q)));sidN=100;
@@ -1583,7 +1628,7 @@ const owns=(u,n)=>noPay(u)||n===7||u.owned.includes(n);
 const gotOf=u=>{let g=0;for(let k=1;k<u.cur.stage;k++)g+=L(k)+1;return Math.min(78,g+Math.min(u.cur.lesson-1,L(u.cur.stage)))};
 const itemName=it=>it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь · 1 месяц":"5 личных сессий";
 const priceOf=it=>it.kind==="stage"?ST(it.n).price:it.kind==="fb"?FB_PRICE:SES_PRICE;
-const kindName=x=>x.kind==="exam"?`Посвящение · ${x.stage} ступень`:x.kind==="quest"?"квест":"расклад";
+const kindName=x=>x.kind==="question"?(x.lesson?`вопрос · лекция ${x.lesson.stage}.${x.lesson.idx}`:"вопрос"):x.kind==="exam"?`Посвящение · ${x.stage} ступень`:x.kind==="quest"?"квест":"расклад";
 const stLabel={journal:"в журнале",wait:"ждёт ответа",done:"мастер ответил",returned:"на доработку"};
 function notify(to,t,go){DB.notifs.unshift({id:Date.now()+Math.random(),to,t,at:nowISO(),read:false,go})}
 const meKey=()=>role==="master"?"master":S&&S.id;
@@ -1842,7 +1887,7 @@ function taskHTML(l){
  return `<h3>Практика на 10 минут</h3><p>Вытяни одну карту на вопрос «Что мне важно понять про ${esc(l.title.toLowerCase())}?». Запиши первый образ, а потом сравни его со значением. Задание необязательное, но именно оно даёт насмотренность.</p>
   <div class="drow"><button class="btn ghost" id="taskJ">Записать расклад в журнал</button></div>`;
 }
-function openLesson(sn,li){
+function openLesson(sn,li){setTimeout(()=>dRestore(["taskAns"]),0);
  L_stage=sn;L_idx=li;const s=ST(sn),l=s.lessons[li-1],n=L(sn);if(!l)return;
  stopPlayer();pPos=0;$("pBar").style.width="0";$("pTime").textContent=`0:00 / ${l.dur||40}:00`;$("pBtn").textContent="▶";
  $("lCrumb").textContent=`${sn} ступень · ${l.kind==="quest"?"квест":"лекция"} ${li} из ${n}`;$("lTitle").textContent=l.title;$("pTitle").textContent=l.title;
@@ -1883,7 +1928,7 @@ function completeLesson(){
  const l=ST(L_stage).lessons[L_idx-1];
  if(l.kind==="quest"){const a=$("taskAns").value.trim();if(!a){setLSeg("t");$("taskErr").textContent="Квест засчитывается после ответа: напиши хотя бы пару строк о своём раскладе.";$("taskErr").hidden=false;$("taskAns").focus();return}
   const fb=isFb(S),x={id:++sidN,kind:"quest",at:nowISO(),sentAt:fb?nowISO():null,q:l.title,cards:"",desc:a,status:fb?"wait":"journal",thread:[],img:null,unreadS:false,unreadM:fb};
-  spreads.push(x);if(fb)notify("master",`${S.name} прислала квест «${l.title.replace("Квест: ","")}»`,{type:"spread",u:S.id,sid:x.id});}
+  dClear(["taskAns"]);spreads.push(x);if(fb)notify("master",`${S.name} прислала квест «${l.title.replace("Квест: ","")}»`,{type:"spread",u:S.id,sid:x.id});}
  stopPlayer();const card=all[got];cur.lesson+=1;persist();got=gotOf(S);
  const n=L(L_stage),more=cur.lesson<=n;
  showReward(card,"Новый аркан в колоде",card.t,`За «${l.title}». Нажми на карту в колоде, чтобы записать, что она для тебя значит.${l.kind==="quest"?(isFb(S)?" Ответ на квест ушёл Лене.":" Ответ на квест сохранён в «Моих раскладах»."):""}`,
@@ -1911,7 +1956,7 @@ function showPendingReward(){
 // ===== испытание =====
 let E_stage=1,eImg=null;
 const lastExam=sn=>S?S.spreads.filter(x=>x.kind==="exam"&&x.stage===sn).slice(-1)[0]:null;
-function openExam(sn){
+function openExam(sn){setTimeout(()=>dRestore(["eQ","eCards","eDesc"]),0);
  E_stage=sn;const s=ST(sn),w=$("eWrap");
  if(sn===7){
   const fin=cur.stage===7&&cur.lesson>L(7);
@@ -1962,11 +2007,11 @@ function submitExam(qs,need,ret){
  if(isFb(S)){
   let x=ret;
   if(x){Object.assign(x,{q,cards,desc,img:eImg,score,status:"wait",sentAt:nowISO(),unreadM:true});x.thread.push({from:"student",t:"Отправила исправленную версию.",at:nowISO()})}
-  else{x={id:++sidN,kind:"exam",stage:E_stage,at:nowISO(),sentAt:nowISO(),q,cards,desc,img:eImg,score,status:"wait",thread:[],unreadS:false,unreadM:true};spreads.push(x)}
+  else{dClear(["eQ","eCards","eDesc"]);x={id:++sidN,kind:"exam",stage:E_stage,at:nowISO(),sentAt:nowISO(),q,cards,desc,img:eImg,score,status:"wait",thread:[],unreadS:false,unreadM:true};spreads.push(x)}
   notify("master",`${S.name} ${ret?"прислала исправленное":"сдала"} Посвящение ${E_stage} ступени`,{type:"spread",u:S.id,sid:x.id});
   persist();toast("Посвящение отправлено Лене");openExam(E_stage);
  }else{
-  const x={id:++sidN,kind:"exam",stage:E_stage,at:nowISO(),sentAt:null,q,cards,desc,img:eImg,score,status:"done",thread:[{from:"system",t:`Тест сдан автоматически: ${score}. Следующая ступень открыта.`,at:nowISO()}],unreadS:false,unreadM:false};
+  dClear(["eQ","eCards","eDesc"]);const x={id:++sidN,kind:"exam",stage:E_stage,at:nowISO(),sentAt:null,q,cards,desc,img:eImg,score,status:"done",thread:[{from:"system",t:`Тест сдан автоматически: ${score}. Следующая ступень открыта.`,at:nowISO()}],unreadS:false,unreadM:false};
   spreads.push(x);passStage(S,false);persist();got=gotOf(S);const r=S.reward;S.reward=null;persist();
   showReward(all[r.card],"Посвящение пройдено",rewardText(r),`Тест: ${score}. В колоду добавлен аркан «${all[r.card].t}».`,[["К новой ступени",()=>{panelStage=r.stage;showView("path")}],["Открыть колоду",()=>showView("deck")]]);
  }
@@ -1993,7 +2038,7 @@ function openCard(i){
  $("dTitle").textContent=open?c.t:"Карта ещё закрыта";
  $("dSrc").textContent=open?srcOf(i):i===got?"Откроется после следующей пройденной лекции или Посвящения":"Откроется, когда ты дойдёшь до неё на пути";
  $("dForm").hidden=!open;renderNotes();$("dlg").hidden=false;
- (open?$("dText"):$("dClose")).focus();
+ dRestore(["dText"]);(open?$("dText"):$("dClose")).focus();
 }
 function renderNotes(){
  const list=notes[openI]||[],ul=$("dNotes");
@@ -2005,14 +2050,15 @@ function renderNotes(){
 $("dSave").onclick=()=>{if(!$("v-journal").hidden)setTimeout(renderJournal,0);
  const ta=$("dText"),t=ta.value.trim();
  if(!t){ta.focus();toast("Сначала напиши заметку");return}
- (notes[openI]=notes[openI]||[]).push({d:fmt(nowISO()),t,at:nowISO()});ta.value="";persist();renderNotes();renderDeck();toast("Заметка сохранена");
+ (notes[openI]=notes[openI]||[]).push({d:fmt(nowISO()),t,at:nowISO()});dClear(["dText"]);ta.value="";persist();renderNotes();renderDeck();toast("Заметка сохранена");
 };
 $("dClose").onclick=()=>closeDlg("dlg");
 
 // ===== мои расклады =====
 let spFilter="all";
 function fakeImg(cards,q){const a=(cards||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,3);const b=a.length?a:[(q||"?").replace(/^Квест:\s*/,"")];return `<div class="ph-fake">${b.map(x=>`<i>${esc(x[0]||"?")}</i>`).join("")}</div>`}
-const imgOf=x=>x.img?`<img class="ph-img" src="${x.img}" alt="Фото расклада">`:fakeImg(x.cards,x.q);
+const imgOf=x=>x.kind==="question"&&!x.img?`<div class="ph-fake qq"><i>?</i></div>`:x.img?`<img class="ph-img" src="${x.img}" alt="Фото расклада">`:fakeImg(x.cards,x.q);
+
 
 
 /* ---- экспорт раскладов ---- */
@@ -2052,7 +2098,8 @@ function xTxt(p){
  p.groups.forEach(([c,list])=>{if(p.sc!=="one"){L.push("","═".repeat(40),`${c.toUpperCase()} · ${list.length} ${plural(list.length,"расклад","расклада","раскладов")}`,"═".repeat(40))}
   list.forEach(x=>{L.push("",`— ${fullDate(x.at)} —`,x.q,`Тема: ${catOf(u,x)} · ${kindName(x)} · ${stLabel[x.status]||""}`);if(x.bg)L.push("","Предыстория:",x.bg);if(x.cards)L.push("",`Карты: ${x.cards}`);
    if(x.desc)L.push("","Моя трактовка:",x.desc);if(x.voice)L.push(`(голосовое ${fmtT(x.voice.dur||0)} — есть в версии с фото)`);
-   const th=x.thread.filter(m=>m.t);if(th.length){L.push("","Переписка:");th.forEach(m=>L.push(`  ${who(m)}, ${fullDT(m.at)}: ${m.t}`))}
+   const th=x.thread.filter(m=>m.t||m.img);if(th.length){L.push("","Переписка:");th.forEach(m=>L.push(`  ${who(m)}, ${fullDT(m.at)}: ${m.t}`))}
+   if(x.final)L.push("",`Итоговый расклад (${fullDT(x.final.at)}):`,x.final.t||"(голосом)");
    L.push("","· · ·")})});
  return L.join("\n")}
 function xHtml(p){
@@ -2060,7 +2107,7 @@ function xHtml(p){
  const card=x=>`<article><div class="d">${e(fullDate(x.at))}</div><h3>${e(x.q)}</h3><div class="m"><span class="t">${e(catOf(u,x))}</span><span>${e(kindName(x))}</span><span>${e(stLabel[x.status]||"")}</span></div>
   ${x.bg?`<h4>Предыстория</h4><p class="tx">${e(x.bg)}</p>`:""}${x.cards?`<p class="c"><b>Карты:</b> ${e(x.cards)}</p>`:""}${x.img?`<img src="${x.img}" alt="Фото расклада">`:""}
   ${x.desc?`<h4>Моя трактовка</h4><p class="tx">${e(x.desc)}</p>`:""}${x.voice?`<h4>Голосовое · ${fmtT(x.voice.dur||0)}</h4><audio controls src="${x.voice.src}"></audio>`:""}
-  ${x.thread.filter(m=>m.t).length?`<h4>Переписка</h4>${x.thread.filter(m=>m.t).map(m=>`<div class="msg ${m.from}"><b>${e(who(m))}</b> <small>${e(fullDT(m.at))}</small><p>${e(m.t)}</p></div>`).join("")}`:""}</article>`;
+  ${x.thread.filter(m=>m.t||m.img).length?`<h4>Переписка</h4>${x.thread.filter(m=>m.t||m.img).map(m=>`<div class="msg ${m.from}"><b>${e(who(m))}</b> <small>${e(fullDT(m.at))}</small>${m.img?`<img src="${m.img}" alt="">`:""}<p>${e(m.t)}</p></div>`).join("")}`:""}${x.final?`<h4>Итоговый расклад · ${e(fullDT(x.final.at))}</h4>${x.final.voice&&x.final.voice.src?`<audio controls src="${x.final.voice.src}"></audio>`:""}<p class="tx">${e(x.final.t||"")}</p>`:""}</article>`;
  const toc=p.sc==="all"?`<nav><b>Темы</b>${p.groups.map(([c,l],i)=>`<a href="#g${i}">${e(c)} <small>${l.length}</small></a>`).join("")}</nav>`:"";
  return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(p.title)} · ${e(u.name)}</title><style>
 body{margin:0;background:#f7efe4;color:#2e1520;font:16px/1.55 Georgia,"Times New Roman",serif}
@@ -2119,7 +2166,7 @@ function renderCats(){
 function renderFCats(){
  const box=$("fCats");
  box.innerHTML=`<button type="button" class="cat ${!fCat?"on":""}" role="radio" aria-checked="${!fCat}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${fCat===c?"on":""}" role="radio" aria-checked="${fCat===c}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="fCatAdd">+ Своя</button>`;
- box.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{fCat=b.dataset.c||null;renderFCats()});
+ box.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{fCat=b.dataset.c||null;renderFCats();fExtraSave()});
  $("fCatAdd").onclick=()=>{$("fCatAdd").replaceWith(catInput(n=>{if(n)fCat=n;renderFCats()}))};
 }
 function renderSp(){
@@ -2127,17 +2174,18 @@ function renderSp(){
  const list=alive(spreads).filter(x=>spCat==="all"||x.cat===spCat).filter(x=>spFilter==="all"||(spFilter==="done"?x.status==="done"||x.status==="returned":x.status===spFilter)).slice().sort((a,b)=>(b.unreadS-a.unreadS)||(b.at||"").localeCompare(a.at||""));
  $("spTarif").innerHTML=FREE?"":isFb(S)?`Обратная связь до <b style="color:var(--gold2);font-weight:500">${fmt(S.fbUntil)}</b>`:`Без обратной связи · <button class="link" id="spFb">подключить</button>`;
  const fb=$("spFb");if(fb)fb.onclick=()=>openPay({kind:"fb"});
- $("spGrid").innerHTML=`<button class="addcard" id="spAdd">+ Новый расклад<span>фото, вопрос и твоя трактовка</span></button>`+
+ $("spGrid").innerHTML=`<button class="addcard" id="spAdd">+ Новый расклад<span>фото, вопрос и твоя трактовка</span></button><button class="addcard ask" id="spAsk">? Вопрос Лене<span>без расклада: про лекцию, карту, практику</span></button>`+
   list.map(x=>{const lm=x.thread.length?x.thread[x.thread.length-1]:null;
    return `<button class="sp ${x.unreadS?"new":""}" data-id="${x.id}">${x.unreadS?'<span class="newtag">новый ответ</span>':""}${imgOf(x)}<div class="sp-b">${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<b>${esc(x.q)}</b><p>${esc(lm&&lm.from!=="system"?(lm.from==="master"?"Лена: ":"Ты: ")+lm.t:x.desc)}</p><div class="sp-m"><span>${fmt(x.at)}${x.kind!=="spread"?` · ${kindName(x)}`:""}</span><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span></div></div></button>`}).join("");
  if(!list.length&&alive(spreads).length)$("spGrid").insertAdjacentHTML("beforeend",`<p class="sp-empty">${spCat!=="all"?`В теме «${esc(spCat)}» пока нет раскладов${spFilter!=="all"?" с таким статусом":""}.`:"Нет раскладов с таким статусом."}</p>`);
+ $("spAsk").onclick=()=>openQ(spCat!=="all"?{cat:spCat}:null);
  $("spAdd").onclick=()=>openForm(null,spCat!=="all"?{cat:spCat}:null);
  document.querySelectorAll(".sp").forEach(b=>b.onclick=()=>openChat(S.id,+b.dataset.id,"student"));
 }
 document.querySelectorAll("#spFilter button").forEach(b=>b.onclick=()=>{spFilter=b.dataset.f;document.querySelectorAll("#spFilter button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderSp()});
 let fImg=null,editId=null;
 function openForm(x,pre){
- editId=x?x.id:null;lastFocus=document.activeElement;fImg=x?x.img||null:null;stopRec(true);setVoice(x&&x.voice||null);fCat=x?x.cat||null:pre&&pre.cat||null;renderFCats();
+ editId=x?x.id:null;lastFocus=document.activeElement;fImg=x?x.img||null:null;RF.stop(true);RF.set(x&&x.voice||null);fCat=x?x.cat||null:pre&&pre.cat||null;renderFCats();
  $("fQ").value=x?x.q:pre&&pre.q||"";$("fCards").value=x?x.cards:"";$("fBg").value=x?x.bg||"":"";$("fDesc").value=x?x.desc:"";
  const p=$("fPrev");p.hidden=!fImg;if(fImg)p.src=fImg;$("dropTxt").hidden=!!fImg;$("fErr").hidden=true;
  $("fTitle").textContent=x?"Изменить расклад":"Добавить в журнал";
@@ -2145,70 +2193,162 @@ function openForm(x,pre){
  send.hidden=!canSend;send.textContent=x?"Сохранить и отправить Лене":"Отправить Лене на разбор";
  $("fSave").textContent=x?"Сохранить изменения":"Сохранить в журнал";
  send.setAttribute("aria-disabled",!fb);$("fLock").hidden=fb||!canSend;$("fHint").hidden=!fb||!canSend;
- $("fdlg").hidden=false;$(pre&&pre.q?"fCards":"fQ").focus();
+ $("fdlg").hidden=false;fRestore();
+ $("fDraftClr").onclick=()=>{dClear(FIDS,[["fQ","extra"]]);FIDS.forEach(i=>$(i).value="");RF.set(null);fImg=null;$("fPrev").hidden=true;$("dropTxt").hidden=false;fCat=null;renderFCats();$("fDraft").hidden=true;$("fQ").focus()};$(pre&&pre.q?"fCards":"fQ").focus();
 }
 function readPhoto(file,cb){
  if(!file||!file.type.startsWith("image/")){toast("Нужен файл с фото");return}
  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.8))};im.src=r.result};r.readAsDataURL(file);
 }
-const setF=d=>{fImg=d;const p=$("fPrev");p.src=d;p.hidden=false;$("dropTxt").hidden=true};
+const setF=d=>{fImg=d;const p=$("fPrev");p.src=d;p.hidden=false;$("dropTxt").hidden=true;if(typeof fExtraSave==="function")fExtraSave()};
 $("fPhoto").onchange=e=>readPhoto(e.target.files[0],setF);
 const drop=$("drop");
 drop.ondragover=e=>{e.preventDefault();drop.classList.add("over")};drop.ondragleave=()=>drop.classList.remove("over");
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");readPhoto(e.dataTransfer.files[0],setF)};
 
-/* ---- голос: запись + расшифровка ---- */
-let fVoice=null,rec=null,recog=null,recT0=0,recTimer=null,recChunks=[],recStream=null;
+/* (черновики ниже) */
+/* ---- голос: запись + расшифровка (одна машинка для формы расклада и для переписки) ---- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const fmtT=sec=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
-function setVoice(v){fVoice=v;$("fClip").hidden=!v;const a=$("fAudio");if(v)a.src=v.src;else a.removeAttribute("src");$("fMicTxt").textContent=v?"Перезаписать":"Надиктовать"}
-async function startRec(){
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast("Этот браузер не умеет записывать звук. Попробуй Chrome или Safari");return}
- try{recStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast("Нет доступа к микрофону. Разреши его для этой страницы в настройках браузера");return}
- recChunks=[];let opts={audioBitsPerSecond:32000};try{rec=new MediaRecorder(recStream,opts)}catch(_){rec=new MediaRecorder(recStream)}
- const r=rec;r.ondataavailable=e=>{if(e.data&&e.data.size)recChunks.push(e.data)};
- r.onstop=()=>{recStream&&recStream.getTracks().forEach(t=>t.stop());recStream=null;if(r._discard||!recChunks.length)return;
-  const dur=Math.max(1,Math.round((Date.now()-recT0)/1000)),b=new Blob(recChunks,{type:r.mimeType||"audio/webm"}),fr=new FileReader();
-  fr.onload=()=>{setVoice({src:fr.result,dur,at:nowISO()});toast(SR?"Голосовое прикреплено, текст расшифрован в поле":"Голосовое прикреплено к раскладу")};fr.readAsDataURL(b)};
- r.start(1000);recT0=Date.now();
- $("fRec").hidden=false;$("fMic").hidden=true;$("fRecT").textContent="0:00";
- $("fInterim").textContent=SR?"Говори, текст появится в поле выше…":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
- recTimer=setInterval(()=>{const sec=Math.round((Date.now()-recT0)/1000);$("fRecT").textContent=fmtT(sec);},300);
- if(SR){const ta=$("fDesc");let base=ta.value.replace(/\s+$/,"");
-  const g=new SR();recog=g;g.lang="ru-RU";g.continuous=true;g.interimResults=true;
-  g.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
-    if(e.results[i].isFinal){const piece=t.charAt(0).toUpperCase()+t.slice(1);base=(base?base+(/[.!?…]$/.test(base)?" ":". "):"")+piece;ta.value=base}else tmp+=t+" "}
-   $("fInterim").textContent=tmp.trim()||"…"};
-  g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){recog=null;$("fInterim").textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
-  g.onend=()=>{if(recog===g&&rec&&rec.state==="recording"){try{g.start()}catch(_){}}};
-  try{g.start()}catch(_){}}
+let RACTIVE=null;
+function makeRec(o){
+ /* o: {ta, mic, micTxt, rec, time, interim, stop, clip, audio, del, label, done, onChange} */
+ const R={voice:null,mr:null,g:null,t0:0,timer:null,chunks:[],stream:null};
+ R.active=()=>!!(R.mr&&R.mr.state==="recording");
+ R.set=v=>{R.voice=v;o.clip.hidden=!v;if(v)o.audio.src=v.src;else o.audio.removeAttribute("src");o.micTxt.textContent=v?"Перезаписать":(o.label||"Надиктовать");if(o.onChange)o.onChange(v)};
+ R.start=async()=>{
+  if(RACTIVE&&RACTIVE!==R)RACTIVE.stop();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast("Этот браузер не умеет записывать звук. Попробуй Chrome или Safari");return}
+  try{R.stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast("Нет доступа к микрофону. Разреши его для этой страницы в настройках браузера");return}
+  R.chunks=[];try{R.mr=new MediaRecorder(R.stream,{audioBitsPerSecond:32000})}catch(_){R.mr=new MediaRecorder(R.stream)}
+  const mr=R.mr,stream=R.stream;RACTIVE=R;
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)R.chunks.push(e.data)};
+  mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());if(R.stream===stream)R.stream=null;if(mr._discard||!R.chunks.length)return;
+   const dur=Math.max(1,Math.round((Date.now()-R.t0)/1000)),b=new Blob(R.chunks,{type:mr.mimeType||"audio/webm"}),fr=new FileReader();
+   fr.onload=()=>{R.set({src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)});toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))};fr.readAsDataURL(b)};
+  mr.start(1000);R.t0=Date.now();
+  o.rec.hidden=false;o.mic.hidden=true;o.time.textContent="0:00";
+  o.interim.textContent=SR?"Говори, текст появится в поле выше…":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
+  R.timer=setInterval(()=>{o.time.textContent=fmtT(Math.round((Date.now()-R.t0)/1000))},300);
+  if(SR){const ta=o.ta;let base=ta.value.replace(/\s+$/,"");
+   const g=new SR();R.g=g;g.lang="ru-RU";g.continuous=true;g.interimResults=true;
+   g.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
+     if(e.results[i].isFinal){const piece=t.charAt(0).toUpperCase()+t.slice(1);base=(base?base+(/[.!?…]$/.test(base)?" ":". "):"")+piece;ta.value=base}else tmp+=t+" "}
+    o.interim.textContent=tmp.trim()||"…"};
+   g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){R.g=null;o.interim.textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
+   g.onend=()=>{if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
+   try{g.start()}catch(_){}}
+ };
+ R.stop=discard=>{
+  clearInterval(R.timer);R.timer=null;const g=R.g;R.g=null;if(g)try{g.stop()}catch(_){}
+  if(R.active()){R.mr._discard=!!discard;R.mr.stop()}else if(R.stream){R.stream.getTracks().forEach(t=>t.stop());R.stream=null}
+  R.mr=null;if(RACTIVE===R)RACTIVE=null;o.rec.hidden=true;o.mic.hidden=false;
+ };
+ o.mic.onclick=()=>R.start();o.stop.onclick=()=>R.stop();
+ o.del.onclick=()=>{R.set(null);toast("Голосовое удалено, текст остался")};
+ return R;
 }
-function stopRec(discard){
- clearInterval(recTimer);recTimer=null;const g=recog;recog=null;if(g)try{g.stop()}catch(_){}
- if(rec&&rec.state==="recording"){rec._discard=!!discard;rec.stop()}else if(recStream){recStream.getTracks().forEach(t=>t.stop());recStream=null}
- rec=null;$("fRec").hidden=true;$("fMic").hidden=false;
+const RF=makeRec({ta:$("fDesc"),mic:$("fMic"),micTxt:$("fMicTxt"),rec:$("fRec"),time:$("fRecT"),interim:$("fInterim"),stop:$("fStop"),clip:$("fClip"),audio:$("fAudio"),del:$("fClipDel"),onChange:()=>{if(typeof fExtraSave==="function")fExtraSave()},done:SR?"Голосовое прикреплено, текст расшифрован в поле":"Голосовое прикреплено к раскладу"});
+const MIC_SVG='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+/* ---- черновики: всё, что начали писать, переживает закрытие окна, перезагрузку и вылет ---- */
+const DCTX={
+ fQ:()=>"f"+(editId||"new"),fBg:()=>"f"+(editId||"new"),fCards:()=>"f"+(editId||"new"),fDesc:()=>"f"+(editId||"new"),
+ cTxt:()=>chatS&&chatU?"c"+chatU.id+"~"+chatS.id:null,
+ edT:()=>chatS&&editMsg!=null?"ed"+chatS.id+"~"+editMsg:null,
+ dText:()=>openI!=null?"n"+openI:null,
+ dayNote:()=>"day"+TODAY,
+ eQ:()=>"e"+E_stage,eCards:()=>"e"+E_stage,eDesc:()=>"e"+E_stage,
+ taskAns:()=>"t"+L_stage+"~"+L_idx,
+ finT:()=>chatS?"fin"+chatS.id:null
+};
+function dWho(){return (typeof ME!=="undefined"&&ME)||(S&&S.id)||(role==="master"?"master":"guest")}
+function dKey(id,suffix){const f=DCTX[id];const k=f&&f();return k?"tp-d:"+dWho()+":"+k+":"+(suffix||id):null}
+const dGet=k=>{try{return k?localStorage.getItem(k):null}catch(e){return null}};
+const dSet=(k,v)=>{if(!k)return;try{v==null||v===""?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+let dT={};
+document.addEventListener("input",e=>{const el=e.target;if(!el||!el.id||!DCTX[el.id])return;const k=dKey(el.id);clearTimeout(dT[el.id]);dT[el.id]=setTimeout(()=>dSet(k,el.value),250)});
+function dRestore(ids){let n=0;ids.forEach(id=>{const el=$(id);if(!el)return;const v=dGet(dKey(id));if(v&&!el.value.trim()){el.value=v;n++}});return n}
+function dClear(ids,extra){ids.forEach(id=>{clearTimeout(dT[id]);dSet(dKey(id),null)});(extra||[]).forEach(([id,suf])=>dSet(dKey(id,suf),null))}
+/* у формы расклада ещё фото, голос и тема */
+const FIDS=["fQ","fBg","fCards","fDesc"];
+function fExtraSave(){if(!$("fdlg")||$("fdlg").hidden)return;const k=dKey("fQ","extra");try{localStorage.setItem(k,JSON.stringify({img:fImg,voice:RF.voice,cat:fCat}))}catch(e){try{localStorage.setItem(k,JSON.stringify({img:null,voice:null,cat:fCat}))}catch(_){}}}
+function fRestore(){
+ let n=dRestore(FIDS);
+ try{const x=JSON.parse(dGet(dKey("fQ","extra"))||"null");if(x){if(x.img&&!fImg){setF(x.img);n++}if(x.voice&&!RF.voice){RF.set(x.voice);n++}if(x.cat&&!fCat){fCat=x.cat;renderFCats()}}}catch(e){}
+ $("fDraft").hidden=!n;
 }
-$("fMic").onclick=()=>{if(fVoice&&!confirm0())return;startRec()};
-function confirm0(){return true}
-$("fStop").onclick=()=>stopRec();
-$("fClipDel").onclick=()=>{setVoice(null);toast("Голосовое удалено, текст остался")};
+
+
+function openZoom(src){let z=$("zoomOv");if(!z){z=document.createElement("div");z.id="zoomOv";z.className="zoomov";z.innerHTML='<img alt="Фото"><button class="dx" aria-label="Закрыть">×</button>';document.body.appendChild(z);z.onclick=()=>z.hidden=true}z.querySelector("img").src=src;z.hidden=false}
+document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&&z&&!z.hidden){z.hidden=true;e.stopImmediatePropagation()}},true);
+/* ---- вопросы Лене вне раскладов ---- */
+let qCtx=null,qCat=null;
+function renderQCats(){const box=$("qCats");box.innerHTML=`<button type="button" class="cat ${!qCat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${qCat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="qCatAdd">+ Своя</button>`;
+ box.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{qCat=b.dataset.c||null;renderQCats()});$("qCatAdd").onclick=()=>{$("qCatAdd").replaceWith(catInput(n=>{if(n)qCat=n;renderQCats()}))}}
+const RQ=makeRec({ta:$("qT"),mic:$("qMic"),micTxt:$("qMicTxt"),rec:$("qRec"),time:$("qRecT"),interim:$("qInterim"),stop:$("qStop"),clip:$("qClip"),audio:$("qAudio"),del:$("qClipDel"),done:SR?"Голосовое готово, текст в поле — поправь и отправь":"Голосовое прикреплено"});
+DCTX.qT=()=>"q"+(qCtx&&qCtx.stage?qCtx.stage+"~"+qCtx.idx:"gen");
+function openQ(ctx){
+ qCtx=ctx||null;qCat=(ctx&&ctx.cat)||null;renderQCats();lastFocus=document.activeElement;RQ.stop(true);RQ.set(null);$("qT").value="";$("qErr").hidden=true;
+ $("qCtx").innerHTML=ctx&&ctx.stage?`К лекции ${ctx.stage}.${ctx.idx} · «${esc(ctx.title)}». Лена увидит, о какой лекции речь.`:"Любой вопрос про Таро, карты, практику или обучение.";
+ const fb=isFb(S);$("qLock").hidden=fb;$("qSend").setAttribute("aria-disabled",!fb);
+ $("qdlg").hidden=false;dRestore(["qT"]);$("qT").focus();
+}
+$("qClose").onclick=()=>closeDlg("qdlg");
+$("qLockPay").onclick=()=>openPay({kind:"fb"},()=>{const fb=isFb(S);$("qLock").hidden=fb;$("qSend").setAttribute("aria-disabled",!fb);if(fb)toast("Обратная связь подключена — можно спрашивать")});
+$("lAsk").onclick=()=>{const l=ST(L_stage).lessons[L_idx-1];openQ({stage:L_stage,idx:L_idx,title:l?l.title:""})};
+$("qSend").onclick=()=>{
+ const err=$("qErr");if(!isFb(S)){err.textContent="Вопросы Лене — на тарифе с обратной связью. Нажми «Оплатить».";err.hidden=false;return}
+ if(RQ.active()){err.textContent="Сначала нажми «Готово», чтобы закончить запись.";err.hidden=false;return}
+ const t=$("qT").value.trim();if(!t&&!RQ.voice){err.textContent="Напиши вопрос или надиктуй его.";err.hidden=false;$("qT").focus();return}
+ const short=(t||"Голосовой вопрос").split(/\n/)[0].slice(0,90);
+ const v=RQ.voice;const x={id:++sidN,kind:"question",at:nowISO(),sentAt:nowISO(),q:short,cards:"",desc:t,voice:v?{src:v.src,dur:v.dur,vid:v.vid}:null,lesson:qCtx&&qCtx.stage?{stage:qCtx.stage,idx:qCtx.idx,title:qCtx.title}:null,status:"wait",thread:[],img:null,cat:qCat,unreadS:false,unreadM:true};
+ spreads.push(x);notify("master",`${S.name} задала вопрос${qCtx&&qCtx.stage?` к лекции «${qCtx.title}»`:""}: «${short}»`,{type:"spread",u:S.id,sid:x.id});
+ dClear(["qT"]);RQ.set(null);persist();closeDlg("qdlg");refresh();toast("Вопрос отправлен Лене. Ответ придёт в «Расклады»");
+};
+/* голос в переписке: черновик живёт, пока окно открыто, даже если чат перерисовался */
+let RC=null,cDraft={sid:null,voice:null,img:null};
+function mountChatRec(x){
+ const ta=$("cTxt");if(!ta){RC=null;return}
+ if(cDraft.sid!==x.id)cDraft={sid:x.id,voice:null,img:null};
+ const lab=document.querySelector('label[for="cTxt"]');
+ const head=document.createElement("div");head.className="fld-h chat-h";lab.parentNode.insertBefore(head,lab);head.appendChild(lab);
+ head.insertAdjacentHTML("beforeend",`<span class="chat-tools"><button type="button" class="micbtn" id="cPhoto"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Фото</span></button><input type="file" id="cPhotoIn" accept="image/*" hidden><button type="button" class="micbtn" id="cMic">${MIC_SVG}<span id="cMicTxt">Голосовое</span></button></span>`);
+ ta.insertAdjacentHTML("afterend",`<div class="vrec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="btn sm" id="cStop">Готово</button></div>
+ <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="cAudio" controls preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>`);
+ ta.insertAdjacentHTML("afterend",`<div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><button type="button" class="link danger" id="cImgDel">Убрать фото</button></div>`);
+ const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}};
+ $("cPhoto").onclick=()=>$("cPhotoIn").click();
+ $("cPhotoIn").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readPhoto(f,showImg)};
+ $("cImgDel").onclick=()=>showImg(null);
+ if(!cDraft.img){const d=dGet(dKey("cTxt","img"));if(d)cDraft.img=d}
+ if(cDraft.img)showImg(cDraft.img);
+ RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",done:SR?"Голосовое готово, расшифровка в поле — поправь и отправь":"Голосовое готово, нажми «Отправить»",onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
+ if(!cDraft.voice){try{const v=JSON.parse(dGet(dKey("cTxt","voice"))||"null");if(v)cDraft.voice=v}catch(e){}}
+ if(cDraft.voice)RC.set(cDraft.voice);
+ dRestore(["cTxt","edT"]);
+}
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vclip on"><span class="vlab">${MIC_SVG}Голосовое · ${fmtT(m.voice.dur||0)}</span><audio controls preload="metadata" src="${m.voice.src}"></audio></div>${m.t?'<div class="tr-lab">Расшифровка</div>':""}`:"";
+
+const talkStarted=x=>(x.thread||[]).some(m=>m.from==="master"||m.from==="student");
 function submitSp(status){
  const q=$("fQ").value.trim(),desc=$("fDesc").value.trim(),err=$("fErr");
- if(rec&&rec.state==="recording"){err.textContent="Сначала нажми «Готово», чтобы закончить запись.";err.hidden=false;return}
- if(!q||(!desc&&!fVoice)){err.textContent="Заполни вопрос и свою трактовку (текстом или голосом), без них разбор не получится.";err.hidden=false;return}
+ if(RF.active()){err.textContent="Сначала нажми «Готово», чтобы закончить запись.";err.hidden=false;return}
+ if(!q||(!desc&&!RF.voice)){err.textContent="Заполни вопрос и свою трактовку (текстом или голосом), без них разбор не получится.";err.hidden=false;return}
  const bg=$("fBg").value.trim(),cards=$("fCards").value.trim(),ex=editId&&spreads.find(s=>s.id===editId);let x=ex;
- if(ex){Object.assign(ex,{q,bg,cards,desc,img:fImg,voice:fVoice,cat:fCat});if(status==="wait"&&ex.status==="journal"){ex.status="wait";ex.sentAt=nowISO();ex.unreadM=true}}
- else{x={id:++sidN,kind:"spread",at:nowISO(),sentAt:status==="wait"?nowISO():null,q,bg,cards,desc,status,thread:[],img:fImg,voice:fVoice,cat:fCat,unreadS:false,unreadM:status==="wait"};spreads.push(x)}
+ if(ex&&talkStarted(ex)){err.textContent="Этот расклад уже обсуждается с Леной, исходник менять нельзя. Запиши выводы в «Итоговый расклад».";err.hidden=false;return}
+ if(ex){Object.assign(ex,{q,bg,cards,desc,img:fImg,voice:RF.voice,cat:fCat});if(status==="wait"&&ex.status==="journal"){ex.status="wait";ex.sentAt=nowISO();ex.unreadM=true}}
+ else{x={id:++sidN,kind:"spread",at:nowISO(),sentAt:status==="wait"?nowISO():null,q,bg,cards,desc,status,thread:[],img:fImg,voice:RF.voice,cat:fCat,unreadS:false,unreadM:status==="wait"};spreads.push(x)}
  if(status==="wait"&&(!ex||ex.sentAt))notify("master",`${S.name} прислала расклад «${q}»`,{type:"spread",u:S.id,sid:x.id});
- if(spCat!=="all"&&fCat!==spCat)spCat="all";persist();closeDlg("fdlg");spFilter="all";document.querySelectorAll("#spFilter button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f==="all"));
+ dClear(FIDS,[["fQ","extra"]]);if(spCat!=="all"&&fCat!==spCat)spCat="all";persist();closeDlg("fdlg");spFilter="all";document.querySelectorAll("#spFilter button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f==="all"));
  refresh();toast(status==="wait"?"Расклад отправлен Лене. Ответ придёт в рабочие часы":ex?"Изменения сохранены":"Расклад сохранён в журнал");
 }
+$("fLockPay").onclick=()=>openPay({kind:"fb"},()=>{const fb=isFb(S);$("fSend").setAttribute("aria-disabled",!fb);$("fLock").hidden=fb;$("fHint").hidden=!fb;if(fb)toast("Обратная связь подключена — можно отправлять Лене")});
 $("fSend").onclick=()=>{if(!isFb(S)){toast("Отправка Лене есть на тарифе с обратной связью");return}submitSp("wait")};
 $("fSave").onclick=()=>{const ex=editId&&spreads.find(s=>s.id===editId);submitSp(ex?ex.status:"journal")};
 $("fClose").onclick=()=>closeDlg("fdlg");
 
 // ===== переписка под разбором =====
-let chatU=null,chatS=null,chatRole=null,editMsg=null;
+let chatU=null,chatS=null,chatRole=null,editMsg=null,finEdit=false;
 function openChat(uid,sid,r){
  const u=DB.users[uid];if(!u)return;const x=u.spreads.find(s=>s.id===sid);if(!x||(x.deletedAt&&r==="student")){toast("Этот расклад удалён");return}
  chatU=u;chatS=x;chatRole=r;editMsg=null;
@@ -2221,48 +2361,66 @@ function openChat(uid,sid,r){
 function renderChat(){
  const u=chatU,x=chatS,r=chatRole,me=r==="master";
  const who=m=>m.from==="master"?MASTER.name:m.from==="student"?(me?u.name:"Ты"):"Платформа";
- const thread=x.thread.map((m,i)=>`<div class="msg ${m.from==="master"?"m":m.from==="student"?"s":"sys"}"><header><b>${esc(who(m))}</b><span>${fmtDT(m.at)}${m.edited?" · изменено":""}</span></header>${editMsg===i?`<textarea id="edT">${esc(m.t)}</textarea><div class="drow"><button class="btn sm" id="edSave">Сохранить</button><button class="btn ghost sm" id="edCancel">Отмена</button></div>`:`<p>${esc(m.t)}</p>`}${me&&m.from==="master"&&editMsg!==i?`<button class="ed" data-e="${i}">изменить</button>`:""}</div>`).join("");
+ const thread=x.thread.map((m,i)=>`<div class="msg ${m.from==="master"?"m":m.from==="student"?"s":"sys"}"><header><b>${esc(who(m))}</b><span>${fmtDT(m.at)}${m.edited?" · изменено":""}</span></header>${editMsg===i?`<textarea id="edT">${esc(m.t)}</textarea><div class="drow"><button class="btn sm" id="edSave">Сохранить</button><button class="btn ghost sm" id="edCancel">Отмена</button></div>`:`${m.img?`<img class="msg-img" src="${m.img}" alt="Фото" tabindex="0">`:""}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}`}${me&&m.from==="master"&&editMsg!==i?`<button class="ed" data-e="${i}">изменить</button>`:""}</div>`).join("");
  let comp="";
  if(x.deletedAt&&me)comp=`<div class="gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя. Расклад и переписка остались только у тебя.<div class="drow" style="margin-top:10px"><button class="btn ghost sm" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div></div>`;
  else if(me){
   if(x.kind==="exam"&&x.status==="wait")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий к Посвящению</label><textarea id="cTxt" placeholder="Что получилось, что доработать…"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cPass">Засчитать Посвящение</button><button class="btn ghost" id="cRet">Вернуть на доработку</button></div></div>`;
-  else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>${x.thread.some(m=>m.from==="master")?"Ответить":"Разбор"}</label><textarea id="cTxt" placeholder="Что ученица увидела верно, на что обратить внимание…"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">${esc(u.name)} получит уведомление</small></div></div>`;
+  else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>${x.thread.some(m=>m.from==="master")||x.kind==="question"?"Ответить":"Разбор"}</label><textarea id="cTxt" placeholder="${x.kind==="question"?"Твой ответ на вопрос…":"Что ученица увидела верно, на что обратить внимание…"}"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">${esc(u.name)} получит уведомление</small></div></div>`;
  }else{
   if(!isFb(u))comp=`<div class="lockline">Задать вопрос Лене и получить разбор можно на тарифе <b>с обратной связью · ${rub(FB_PRICE)} в месяц</b>. <button class="link" id="cBuy">Подключить</button></div>`;
   else if(x.status==="journal")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий для Лены, если хочешь</label><textarea id="cTxt" placeholder="В чём сомневаешься, на что посмотреть…"></textarea><div class="drow"><button class="btn" id="cSendRev">Отправить на разбор</button></div></div>`;
   else if(x.kind==="exam"&&x.status==="returned")comp=`<div class="drow"><button class="btn" id="cFix">Исправить Посвящение</button></div>`;
   else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Написать Лене</label><textarea id="cTxt" placeholder="Уточнить, переспросить, рассказать, как сбылось…"></textarea><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">Ответ пн–пт с 10 до 18 мск</small></div></div>`;
  }
- const own=!me&&!x.deletedAt&&x.kind!=="exam";
- $("vBox").className="dbox vbox chatbox";
+ const own=!me&&!x.deletedAt&&x.kind!=="exam",locked=talkStarted(x);
+ const hasM=x.thread.some(m=>m.from==="master"),fin=x.final;
+ const finBlock=(hasM||fin)&&x.kind!=="exam"&&x.kind!=="question"?`<div class="finbox" id="finBox"><div class="lab"><i></i>Итоговый расклад <small>после разбора с Леной</small></div>${finEdit?`<div class="fld-h chat-h"><span></span><button type="button" class="micbtn" id="finMic">${MIC_SVG}<span id="finMicTxt">Надиктовать</span></button></div><textarea id="finT" placeholder="Как ты теперь читаешь этот расклад: что поменялось после разбора, к какому выводу пришла">${fin?esc(fin.t):""}</textarea><div class="vrec" id="finRec" hidden><span class="rdot"></span><span class="rt" id="finRecT">0:00</span><span class="interim" id="finInterim"></span><button type="button" class="btn sm" id="finStop">Готово</button></div><div class="vclip" id="finClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="finAudio" controls></audio><button type="button" class="link danger" id="finDel">Удалить</button></div><div class="drow"><button class="btn sm" id="finSave">Сохранить итог</button><button class="btn ghost sm" id="finCancel">Отмена</button></div>`:fin?`${fin.voice&&fin.voice.src?voiceMsg({voice:fin.voice,t:fin.t}):""}<p class="fin-t">${esc(fin.t)}</p><small class="fin-d">${fullDT(fin.at)}${fin.edited?" · изменено":""}</small>${!me&&!x.deletedAt?` <button class="link" id="finOpen">изменить</button>`:""}`:(!me&&!x.deletedAt?`<p class="hint2">Когда обсудите с Леной, запиши, как ты теперь читаешь расклад. Исходная трактовка останется как была.</p><button class="btn ghost sm" id="finOpen">Написать итоговый расклад</button>`:`<p class="hint2">Ученица ещё не записала итог.</p>`)}</div>`:"";
+ $("vBox").className="dbox vbox chatbox"+(x.kind==="question"&&!x.img?" qchat":"");
  $("vBox").innerHTML=`<div>${imgOf(x)}</div>
   <div class="dside"><button class="dx" id="vClose" aria-label="Закрыть">×</button>
    <div class="drow"><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span><span class="kind">${kindName(x)}</span><small>${fmt(x.at)}</small>${me?`<button class="link" id="cWho">${esc(u.name)}</button>`:""}<button class="link cexp" type="button" data-exp="${x.id}">Экспорт</button></div>
-   ${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<h3 id="vTitle">${esc(x.q)}</h3>${x.bg?`<div class="bgbox"><div class="lab"><i></i>Предыстория</div><p>${esc(x.bg)}</p></div>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
-   <div class="lab"><i></i>${me?"Трактовка ученицы":"Моя трактовка"}</div>${x.desc?`<p style="font-size:14.5px;white-space:pre-wrap">${esc(x.desc)}</p>`:""}${x.voice?`<div class="vclip on"><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое · ${fmtT(x.voice.dur||0)}</span><audio controls preload="metadata" src="${x.voice.src}"></audio></div>`:""}
+   ${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<h3 id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</h3>${x.bg?`<div class="bgbox"><div class="lab"><i></i>Предыстория</div><p>${esc(x.bg)}</p></div>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
+   <div class="lab"><i></i>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</div>${x.desc?`<p style="font-size:14.5px;white-space:pre-wrap">${esc(x.desc)}</p>`:""}${x.voice?`<div class="vclip on"><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое · ${fmtT(x.voice.dur||0)}</span><audio controls preload="metadata" src="${x.voice.src}"></audio></div>`:""}
    ${x.thread.length?`<div class="lab"><i></i>Переписка</div><div class="thread" id="thread">${thread}</div>`:(x.status==="wait"?`<p class="hint2">${me?"Ученица ждёт разбора.":"Расклад у Лены. Когда она ответит, придёт уведомление."}</p>`:"")}
+   ${finBlock}
    ${comp}
-   ${own?`<div class="drow"><button class="btn ghost sm" id="vEdit">Изменить расклад</button><button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить расклад</button></div>`:""}
+   ${own?`<div class="drow">${x.kind==="question"?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить расклад</button></div>`:""}
   </div>`;
  $("vClose").onclick=()=>closeDlg("vdlg");
+ mountChatRec(x);
+ $("vBox").querySelectorAll(".msg-img").forEach(im=>{const z=()=>openZoom(im.src);im.onclick=z;im.onkeydown=e=>{if(e.key==="Enter")z()}});
+ {const fo=$("finOpen");if(fo)fo.onclick=()=>{finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
+ if(finEdit&&$("finT")){dRestore(["finT"]);
+  const FR=makeRec({ta:$("finT"),mic:$("finMic"),micTxt:$("finMicTxt"),rec:$("finRec"),time:$("finRecT"),interim:$("finInterim"),stop:$("finStop"),clip:$("finClip"),audio:$("finAudio"),del:$("finDel"),label:"Надиктовать",done:"Готово, текст в поле"});
+  if(x.final&&x.final.voice&&x.final.voice.src)FR.set(x.final.voice);
+  $("finCancel").onclick=()=>{FR.stop(true);finEdit=false;renderChat()};
+  $("finSave").onclick=()=>{if(FR.active()){toast("Сначала нажми «Готово»");return}const t=$("finT").value.trim();if(!t&&!FR.voice){$("finT").focus();toast("Напиши итог или надиктуй его");return}
+   const was=!!x.final;x.final={t,at:nowISO(),edited:was,voice:FR.voice?{src:FR.voice.src,dur:FR.voice.dur,vid:FR.voice.vid||("f"+Date.now().toString(36))}:null};
+   x.unreadM=true;dClear(["finT"]);finEdit=false;
+   notify("master",`${u.name} ${was?"обновила":"записала"} итоговый расклад к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});
+   persist();renderChat();refresh();toast("Итог сохранён, Лена увидит его в разборе")};
+ }
  const w=$("cWho");if(w)w.onclick=()=>{closeDlg("vdlg");openStudent(u.id)};
  $("vBox").querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{editMsg=+b.dataset.e;renderChat();$("edT").focus()});
- const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}const m=x.thread[editMsg];m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
+ const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
  const ec=$("edCancel");if(ec)ec.onclick=()=>{editMsg=null;renderChat()};
  const txt=()=>($("cTxt")?$("cTxt").value.trim():"");
- const post=(from,t)=>{if(t)x.thread.push({from,t,at:nowISO()})};
+ const hasV=()=>!!(RC&&RC.voice)||!!cDraft.img;
+ const post=(from,t)=>{const v=RC&&RC.voice;if(RC&&RC.active()){toast("Сначала нажми «Готово», чтобы закончить запись");throw "rec"}
+  const im=cDraft.img;if(t||v||im){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid};if(im){m.img=im;m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}x.thread.push(m)}cDraft.voice=null;cDraft.img=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"]]);};
  const done=m=>{persist();renderChat();refresh();toast(m);const th=$("thread");if(th)th.scrollTop=th.scrollHeight};
  const cErr=m=>{const e=$("cErr");e.textContent=m;e.hidden=false;$("cTxt").focus()};
  if(me){
-  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t)return cErr("Напиши ответ перед отправкой.");post("master",t);if(x.status==="wait")x.status="done";x.unreadS=true;DB.done++;
+  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t&&!hasV())return cErr("Напиши ответ или запиши голосовое.");try{post("master",t)}catch(e){return}if(x.status==="wait")x.status="done";x.unreadS=true;DB.done++;
    notify(u.id,`Лена ответила ${x.kind==="exam"?"по Посвящению":x.kind==="quest"?"на квест":"на расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done(`Ответ отправлен, ${u.name} получит уведомление`)};
-  const p=$("cPass");if(p)p.onclick=()=>{post("master",txt());x.thread.push({from:"system",t:"Посвящение засчитано. Следующая ступень открыта.",at:nowISO()});x.status="done";x.unreadS=true;passStage(u,true);DB.done++;done("Посвящение засчитано, ученице открыта следующая ступень")};
-  const rt=$("cRet");if(rt)rt.onclick=()=>{const t=txt();if(!t)return cErr("Напиши, что доработать, иначе ученица не поймёт, что исправить.");post("master",t);x.status="returned";x.unreadS=true;DB.done++;
+  const p=$("cPass");if(p)p.onclick=()=>{try{post("master",txt())}catch(e){return}x.thread.push({from:"system",t:"Посвящение засчитано. Следующая ступень открыта.",at:nowISO()});x.status="done";x.unreadS=true;passStage(u,true);DB.done++;done("Посвящение засчитано, ученице открыта следующая ступень")};
+  const rt=$("cRet");if(rt)rt.onclick=()=>{const t=txt();if(!t&&!hasV())return cErr("Напиши, что доработать, иначе ученица не поймёт, что исправить.");try{post("master",t)}catch(e){return}x.status="returned";x.unreadS=true;DB.done++;
    notify(u.id,`Лена вернула Посвящение ${x.stage} ступени на доработку`,{type:"spread",u:u.id,sid:x.id});done("Посвящение возвращено с комментарием")};
  }else{
   const b=$("cBuy");if(b)b.onclick=()=>openPay({kind:"fb"},()=>{renderChat();refresh()});
-  const sr=$("cSendRev");if(sr)sr.onclick=()=>{post("student",txt());x.status="wait";x.sentAt=nowISO();x.unreadM=true;notify("master",`${u.name} прислала ${x.kind==="quest"?"квест":"расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Отправлено Лене")};
-  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t){$("cTxt").focus();return}post("student",t);const wasDone=x.status!=="wait";if(x.kind!=="exam"||x.status==="wait"){x.status="wait";if(wasDone)x.sentAt=nowISO()}x.unreadM=true;
+  const sr=$("cSendRev");if(sr)sr.onclick=()=>{try{post("student",txt())}catch(e){return}x.status="wait";x.sentAt=nowISO();x.unreadM=true;notify("master",`${u.name} прислала ${x.kind==="quest"?"квест":"расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Отправлено Лене")};
+  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t&&!hasV()){$("cTxt").focus();return}try{post("student",t)}catch(e){return}const wasDone=x.status!=="wait";if(x.kind!=="exam"||x.status==="wait"){x.status="wait";if(wasDone)x.sentAt=nowISO()}x.unreadM=true;
    notify("master",`${u.name} ${wasDone?"задала вопрос":"дописала"} к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Сообщение отправлено Лене")};
   const f=$("cFix");if(f)f.onclick=()=>{closeDlg("vdlg");openExam(x.stage)};
   const ve=$("vEdit");if(ve)ve.onclick=()=>{$("vdlg").hidden=true;openForm(x)};
@@ -2555,7 +2713,7 @@ const qp=$("qProg");if(qp)qp.textContent=(st==="pay"?"ступень ждёт о
  $("qDay").textContent=S.drawn===TODAY?`сегодня: ${S.dayName||"карта вытянута"} · серия ${S.streak}`:`карта дня ждёт · серия ${S.streak} ${plural(S.streak,"день","дня","дней")}`;
  const nn=noteCount();$("qJour").textContent=`${nn} ${plural(nn,"заметка","заметки","заметок")} к картам`;
 }
-function openDay(){lastFocus=document.activeElement;renderHero();$("dayDlg").hidden=false;($("drawBtn").disabled?$("dayNote"):$("drawBtn")).focus()}
+function openDay(){lastFocus=document.activeElement;renderHero();dRestore(["dayNote"]);$("dayDlg").hidden=false;($("drawBtn").disabled?$("dayNote"):$("drawBtn")).focus()}
 document.querySelectorAll(".qc[data-q]").forEach(b=>b.onclick=()=>{const q=b.dataset.q;
  if(q==="progress"){panelStage=cur.stage;renderPath(cur.stage);renderPanel(cur.stage);$("panel").scrollIntoView({behavior:"smooth",block:"start"})}
  else if(q==="day")openDay();else showView("journal")});
@@ -2571,7 +2729,7 @@ $("dayClose").onclick=()=>closeDlg("dayDlg");
 $("jDay").onclick=openDay;
 $("daySave").onclick=()=>{const t=$("dayNote").value.trim();if(!t){$("dayNote").focus();toast("Сначала напиши, что увидела");return}
  let idx=all.findIndex(c=>c.t===S.dayName);if(idx<0)idx=0;(notes[idx]=notes[idx]||[]).push({d:fmt(nowISO()),t,at:nowISO(),day:true});
- $("dayNote").value="";persist();renderStage();toast("Записано в журнал");closeDlg("dayDlg")};
+ dClear(["dayNote"]);$("dayNote").value="";persist();renderStage();toast("Записано в журнал");closeDlg("dayDlg")};
 // ===== журнал =====
 function renderJournal(){
  const q=($("jSearch").value||"").trim().toLowerCase();
@@ -2584,10 +2742,10 @@ function renderJournal(){
 }
 $("jSearch").addEventListener("input",renderJournal);
 // ===== диалоги =====
-function closeDlg(id){if(id==="fdlg")stopRec(true);$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
-["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
+function closeDlg(id){if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg","qdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel").hidden){$("npanel").hidden=true;renderTabs();return}
- for(const id of ["xdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
+ for(const id of ["xdlg","qdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
 
 
 /* ===================== ОБЩАЯ БАЗА: Supabase ===================== */
@@ -2648,6 +2806,9 @@ function rSerialize(db){
    const put=(f,str)=>{const n=Math.ceil(str.length/RCH);for(let i=0;i<n;i++)o[`m/${k}~${f}~${i}`]={d:str.slice(i*RCH,(i+1)*RCH)};return n};
    if(b.img){b.imgN=put("img",b.img);b.img=null}
    if(b.voice&&b.voice.src){b.voiceN=put("voice",b.voice.src);b.voice.src=""}
+   if(b.final&&b.final.voice&&b.final.voice.src){const fv=b.final.voice;fv.vid=rkey(fv.vid||"fin");fv.n=put("tv"+fv.vid,fv.src);fv.src=""}
+   (b.thread||[]).forEach(m=>{if(m.img){const iid=rkey(m.iid||m.at);m.iid=iid;m.imgN=put("ti"+iid,m.img);m.img=null}});
+   (b.thread||[]).forEach(m=>{if(m.voice&&m.voice.src){const vid=rkey(m.voice.vid||m.at);m.voice.vid=vid;m.voice.n=put("tv"+vid,m.voice.src);m.voice.src=""}});
    o["s/"+k]=b});
  });
  db.payments.forEach(p=>o["pay/"+rkey(p.id)]=p);
@@ -2662,6 +2823,9 @@ function rDeserialize(m){
    for(const f of ["img","voice"]){const n=x[f+"N"];delete x[f+"N"];if(!n)continue;let s="";
     for(let i=0;i<n;i++){const c=m[`m/${k}~${f}~${i}`];if(!c){s=null;break}s+=c.d}
     if(f==="img")x.img=s;else if(x.voice)x.voice.src=s||""}
+   if(x.final&&x.final.voice&&x.final.voice.n){const fv=x.final.voice;let s="";for(let i=0;i<fv.n;i++){const c=m[`m/${k}~tv${fv.vid}~${i}`];if(!c){s="";break}s+=c.d}fv.src=s;delete fv.n}
+   (x.thread||[]).forEach(mm=>{if(mm.imgN){let s="";for(let i=0;i<mm.imgN;i++){const c=m[`m/${k}~ti${mm.iid}~${i}`];if(!c){s="";break}s+=c.d}mm.img=s||null;delete mm.imgN}});
+   (x.thread||[]).forEach(mm=>{if(mm.voice&&mm.voice.n){let s="";for(let i=0;i<mm.voice.n;i++){const c=m[`m/${k}~tv${mm.voice.vid}~${i}`];if(!c){s="";break}s+=c.d}mm.voice.src=s;delete mm.voice.n}});
    u.spreads.push(x)}
   else if(p.startsWith("pay/"))db.payments.push(JSON.parse(JSON.stringify(d)));
   else if(p.startsWith("n/"))db.notifs.push(JSON.parse(JSON.stringify(d)));
@@ -2725,7 +2889,7 @@ function rRebind(){
  if(xU)xU=DB.users[xU.id]||null;
  if(!role)return;
  const t=$("cTxt"),tv=t?t.value:null,ss=t?t.selectionStart:0,foc=t&&document.activeElement===t;
- try{refresh();if(!$("vdlg").hidden&&chatS)renderChat()}catch(e){console.warn(e)}
+ try{refresh();if(!$("vdlg").hidden&&chatS&&!(RC&&RC.active())&&editMsg==null&&!finEdit)renderChat()}catch(e){console.warn(e)}
  const t2=$("cTxt");if(t2&&tv!=null){t2.value=tv;if(foc){t2.focus();try{t2.setSelectionRange(ss,ss)}catch(_){}}}
 }
 async function rLoadAll(){
@@ -2774,5 +2938,6 @@ function rReset(){clearInterval(pollT);ME=null;IS_M=false;remoteReady=false;rSta
  if(SBX.sess)sb.user().then(u=>afterAuth(u),()=>{sbSave(null)});
 })();
 
+if(window.__DEMO){const n=document.createElement("p");n.className="demo-note";n.innerHTML="Демо-версия с примерами. Ученица: <b>anna@example.com</b> / <b>demo-pass</b>. Мастер: почта Лены.";$("fIn").prepend(n)}
 renderTabs();showView("login");
 </script>
