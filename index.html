@@ -1110,7 +1110,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
     <p>Расклады и Посвящения от учениц с тарифом обратной связи. Ответ сразу появляется у ученицы в журнале, а засчитанное Посвящение открывает ей следующую ступень.</p>
   </div>
   <div class="chipsrow" id="mChips"></div>
-  <div class="seg qstat" id="qStat" role="group" aria-label="Что показать"><button type="button" data-s="wait" aria-pressed="true">Ждут ответа <b id="qsW"></b></button><button type="button" data-s="done" aria-pressed="false">Отвеченные <b id="qsD"></b></button><button type="button" data-s="all" aria-pressed="false">Вся история</button></div>
+  <div class="seg qstat" id="qStat" role="group" aria-label="Что показать"><button type="button" data-s="all" aria-pressed="true">Все <b id="qsA"></b></button><button type="button" data-s="wait" aria-pressed="false">Ждут ответа <b id="qsW"></b></button><button type="button" data-s="done" aria-pressed="false">Отвеченные <b id="qsD"></b></button></div>
   <div class="filt qf">
     <div class="fld"><label for="qWho">Ученица</label><select id="qWho"><option value="all">Все ученицы</option></select></div>
     <div class="fld"><label for="qType">Что</label><select id="qType"><option value="all">Всё</option><option value="spread">Расклады</option><option value="quest">Квесты</option><option value="exam">Посвящения</option><option value="question">Вопросы</option></select></div>
@@ -2502,29 +2502,29 @@ function applyQ(q){
  $("qFrom").value=addDays(-(+q));$("qTo").value=TODAY;
 }
 const lastAct=x=>x.thread.length?x.thread[x.thread.length-1].at:(x.sentAt||x.at);
-let qStat="wait";
+let qStat="all";
 const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt).map(x=>({u,x})));
 const answeredAll=()=>sentAll().filter(i=>!i.x.deletedAt&&(i.x.status==="done"||i.x.status==="returned"));
 function renderQueue(){
- const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";
+ const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";$("qsA").textContent=sentAll().length||"";
  document.querySelectorAll("#qStat button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===qStat));
  const all0=(qStat==="wait"?W:qStat==="done"?D:sentAll()).map(({u,x})=>({u,x,day:dayOf(x.sentAt||x.at)}));
  const ws=$("qWho"),wv=ws.value,us=Object.values(DB.users);
  ws.innerHTML=`<option value="all">Все ученицы</option>`+us.map(u=>{const c=all0.filter(i=>i.u.id===u.id).length;return `<option value="${u.id}">${esc(u.name)}${c?` · ${c}`:""}</option>`}).join("");
  ws.value=us.some(u=>u.id===wv)?wv:"all";
  const who=ws.value,ty=$("qType").value,from=$("qFrom").value,to=$("qTo").value,sort=$("qSort").value;
- const items=all0.filter(i=>(who==="all"||i.u.id===who)&&(ty==="all"||i.x.kind===ty)&&(!from||i.day>=from)&&(!to||i.day<=to)).sort((a,b)=>(b.x.unreadM-a.x.unreadM)||(a.x.unreadM&&b.x.unreadM?lastAct(b.x).localeCompare(lastAct(a.x)):0)||(sort==="old"?a.day.localeCompare(b.day):b.day.localeCompare(a.day)));
+ const items=all0.filter(i=>(who==="all"||i.u.id===who)&&(ty==="all"||i.x.kind===ty)&&(!from||i.day>=from)&&(!to||i.day<=to)).sort((a,b)=>(b.x.unreadM-a.x.unreadM)||((a.x.status==="wait"&&!a.x.deletedAt?0:1)-(b.x.status==="wait"&&!b.x.deletedAt?0:1))||(a.x.unreadM&&b.x.unreadM?lastAct(b.x).localeCompare(lastAct(a.x)):0)||(sort==="old"?a.day.localeCompare(b.day):b.day.localeCompare(a.day)));
  $("qCnt").textContent=`Показано: ${items.length} из ${all0.length}`;
  document.querySelectorAll("#qQuick button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.q===qQuick));
  const st=us,ending=st.filter(s=>s.fbUntil&&daysLeft(s.fbUntil)>=0&&daysLeft(s.fbUntil)<=7).length;
  const cnt=k=>all0.filter(i=>i.x.kind===k).length;
  $("mChips").innerHTML=`<span class="mchip"><b>${cnt("spread")}</b> ${plural(cnt("spread"),"расклад","расклада","раскладов")}</span><span class="mchip"><b>${cnt("quest")}</b> ${plural(cnt("quest"),"квест","квеста","квестов")}</span><span class="mchip"><b>${cnt("exam")}</b> Посвящ.</span>${FREE?"":`<span class="mchip"><b>${st.filter(s=>isFb(s)).length}</b> с обратной связью</span><span class="mchip"><b>${ending}</b> заканчивается на неделе</span>`}<span class="mchip">отвечено сегодня: <b>${DB.done}</b></span>`+(all0.some(i=>i.x.unreadM)?`<span class="newtag" style="align-self:center">${all0.filter(i=>i.x.unreadM).length} новых — они сверху</span>`:"");
- if(!items.length&&qStat!=="wait"&&!all0.length){$("mq").innerHTML=`<div class="emptyq"><b>Пока пусто</b>${qStat==="done"?"Здесь будут все расклады, квесты и вопросы, на которые ты уже ответила.":"Здесь будет вся история переписки с ученицами."}</div>`;return}
+ if(!items.length&&qStat!=="wait"&&!all0.length){$("mq").innerHTML=`<div class="emptyq"><b>Пока пусто</b>${qStat==="done"?"Здесь будут все расклады, квесты и вопросы, на которые ты уже ответила.":"Здесь будут все расклады, квесты, вопросы и Посвящения, которые ученицы отправили."}</div>`;return}
  if(!items.length){
   const match=i=>(who==="all"||i.u.id===who)&&(ty==="all"||i.x.kind===ty)&&(!from||dayOf(i.x.sentAt||i.x.at)>=from)&&(!to||dayOf(i.x.sentAt||i.x.at)<=to);
-  const other=[["wait","в «Ждут ответа»",W],["done","в «Отвеченных»",D],["all","во «Всей истории»",sentAll()]].filter(o=>o[0]!==qStat).map(o=>[o[0],o[1],o[2].filter(match).length]).filter(o=>o[2]);
+  const other=[["all","во «Всех»",sentAll()],["wait","в «Ждут ответа»",W],["done","в «Отвеченных»",D]].filter(o=>o[0]!==qStat).map(o=>[o[0],o[1],o[2].filter(match).length]).filter(o=>o[2]);
   if(other.length){const tn={spread:"расклады",quest:"квесты",exam:"Посвящения",question:"вопросы"}[ty]||"записи";
-   $("mq").innerHTML=`<div class="emptyq"><b>${qStat==="wait"?"Сейчас ничего не ждёт ответа":"Здесь пусто"}</b>Зато ${tn} есть ${other.map(o=>`${o[1]} (${o[2]})`).join(" и ")}.<div class="drow" style="justify-content:center;margin-top:14px">${other.map(o=>`<button class="btn ghost sm" data-goto="${o[0]}">Открыть «${{wait:"Ждут ответа",done:"Отвеченные",all:"Вся история"}[o[0]]}»</button>`).join("")}</div></div>`;
+   $("mq").innerHTML=`<div class="emptyq"><b>${qStat==="wait"?"Сейчас ничего не ждёт ответа":"Здесь пусто"}</b>Зато ${tn} есть ${other.map(o=>`${o[1]} (${o[2]})`).join(" и ")}.<div class="drow" style="justify-content:center;margin-top:14px">${other.map(o=>`<button class="btn ghost sm" data-goto="${o[0]}">Открыть «${{wait:"Ждут ответа",done:"Отвеченные",all:"Все"}[o[0]]}»</button>`).join("")}</div></div>`;
    $("mq").querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{qStat=b.dataset.goto;renderQueue()});return}
  }
  if(!items.length){$("mq").innerHTML=all0.length?`<div class="emptyq"><b>За этот период ничего нет</b>Измени фильтр или нажми «Сбросить», чтобы увидеть всю очередь.</div>`:`<div class="emptyq"><b>Всё проверено</b>Новые расклады, квесты и Посвящения появятся здесь, как только ученицы их отправят.</div>`;return}
@@ -2538,7 +2538,7 @@ function renderQueue(){
    </div></article>`;
   return `<article class="mi ${x.unreadM?"new":""}">${imgOf(x)}
    <div class="mi-b">
-    <div class="mi-h"><span class="typ ${x.kind==="exam"?"ex":""}">${kindName(x)}</span>${qStat!=="wait"?`<span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]||""}</span>`:""}<button class="link" data-who="${u.id}" style="font-size:14px;color:var(--ink)">${esc(u.name)}</button><span>${u.cur.stage} ступень</span><span>${fmt(day)}${w>=1?` · ждёт ${w} ${plural(w,"день","дня","дней")}`:""}</span>${u.fbUntil?`<span>обратная связь до ${fmt(u.fbUntil)}</span>`:""}${x.unreadM?`<span class="newtag">${q?"новое сообщение":"новое"}</span>`:q?`<span class="typ">новый вопрос</span>`:""}</div>
+    <div class="mi-h"><span class="typ ${x.kind==="exam"?"ex":""}">${kindName(x)}</span>${qStat!=="wait"&&x.status!=="wait"?`<span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]||""}</span>`:""}<button class="link" data-who="${u.id}" style="font-size:14px;color:var(--ink)">${esc(u.name)}</button><span>${u.cur.stage} ступень</span><span>${fmt(day)}${w>=1?` · ждёт ${w} ${plural(w,"день","дня","дней")}`:""}</span>${u.fbUntil?`<span>обратная связь до ${fmt(u.fbUntil)}</span>`:""}${x.unreadM?`<span class="newtag">${q?"новое сообщение":"новое"}</span>`:q?`<span class="typ">новый вопрос</span>`:""}</div>
     <h3>${esc(x.q)}</h3>${x.bg?`<p class="bgq"><b>Предыстория:</b> ${esc(x.bg)}</p>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
     ${x.desc&&x.desc!==x.q?`<p class="desc" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(x.desc)}</p>`:""}
     ${q?`<p class="lastm"><b>${esc(u.name)}:</b> ${esc(lm.t)}</p>`:""}
