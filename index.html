@@ -977,6 +977,8 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .sp.spq .sp-b{padding-top:22px}
 
 @media (max-width:760px){.sp-act{width:100%;justify-content:flex-start}.sp-act #spAdd,.sp-act #spAsk{flex:1 1 40%}.sp-act #spExp{margin-left:0}}
+.vfoot{align-items:center;gap:16px}.vfoot #mDel{margin-right:auto}
+.link.sure{font-weight:600}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -1713,7 +1715,7 @@ function refresh(){
 }
 const BELL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 const alive=a=>a.filter(x=>!x.deletedAt);
-function waitingAll(){return Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>(x.status==="wait"&&!x.deletedAt)||(x.deletedAt&&x.sentAt&&!x.mDismissed)).map(x=>({u,x})))}
+function waitingAll(){return Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>!x.mDeletedAt&&(x.status==="wait"&&!x.deletedAt)||(x.deletedAt&&x.sentAt&&!x.mDismissed)).map(x=>({u,x})))}
 function renderTabs(){
  const top=document.querySelector(".top");top.classList.toggle("out",!role);
  const tabs=role==="master"
@@ -2204,7 +2206,7 @@ function renderSp(){
  const fb=$("spFb");if(fb)fb.onclick=()=>openPay({kind:"fb"});
  $("spGrid").innerHTML=(alive(spreads).length?"":`<p class="sp-empty">Здесь будут твои расклады и вопросы Лене. Начни с кнопок выше.</p>`)+
   list.map(x=>{const lm=x.thread.length?x.thread[x.thread.length-1]:null;
-   return `<button class="sp ${x.unreadS?"new":""} ${x.kind==="question"&&!x.img?"spq":""}" data-id="${x.id}">${x.unreadS?'<span class="newtag">новый ответ</span>':""}${x.kind==="question"&&!x.img?`<div class="qpanel"><span class="qmark">?</span><small>${x.lesson?`вопрос к лекции ${x.lesson.stage}.${x.lesson.idx}`:"вопрос Лене"}</small></div>`:imgOf(x)}<div class="sp-b">${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<b>${esc(x.q)}</b><p>${esc(lm&&lm.from!=="system"?(lm.from==="master"?"Лена: ":"Ты: ")+(lm.t||(lm.voice?"голосовое":lm.img?"фото":"")):x.kind==="question"?(x.desc||"").replace(x.q,"").trim():x.desc)}</p><div class="sp-m"><span>${fmt(x.at)}${x.kind!=="spread"?` · ${kindName(x)}`:""}</span><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span></div></div></button>`}).join("");
+   return `<button class="sp ${x.unreadS?"new":""} ${x.kind==="question"&&!x.img?"spq":""}" data-id="${x.id}">${x.unreadS?'<span class="newtag">новый ответ</span>':""}${x.kind==="question"&&!x.img?`<div class="qpanel"><span class="qmark">?</span><small>${x.lesson?`вопрос к лекции ${x.lesson.stage}.${x.lesson.idx}`:"вопрос Лене"}</small></div>`:imgOf(x)}<div class="sp-b">${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<b>${esc(x.q)}</b><p>${esc(lm&&lm.from!=="system"?(lm.from==="master"?"Лена: ":"Ты: ")+(lm.t||(lm.voice?"голосовое":lm.img?"фото":"")):x.kind==="question"?(x.desc||"").replace(x.q,"").trim():x.desc)}</p><div class="sp-m"><span>${fmt(x.at)}${x.kind!=="spread"?` · ${kindName(x)}`:""}</span>${x.mDeletedAt?`<span class="gone-tag">удалён Леной</span>`:`<span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span>`}</div></div></button>`}).join("");
  if(!list.length&&alive(spreads).length)$("spGrid").insertAdjacentHTML("beforeend",`<p class="sp-empty">${spCat!=="all"?`В теме «${esc(spCat)}» пока нет раскладов${spFilter!=="all"?" с таким статусом":""}.`:"Нет раскладов с таким статусом."}</p>`);
  $("spAsk").onclick=()=>openQ(spCat!=="all"?{cat:spCat}:null);
  $("spAdd").onclick=()=>openForm(null,spCat!=="all"?{cat:spCat}:null);
@@ -2318,6 +2320,14 @@ function fRestore(){
 
 function openZoom(src){let z=$("zoomOv");if(!z){z=document.createElement("div");z.id="zoomOv";z.className="zoomov";z.innerHTML='<img alt="Фото"><button class="dx" aria-label="Закрыть">×</button>';document.body.appendChild(z);z.onclick=()=>z.hidden=true}z.querySelector("img").src=src;z.hidden=false}
 document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&&z&&!z.hidden){z.hidden=true;e.stopImmediatePropagation()}},true);
+
+/* ---- Лена удаляет расклад или вопрос ---- */
+function masterDelete(u,x){
+ const what=x.kind==="question"?"вопрос":x.kind==="quest"?"квест":x.kind==="exam"?"Посвящение":"расклад";
+ if(x.deletedAt){const k=u.spreads.indexOf(x);if(k>-1)u.spreads.splice(k,1)}
+ else{x.mDeletedAt=nowISO();x.unreadM=false;x.unreadS=true;notify(u.id,`Лена удалила ${what} «${x.q.replace("Квест: ","")}». Его можно посмотреть и сохранить через «Экспорт»`,{type:"spread",u:u.id,sid:x.id})}
+ persist();refresh();toast(x.deletedAt?"Удалено навсегда":`Удалено. ${u.name} получит уведомление и сможет сохранить переписку`);
+}
 /* ---- вопросы Лене вне раскладов ---- */
 let qCtx=null,qCat=null;
 function renderQCats(){const box=$("qCats");box.innerHTML=`<button type="button" class="cat ${!qCat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${qCat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="qCatAdd">+ Своя</button>`;
@@ -2400,11 +2410,12 @@ function renderChat(){
  const who=m=>m.from==="master"?MASTER.name:m.from==="student"?(me?u.name:"Ты"):"Платформа";
  const thread=x.thread.map((m,i)=>`<div class="msg ${m.from==="master"?"m":m.from==="student"?"s":"sys"}"><header><b>${esc(who(m))}</b><span>${fmtDT(m.at)}${m.edited?" · изменено":""}</span></header>${editMsg===i?`<textarea id="edT">${esc(m.t)}</textarea><div class="drow"><button class="btn sm" id="edSave">Сохранить</button><button class="btn ghost sm" id="edCancel">Отмена</button></div>`:`${m.img?`<img class="msg-img" src="${m.img}" alt="Фото" tabindex="0">`:""}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}`}${me&&m.from==="master"&&editMsg!==i?`<button class="ed" data-e="${i}">изменить</button>`:""}</div>`).join("");
  let comp="";
- if(x.deletedAt&&me)comp=`<div class="gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя. Расклад и переписка остались только у тебя.<div class="drow" style="margin-top:10px"><button class="btn ghost sm" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div></div>`;
+ if(x.mDeletedAt&&!me)comp=`<div class="gone-note"><b>Лена удалила ${x.kind==="question"?"этот вопрос":"этот расклад"} ${fullDT(x.mDeletedAt)}.</b> Переписка закрыта: писать сюда больше нельзя. Посмотреть можно здесь, а сохранить себе — через «Экспорт» вверху.</div>`;
+ else if(x.deletedAt&&me)comp=`<div class="gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя. Расклад и переписка остались только у тебя.<div class="drow" style="margin-top:10px"><button class="btn ghost sm" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div></div>`;
  else if(me){
   if(x.kind==="exam"&&x.status==="wait")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий к Посвящению</label><textarea id="cTxt" placeholder="Что получилось, что доработать…"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cPass">Засчитать Посвящение</button><button class="btn ghost" id="cRet">Вернуть на доработку</button></div></div>`;
   else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>${x.thread.some(m=>m.from==="master")||x.kind==="question"?"Ответить":"Разбор"}</label><textarea id="cTxt" placeholder="${x.kind==="question"?"Твой ответ на вопрос…":"Что ученица увидела верно, на что обратить внимание…"}"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">${esc(u.name)} получит уведомление</small></div></div>`;
- }else{
+ }else if(!x.mDeletedAt){
   if(!isFb(u))comp=`<div class="lockline">Задать вопрос Лене и получить разбор можно на тарифе <b>с обратной связью · ${rub(FB_PRICE)} в месяц</b>. <button class="link" id="cBuy">Подключить</button></div>`;
   else if(x.status==="journal")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий для Лены, если хочешь</label><textarea id="cTxt" placeholder="В чём сомневаешься, на что посмотреть…"></textarea><div class="drow"><button class="btn" id="cSendRev">Отправить на разбор</button></div></div>`;
   else if(x.kind==="exam"&&x.status==="returned")comp=`<div class="drow"><button class="btn" id="cFix">Исправить Посвящение</button></div>`;
@@ -2412,7 +2423,7 @@ function renderChat(){
  }
  const own=!me&&!x.deletedAt&&x.kind!=="exam",locked=talkStarted(x);
  const hasM=x.thread.some(m=>m.from==="master"),fin=x.final;
- const finBlock=(hasM||fin)&&x.kind!=="exam"&&x.kind!=="question"?`<div class="finbox" id="finBox"><div class="lab"><i></i>Итоговый расклад <small>после разбора с Леной</small></div>${finEdit?`<div class="fld-h chat-h"><span></span><button type="button" class="micbtn" id="finMic">${MIC_SVG}<span id="finMicTxt">Надиктовать</span></button></div><textarea id="finT" placeholder="Как ты теперь читаешь этот расклад: что поменялось после разбора, к какому выводу пришла">${fin?esc(fin.t):""}</textarea><div class="vrec" id="finRec" hidden><span class="rdot"></span><span class="rt" id="finRecT">0:00</span><span class="interim" id="finInterim"></span><button type="button" class="btn sm" id="finStop">Готово</button></div><div class="vclip" id="finClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="finAudio" controls></audio><button type="button" class="link danger" id="finDel">Удалить</button></div><div class="drow"><button class="btn sm" id="finSave">Сохранить итог</button><button class="btn ghost sm" id="finCancel">Отмена</button></div>`:fin?`${fin.voice&&fin.voice.src?voiceMsg({voice:fin.voice,t:fin.t}):""}<p class="fin-t">${esc(fin.t)}</p><small class="fin-d">${fullDT(fin.at)}${fin.edited?" · изменено":""}</small>${!me&&!x.deletedAt?` <button class="link" id="finOpen">изменить</button>`:""}`:(!me&&!x.deletedAt?`<p class="hint2">Когда обсудите с Леной, запиши, как ты теперь читаешь расклад. Исходная трактовка останется как была.</p><button class="btn ghost sm" id="finOpen">Написать итоговый расклад</button>`:`<p class="hint2">Ученица ещё не записала итог.</p>`)}</div>`:"";
+ const finBlock=!x.mDeletedAt&&(hasM||fin)&&x.kind!=="exam"&&x.kind!=="question"?`<div class="finbox" id="finBox"><div class="lab"><i></i>Итоговый расклад <small>после разбора с Леной</small></div>${finEdit?`<div class="fld-h chat-h"><span></span><button type="button" class="micbtn" id="finMic">${MIC_SVG}<span id="finMicTxt">Надиктовать</span></button></div><textarea id="finT" placeholder="Как ты теперь читаешь этот расклад: что поменялось после разбора, к какому выводу пришла">${fin?esc(fin.t):""}</textarea><div class="vrec" id="finRec" hidden><span class="rdot"></span><span class="rt" id="finRecT">0:00</span><span class="interim" id="finInterim"></span><button type="button" class="btn sm" id="finStop">Готово</button></div><div class="vclip" id="finClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="finAudio" controls></audio><button type="button" class="link danger" id="finDel">Удалить</button></div><div class="drow"><button class="btn sm" id="finSave">Сохранить итог</button><button class="btn ghost sm" id="finCancel">Отмена</button></div>`:fin?`${fin.voice&&fin.voice.src?voiceMsg({voice:fin.voice,t:fin.t}):""}<p class="fin-t">${esc(fin.t)}</p><small class="fin-d">${fullDT(fin.at)}${fin.edited?" · изменено":""}</small>${!me&&!x.deletedAt?` <button class="link" id="finOpen">изменить</button>`:""}`:(!me&&!x.deletedAt?`<p class="hint2">Когда обсудите с Леной, запиши, как ты теперь читаешь расклад. Исходная трактовка останется как была.</p><button class="btn ghost sm" id="finOpen">Написать итоговый расклад</button>`:`<p class="hint2">Ученица ещё не записала итог.</p>`)}</div>`:"";
  $("vBox").className="dbox vbox chatbox"+(x.kind==="question"&&!x.img?" qchat":"");
  $("vBox").innerHTML=`<div>${imgOf(x)}</div>
   <div class="dside"><button class="dx" id="vClose" aria-label="Закрыть">×</button>
@@ -2422,10 +2433,11 @@ function renderChat(){
    ${x.thread.length?`<div class="lab"><i></i>Переписка</div><div class="thread" id="thread">${thread}</div>`:(x.status==="wait"?`<p class="hint2">${me?(x.kind==="question"?"Ученица ждёт ответа.":"Ученица ждёт разбора."):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление."}</p>`:"")}
    ${finBlock}
    ${comp}
-   ${own?`<div class="drow">${x.kind==="question"?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить ${x.kind==="question"?"вопрос":"расклад"}</button></div>`:""}
-   <div class="vfoot"><button type="button" class="btn ghost sm" id="vClose2">Закрыть</button></div>
+   ${own?`<div class="drow">${x.kind==="question"||x.mDeletedAt?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить ${x.kind==="question"?"вопрос":"расклад"}</button></div>`:""}
+   <div class="vfoot">${me?`<button type="button" class="link danger" id="mDel">Удалить навсегда</button>`:""}<button type="button" class="btn ghost sm" id="vClose2">Закрыть</button></div>
   </div>`;
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
+ {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
  mountChatRec(x);
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
@@ -2465,8 +2477,9 @@ function renderChat(){
    notify("master",`${u.name} ${wasDone?"задала вопрос":"дописала"} к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Сообщение отправлено Лене")};
   const f=$("cFix");if(f)f.onclick=()=>{closeDlg("vdlg");openExam(x.stage)};
   const ve=$("vEdit");if(ve)ve.onclick=()=>{$("vdlg").hidden=true;openForm(x)};
-  const vd=$("vDel");if(vd)vd.onclick=()=>{if(vd.dataset.c!=="1"){vd.dataset.c="1";vd.textContent=x.sentAt?"нажми ещё раз · Лена увидит, что расклад удалён":"нажми ещё раз, чтобы удалить";return}
-   if(x.sentAt){x.deletedAt=nowISO();x.unreadM=true;x.mDismissed=false;notify("master",`${S.name} удалила расклад «${x.q}»`,{type:"spread",u:S.id,sid:x.id})}
+  const vd=$("vDel");if(vd)vd.onclick=()=>{if(vd.dataset.c!=="1"){vd.dataset.c="1";vd.textContent=x.mDeletedAt?"нажми ещё раз, чтобы удалить":x.sentAt?"нажми ещё раз · Лена увидит, что расклад удалён":"нажми ещё раз, чтобы удалить";return}
+   if(x.mDeletedAt){const k=spreads.findIndex(s=>s.id===x.id);if(k>-1)spreads.splice(k,1)}
+   else if(x.sentAt){x.deletedAt=nowISO();x.unreadM=true;x.mDismissed=false;notify("master",`${S.name} удалила расклад «${x.q}»`,{type:"spread",u:S.id,sid:x.id})}
    else{const k=spreads.findIndex(s=>s.id===x.id);if(k>-1)spreads.splice(k,1)}
    persist();closeDlg("vdlg");refresh();toast("Расклад удалён")};
  }
@@ -2528,7 +2541,7 @@ function applyQ(q){
 }
 const lastAct=x=>x.thread.length?x.thread[x.thread.length-1].at:(x.sentAt||x.at);
 let qStat="all";
-const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt&&!(x.deletedAt&&x.mDismissed)).map(x=>({u,x})));
+const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt&&!x.mDeletedAt&&!(x.deletedAt&&x.mDismissed)).map(x=>({u,x})));
 const answeredAll=()=>sentAll().filter(i=>!i.x.deletedAt&&(i.x.status==="done"||i.x.status==="returned"));
 function renderQueue(){
  const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";$("qsA").textContent=sentAll().length||"";
@@ -2559,7 +2572,7 @@ function renderQueue(){
     <div class="mi-h"><span class="gone-tag">Удалён ученицей</span><button class="link" data-who="${u.id}" style="font-size:14px;color:var(--ink)">${esc(u.name)}</button><span>${kindName(x)}</span><span>удалён ${fmt(x.deletedAt)}</span></div>
     <h3>${esc(x.q)}</h3>${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}
     <p class="desc" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(x.desc)}</p>
-    <div class="drow"><button class="btn ghost" data-open="${u.id}:${x.id}">Посмотреть</button><button class="link" data-dis="${u.id}:${x.id}">Убрать из очереди</button></div>
+    <div class="drow"><button class="btn ghost" data-open="${u.id}:${x.id}">Посмотреть</button><button class="link" data-dis="${u.id}:${x.id}">Убрать из очереди</button><button class="link danger" data-hard="${u.id}:${x.id}">Удалить навсегда</button></div>
    </div></article>`;
   return `<article class="mi ${x.unreadM?"new":""}">${imgOf(x)}
    <div class="mi-b">
@@ -2570,6 +2583,7 @@ function renderQueue(){
     <div class="drow"><button class="btn${x.status!=="wait"?" ghost":""}" data-open="${u.id}:${x.id}">${x.status!=="wait"?"Открыть переписку":x.kind==="exam"?"Проверить Посвящение":q?"Открыть переписку":"Открыть и ответить"}</button></div>
    </div></article>`}).join("");
  $("mq").querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{$("qWho").value=b.dataset.who;renderQueue();window.scrollTo({top:0})});
+ $("mq").querySelectorAll("[data-hard]").forEach(b=>b.onclick=()=>{if(b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Точно удалить? Нажми ещё раз";return}const [uid,sid]=b.dataset.hard.split(":"),u=DB.users[uid],x=u&&u.spreads.find(s=>s.id===+sid);if(x)masterDelete(u,x)});
  $("mq").querySelectorAll("[data-dis]").forEach(b=>b.onclick=()=>{const [uid,sid]=b.dataset.dis.split(":"),x=DB.users[uid].spreads.find(s=>s.id===+sid);if(x){x.mDismissed=true;x.unreadM=false;persist();renderQueue();refresh();toast("Убрано из очереди. Расклад остался в карточке ученицы")}});
  $("mq").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{const [uid,sid]=b.dataset.open.split(":");openChat(uid,+sid,"master")});
 }
@@ -2620,7 +2634,7 @@ function openStudent(id){cardId=id;if($("cdlg").hidden)lastFocus=document.active
 function renderStudentCard(){
  const u=DB.users[cardId];if(!u)return;
  const pays=DB.payments.filter(p=>p.u===u.id).sort((a,b)=>b.at.localeCompare(a.at)),sum=pays.reduce((a,p)=>a+p.amount,0);
- const list=u.spreads.slice().sort((a,b)=>(b.unreadM-a.unreadM)||(b.at||"").localeCompare(a.at||""));
+ const list=u.spreads.filter(x=>!x.mDeletedAt).slice().sort((a,b)=>(b.unreadM-a.unreadM)||(b.at||"").localeCompare(a.at||""));
  const notOwned=DB.program.filter(s=>s.n<7&&!owns(u,s.n));
  const ad=daysLeft(u.active);
  $("cBox").innerHTML=`
