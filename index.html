@@ -2520,6 +2520,13 @@ function renderQueue(){
  const cnt=k=>all0.filter(i=>i.x.kind===k).length;
  $("mChips").innerHTML=`<span class="mchip"><b>${cnt("spread")}</b> ${plural(cnt("spread"),"расклад","расклада","раскладов")}</span><span class="mchip"><b>${cnt("quest")}</b> ${plural(cnt("quest"),"квест","квеста","квестов")}</span><span class="mchip"><b>${cnt("exam")}</b> Посвящ.</span>${FREE?"":`<span class="mchip"><b>${st.filter(s=>isFb(s)).length}</b> с обратной связью</span><span class="mchip"><b>${ending}</b> заканчивается на неделе</span>`}<span class="mchip">отвечено сегодня: <b>${DB.done}</b></span>`+(all0.some(i=>i.x.unreadM)?`<span class="newtag" style="align-self:center">${all0.filter(i=>i.x.unreadM).length} новых — они сверху</span>`:"");
  if(!items.length&&qStat!=="wait"&&!all0.length){$("mq").innerHTML=`<div class="emptyq"><b>Пока пусто</b>${qStat==="done"?"Здесь будут все расклады, квесты и вопросы, на которые ты уже ответила.":"Здесь будет вся история переписки с ученицами."}</div>`;return}
+ if(!items.length){
+  const match=i=>(who==="all"||i.u.id===who)&&(ty==="all"||i.x.kind===ty)&&(!from||dayOf(i.x.sentAt||i.x.at)>=from)&&(!to||dayOf(i.x.sentAt||i.x.at)<=to);
+  const other=[["wait","в «Ждут ответа»",W],["done","в «Отвеченных»",D],["all","во «Всей истории»",sentAll()]].filter(o=>o[0]!==qStat).map(o=>[o[0],o[1],o[2].filter(match).length]).filter(o=>o[2]);
+  if(other.length){const tn={spread:"раскладов",quest:"квестов",exam:"Посвящений",question:"вопросов"}[ty]||"записей";
+   $("mq").innerHTML=`<div class="emptyq"><b>${qStat==="wait"?"Сейчас ничего не ждёт ответа":"Здесь пусто"}</b>Но ${tn} есть ${other.map(o=>`${o[1]}: ${o[2]}`).join(", ")}.<div class="drow" style="justify-content:center;margin-top:14px">${other.map(o=>`<button class="btn ghost sm" data-goto="${o[0]}">Открыть «${{wait:"Ждут ответа",done:"Отвеченные",all:"Вся история"}[o[0]]}»</button>`).join("")}</div></div>`;
+   $("mq").querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{qStat=b.dataset.goto;renderQueue()});return}
+ }
  if(!items.length){$("mq").innerHTML=all0.length?`<div class="emptyq"><b>За этот период ничего нет</b>Измени фильтр или нажми «Сбросить», чтобы увидеть всю очередь.</div>`:`<div class="emptyq"><b>Всё проверено</b>Новые расклады, квесты и Посвящения появятся здесь, как только ученицы их отправят.</div>`;return}
  $("mq").innerHTML=items.map(({u,x,day})=>{const w=-daysLeft(day),lm=x.thread.length?x.thread[x.thread.length-1]:null,q=lm&&lm.from==="student";
   if(x.deletedAt)return `<article class="mi gone ${x.unreadM?"new":""}">${imgOf(x)}
