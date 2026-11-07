@@ -955,6 +955,11 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .qstat{margin:14px 0 4px;width:max-content;max-width:100%;flex-wrap:wrap}
 .qstat b{font-weight:600;margin-left:4px;opacity:.8}
 .vfoot{display:flex;justify-content:flex-end;margin-top:4px}
+.vcats{display:grid;gap:6px;margin:2px 0 4px}
+.vbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);background:#fffaf3;padding:4px 12px;font-size:12.5px}
+.vbox .cat.on{background:#8a2742;border-color:#8a2742;color:#fff3e6}
+.vbox .cat.add{color:#8a2742}
+.vbox .catnew{background:#fffaf3;color:#3a1428}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -2395,16 +2400,19 @@ function renderChat(){
  $("vBox").innerHTML=`<div>${imgOf(x)}</div>
   <div class="dside"><button class="dx" id="vClose" aria-label="Закрыть">×</button>
    <div class="drow"><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span><span class="kind">${kindName(x)}</span><small>${fmt(x.at)}</small>${me?`<button class="link" id="cWho">${esc(u.name)}</button>`:""}<button class="link cexp" type="button" data-exp="${x.id}">Экспорт</button></div>
-   ${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<h3 id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</h3>${x.bg?`<div class="bgbox"><div class="lab"><i></i>Предыстория</div><p>${esc(x.bg)}</p></div>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
+   ${!me&&!x.deletedAt?`<div class="vcats"><span class="flab">Тема</span><div class="cats sm" id="vCats"></div></div>`:x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<h3 id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</h3>${x.bg?`<div class="bgbox"><div class="lab"><i></i>Предыстория</div><p>${esc(x.bg)}</p></div>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
    <div class="lab"><i></i>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</div>${x.desc?`<p style="font-size:14.5px;white-space:pre-wrap">${esc(x.desc)}</p>`:""}${x.voice?`<div class="vclip on"><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое · ${fmtT(x.voice.dur||0)}</span><audio controls preload="metadata" src="${x.voice.src}"></audio></div>`:""}
-   ${x.thread.length?`<div class="lab"><i></i>Переписка</div><div class="thread" id="thread">${thread}</div>`:(x.status==="wait"?`<p class="hint2">${me?"Ученица ждёт разбора.":"Расклад у Лены. Когда она ответит, придёт уведомление."}</p>`:"")}
+   ${x.thread.length?`<div class="lab"><i></i>Переписка</div><div class="thread" id="thread">${thread}</div>`:(x.status==="wait"?`<p class="hint2">${me?(x.kind==="question"?"Ученица ждёт ответа.":"Ученица ждёт разбора."):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление."}</p>`:"")}
    ${finBlock}
    ${comp}
-   ${own?`<div class="drow">${x.kind==="question"?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить расклад</button></div>`:""}
+   ${own?`<div class="drow">${x.kind==="question"?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить ${x.kind==="question"?"вопрос":"расклад"}</button></div>`:""}
    <div class="vfoot"><button type="button" class="btn ghost sm" id="vClose2">Закрыть</button></div>
   </div>`;
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  mountChatRec(x);
+ {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
+   vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
+   $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
  $("vBox").querySelectorAll(".msg-img").forEach(im=>{const z=()=>openZoom(im.src);im.onclick=z;im.onkeydown=e=>{if(e.key==="Enter")z()}});
  {const fo=$("finOpen");if(fo)fo.onclick=()=>{finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
  if(finEdit&&$("finT")){dRestore(["finT"]);
