@@ -950,6 +950,8 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .chatbox.qchat{grid-template-columns:minmax(0,1fr)!important;width:min(760px,100%)}
 .chatbox.qchat>div:first-child{display:none}
 .demo-note{margin:0;font-size:12.5px;color:#7a4a52;background:#fff4e2;border:1px dashed rgba(201,162,78,.6);border-radius:10px;padding:8px 12px}
+.fld,.vrec,.vclip,.qbox>*,.fbox>*{min-width:0}
+.vrec .interim{white-space:normal}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -2228,15 +2230,24 @@ function makeRec(o){
    fr.onload=()=>{R.set({src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)});toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))};fr.readAsDataURL(b)};
   mr.start(1000);R.t0=Date.now();
   o.rec.hidden=false;o.mic.hidden=true;o.time.textContent="0:00";
-  o.interim.textContent=SR?"Говори, текст появится в поле выше…":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
+  o.interim.textContent=SR?"Идёт запись, текст появляется в поле выше":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
   R.timer=setInterval(()=>{o.time.textContent=fmtT(Math.round((Date.now()-R.t0)/1000))},300);
-  if(SR){const ta=o.ta;let base=ta.value.replace(/\s+$/,"");
+  if(SR){const ta=o.ta;let base=ta.value.replace(/\s+$/,""),fin="";
+   const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+   const join=(a,b)=>!a?b:!b?a:a+(/[.!?…]$/.test(a)?" ":". ")+b;
    const g=new SR();R.g=g;g.lang="ru-RU";g.continuous=true;g.interimResults=true;
-   g.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
-     if(e.results[i].isFinal){const piece=t.charAt(0).toUpperCase()+t.slice(1);base=(base?base+(/[.!?…]$/.test(base)?" ":". "):"")+piece;ta.value=base}else tmp+=t+" "}
-    o.interim.textContent=tmp.trim()||"…"};
+   g.onresult=e=>{
+    /* собираем всю сессию заново: так текст не дублируется (Chrome на Android присылает накопленные куски) */
+    const parts=[];let tmp="";
+    for(let i=0;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
+     if(e.results[i].isFinal){const last=parts[parts.length-1];if(last&&t.toLowerCase().startsWith(last.toLowerCase()))parts[parts.length-1]=t;else if(!last||!last.toLowerCase().endsWith(t.toLowerCase()))parts.push(t)}
+     else tmp=t}
+    fin=parts.map(cap).reduce(join,"");
+    const live=tmp&&!(fin.toLowerCase().endsWith(tmp.toLowerCase()))?cap(tmp):"";
+    ta.value=join(join(base,fin),live);ta.scrollTop=ta.scrollHeight;
+    ta.dispatchEvent(new Event("input",{bubbles:true}))};
    g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){R.g=null;o.interim.textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
-   g.onend=()=>{if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
+   g.onend=()=>{base=join(base,fin);fin="";ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
    try{g.start()}catch(_){}}
  };
  R.stop=discard=>{
