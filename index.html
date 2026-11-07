@@ -952,6 +952,8 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .demo-note{margin:0;font-size:12.5px;color:#7a4a52;background:#fff4e2;border:1px dashed rgba(201,162,78,.6);border-radius:10px;padding:8px 12px}
 .fld,.vrec,.vclip,.qbox>*,.fbox>*{min-width:0}
 .vrec .interim{white-space:normal}
+.qstat{margin:14px 0 4px;width:max-content;max-width:100%;flex-wrap:wrap}
+.qstat b{font-weight:600;margin-left:4px;opacity:.8}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -1107,6 +1109,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
     <p>Расклады и Посвящения от учениц с тарифом обратной связи. Ответ сразу появляется у ученицы в журнале, а засчитанное Посвящение открывает ей следующую ступень.</p>
   </div>
   <div class="chipsrow" id="mChips"></div>
+  <div class="seg qstat" id="qStat" role="group" aria-label="Что показать"><button type="button" data-s="wait" aria-pressed="true">Ждут ответа <b id="qsW"></b></button><button type="button" data-s="done" aria-pressed="false">Отвеченные <b id="qsD"></b></button><button type="button" data-s="all" aria-pressed="false">Вся история</button></div>
   <div class="filt qf">
     <div class="fld"><label for="qWho">Ученица</label><select id="qWho"><option value="all">Все ученицы</option></select></div>
     <div class="fld"><label for="qType">Что</label><select id="qType"><option value="all">Всё</option><option value="spread">Расклады</option><option value="quest">Квесты</option><option value="exam">Посвящения</option><option value="question">Вопросы</option></select></div>
@@ -2497,8 +2500,13 @@ function applyQ(q){
  $("qFrom").value=addDays(-(+q));$("qTo").value=TODAY;
 }
 const lastAct=x=>x.thread.length?x.thread[x.thread.length-1].at:(x.sentAt||x.at);
+let qStat="wait";
+const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt).map(x=>({u,x})));
+const answeredAll=()=>sentAll().filter(i=>!i.x.deletedAt&&(i.x.status==="done"||i.x.status==="returned"));
 function renderQueue(){
- const all0=waitingAll().map(({u,x})=>({u,x,day:dayOf(x.sentAt||x.at)}));
+ const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";
+ document.querySelectorAll("#qStat button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===qStat));
+ const all0=(qStat==="wait"?W:qStat==="done"?D:sentAll()).map(({u,x})=>({u,x,day:dayOf(x.sentAt||x.at)}));
  const ws=$("qWho"),wv=ws.value,us=Object.values(DB.users);
  ws.innerHTML=`<option value="all">Все ученицы</option>`+us.map(u=>{const c=all0.filter(i=>i.u.id===u.id).length;return `<option value="${u.id}">${esc(u.name)}${c?` · ${c}`:""}</option>`}).join("");
  ws.value=us.some(u=>u.id===wv)?wv:"all";
@@ -2509,6 +2517,7 @@ function renderQueue(){
  const st=us,ending=st.filter(s=>s.fbUntil&&daysLeft(s.fbUntil)>=0&&daysLeft(s.fbUntil)<=7).length;
  const cnt=k=>all0.filter(i=>i.x.kind===k).length;
  $("mChips").innerHTML=`<span class="mchip"><b>${cnt("spread")}</b> ${plural(cnt("spread"),"расклад","расклада","раскладов")}</span><span class="mchip"><b>${cnt("quest")}</b> ${plural(cnt("quest"),"квест","квеста","квестов")}</span><span class="mchip"><b>${cnt("exam")}</b> Посвящ.</span>${FREE?"":`<span class="mchip"><b>${st.filter(s=>isFb(s)).length}</b> с обратной связью</span><span class="mchip"><b>${ending}</b> заканчивается на неделе</span>`}<span class="mchip">отвечено сегодня: <b>${DB.done}</b></span>`+(all0.some(i=>i.x.unreadM)?`<span class="newtag" style="align-self:center">${all0.filter(i=>i.x.unreadM).length} новых — они сверху</span>`:"");
+ if(!items.length&&qStat!=="wait"&&!all0.length){$("mq").innerHTML=`<div class="emptyq"><b>Пока пусто</b>${qStat==="done"?"Здесь будут все расклады, квесты и вопросы, на которые ты уже ответила.":"Здесь будет вся история переписки с ученицами."}</div>`;return}
  if(!items.length){$("mq").innerHTML=all0.length?`<div class="emptyq"><b>За этот период ничего нет</b>Измени фильтр или нажми «Сбросить», чтобы увидеть всю очередь.</div>`:`<div class="emptyq"><b>Всё проверено</b>Новые расклады, квесты и Посвящения появятся здесь, как только ученицы их отправят.</div>`;return}
  $("mq").innerHTML=items.map(({u,x,day})=>{const w=-daysLeft(day),lm=x.thread.length?x.thread[x.thread.length-1]:null,q=lm&&lm.from==="student";
   if(x.deletedAt)return `<article class="mi gone ${x.unreadM?"new":""}">${imgOf(x)}
@@ -2520,16 +2529,17 @@ function renderQueue(){
    </div></article>`;
   return `<article class="mi ${x.unreadM?"new":""}">${imgOf(x)}
    <div class="mi-b">
-    <div class="mi-h"><span class="typ ${x.kind==="exam"?"ex":""}">${kindName(x)}</span><button class="link" data-who="${u.id}" style="font-size:14px;color:var(--ink)">${esc(u.name)}</button><span>${u.cur.stage} ступень</span><span>${fmt(day)}${w>=1?` · ждёт ${w} ${plural(w,"день","дня","дней")}`:""}</span>${u.fbUntil?`<span>обратная связь до ${fmt(u.fbUntil)}</span>`:""}${x.unreadM?`<span class="newtag">${q?"новое сообщение":"новое"}</span>`:q?`<span class="typ">новый вопрос</span>`:""}</div>
+    <div class="mi-h"><span class="typ ${x.kind==="exam"?"ex":""}">${kindName(x)}</span>${qStat!=="wait"?`<span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]||""}</span>`:""}<button class="link" data-who="${u.id}" style="font-size:14px;color:var(--ink)">${esc(u.name)}</button><span>${u.cur.stage} ступень</span><span>${fmt(day)}${w>=1?` · ждёт ${w} ${plural(w,"день","дня","дней")}`:""}</span>${u.fbUntil?`<span>обратная связь до ${fmt(u.fbUntil)}</span>`:""}${x.unreadM?`<span class="newtag">${q?"новое сообщение":"новое"}</span>`:q?`<span class="typ">новый вопрос</span>`:""}</div>
     <h3>${esc(x.q)}</h3>${x.bg?`<p class="bgq"><b>Предыстория:</b> ${esc(x.bg)}</p>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
-    <p class="desc" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(x.desc)}</p>
+    ${x.desc&&x.desc!==x.q?`<p class="desc" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(x.desc)}</p>`:""}
     ${q?`<p class="lastm"><b>${esc(u.name)}:</b> ${esc(lm.t)}</p>`:""}
-    <div class="drow"><button class="btn" data-open="${u.id}:${x.id}">${x.kind==="exam"?"Проверить Посвящение":q?"Открыть переписку":"Открыть и ответить"}</button></div>
+    <div class="drow"><button class="btn${x.status!=="wait"?" ghost":""}" data-open="${u.id}:${x.id}">${x.status!=="wait"?"Открыть переписку":x.kind==="exam"?"Проверить Посвящение":q?"Открыть переписку":"Открыть и ответить"}</button></div>
    </div></article>`}).join("");
  $("mq").querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{$("qWho").value=b.dataset.who;renderQueue();window.scrollTo({top:0})});
  $("mq").querySelectorAll("[data-dis]").forEach(b=>b.onclick=()=>{const [uid,sid]=b.dataset.dis.split(":"),x=DB.users[uid].spreads.find(s=>s.id===+sid);if(x){x.mDismissed=true;x.unreadM=false;persist();renderQueue();refresh();toast("Убрано из очереди. Расклад остался в карточке ученицы")}});
  $("mq").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{const [uid,sid]=b.dataset.open.split(":");openChat(uid,+sid,"master")});
 }
+document.querySelectorAll("#qStat button").forEach(b=>b.onclick=()=>{qStat=b.dataset.s;renderQueue()});
 ["qWho","qType","qFrom","qTo","qSort"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="qFrom"||id==="qTo")qQuick=null;renderQueue()}));
 document.querySelectorAll("#qQuick button").forEach(b=>b.onclick=()=>{applyQ(b.dataset.q);renderQueue()});
 
