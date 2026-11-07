@@ -960,6 +960,13 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .vbox .cat.on{background:#8a2742;border-color:#8a2742;color:#fff3e6}
 .vbox .cat.add{color:#8a2742}
 .vbox .catnew{background:#fffaf3;color:#3a1428}
+.sp-act{gap:10px}.sp-act #spExp{margin-left:6px}
+.sp.spq .sp-b{padding-top:22px}
+.sp.spq .sp-b>b{font-size:1.15rem;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.sp.spq .sp-b>b::before{content:"?";display:inline-grid;place-items:center;width:26px;height:26px;margin-right:8px;border-radius:50%;background:#8a2742;color:#fff3e6;font-size:15px;vertical-align:3px}
+.sp.spq .sp-b>p{display:none}
+@media (max-width:760px){.sp-act{width:100%;justify-content:flex-start}.sp-act #spAdd,.sp-act #spAsk{flex:1 1 40%}.sp-act #spExp{margin-left:0}}
+.sp.spq{align-self:start}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -1218,7 +1225,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
     <div class="seg" id="spFilter">
       <button aria-pressed="true" data-f="all">Все</button><button aria-pressed="false" data-f="journal">В журнале</button><button aria-pressed="false" data-f="wait">Ждут ответа</button><button aria-pressed="false" data-f="done">Есть ответ</button>
     </div>
-    <div class="sp-act"><button type="button" class="micbtn xbtn" id="spExp"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Экспорт</button><div class="tarif" id="spTarif"></div></div>
+    <div class="sp-act"><button type="button" class="btn sm" id="spAdd">+ Новый расклад</button><button type="button" class="btn ghost sm" id="spAsk">? Вопрос Лене</button><button type="button" class="micbtn xbtn" id="spExp"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Экспорт</button><div class="tarif" id="spTarif"></div></div>
   </div>
   <div class="cats" id="spCats" role="group" aria-label="Темы раскладов"></div>
   <div class="sp-grid" id="spGrid"></div>
@@ -2185,9 +2192,9 @@ function renderSp(){
  const list=alive(spreads).filter(x=>spCat==="all"||x.cat===spCat).filter(x=>spFilter==="all"||(spFilter==="done"?x.status==="done"||x.status==="returned":x.status===spFilter)).slice().sort((a,b)=>(b.unreadS-a.unreadS)||(b.at||"").localeCompare(a.at||""));
  $("spTarif").innerHTML=FREE?"":isFb(S)?`Обратная связь до <b style="color:var(--gold2);font-weight:500">${fmt(S.fbUntil)}</b>`:`Без обратной связи · <button class="link" id="spFb">подключить</button>`;
  const fb=$("spFb");if(fb)fb.onclick=()=>openPay({kind:"fb"});
- $("spGrid").innerHTML=`<button class="addcard" id="spAdd">+ Новый расклад<span>фото, вопрос и твоя трактовка</span></button><button class="addcard ask" id="spAsk">? Вопрос Лене<span>без расклада: про лекцию, карту, практику</span></button>`+
+ $("spGrid").innerHTML=(alive(spreads).length?"":`<p class="sp-empty">Здесь будут твои расклады и вопросы Лене. Начни с кнопок выше.</p>`)+
   list.map(x=>{const lm=x.thread.length?x.thread[x.thread.length-1]:null;
-   return `<button class="sp ${x.unreadS?"new":""}" data-id="${x.id}">${x.unreadS?'<span class="newtag">новый ответ</span>':""}${imgOf(x)}<div class="sp-b">${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<b>${esc(x.q)}</b><p>${esc(lm&&lm.from!=="system"?(lm.from==="master"?"Лена: ":"Ты: ")+lm.t:x.desc)}</p><div class="sp-m"><span>${fmt(x.at)}${x.kind!=="spread"?` · ${kindName(x)}`:""}</span><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span></div></div></button>`}).join("");
+   return `<button class="sp ${x.unreadS?"new":""} ${x.kind==="question"&&!x.img?"spq":""}" data-id="${x.id}">${x.unreadS?'<span class="newtag">новый ответ</span>':""}${x.kind==="question"&&!x.img?"":imgOf(x)}<div class="sp-b">${x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<b>${esc(x.q)}</b><p>${esc(lm&&lm.from!=="system"?(lm.from==="master"?"Лена: ":"Ты: ")+lm.t:x.desc)}</p><div class="sp-m"><span>${fmt(x.at)}${x.kind!=="spread"?` · ${kindName(x)}`:""}</span><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span></div></div></button>`}).join("");
  if(!list.length&&alive(spreads).length)$("spGrid").insertAdjacentHTML("beforeend",`<p class="sp-empty">${spCat!=="all"?`В теме «${esc(spCat)}» пока нет раскладов${spFilter!=="all"?" с таким статусом":""}.`:"Нет раскладов с таким статусом."}</p>`);
  $("spAsk").onclick=()=>openQ(spCat!=="all"?{cat:spCat}:null);
  $("spAdd").onclick=()=>openForm(null,spCat!=="all"?{cat:spCat}:null);
