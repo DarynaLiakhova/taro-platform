@@ -954,6 +954,7 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 .vrec .interim{white-space:normal}
 .qstat{margin:14px 0 4px;width:max-content;max-width:100%;flex-wrap:wrap}
 .qstat b{font-weight:600;margin-left:4px;opacity:.8}
+.vfoot{display:flex;justify-content:flex-end;margin-top:4px}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -2400,8 +2401,9 @@ function renderChat(){
    ${finBlock}
    ${comp}
    ${own?`<div class="drow">${x.kind==="question"?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить расклад</button></div>`:""}
+   <div class="vfoot"><button type="button" class="btn ghost sm" id="vClose2">Закрыть</button></div>
   </div>`;
- $("vClose").onclick=()=>closeDlg("vdlg");
+ $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  mountChatRec(x);
  $("vBox").querySelectorAll(".msg-img").forEach(im=>{const z=()=>openZoom(im.src);im.onclick=z;im.onkeydown=e=>{if(e.key==="Enter")z()}});
  {const fo=$("finOpen");if(fo)fo.onclick=()=>{finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
