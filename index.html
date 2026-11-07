@@ -2241,10 +2241,10 @@ function makeRec(o){
     const parts=[];let tmp="";
     for(let i=0;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
      if(e.results[i].isFinal){const last=parts[parts.length-1];if(last&&t.toLowerCase().startsWith(last.toLowerCase()))parts[parts.length-1]=t;else if(!last||!last.toLowerCase().endsWith(t.toLowerCase()))parts.push(t)}
-     else tmp=t}
+     else tmp=tmp?tmp+" "+t:t}
     fin=parts.map(cap).reduce(join,"");
-    const live=tmp&&!(fin.toLowerCase().endsWith(tmp.toLowerCase()))?cap(tmp):"";
-    ta.value=join(join(base,fin),live);ta.scrollTop=ta.scrollHeight;
+    const live=tmp&&!(fin.toLowerCase().endsWith(tmp.toLowerCase()))?(fin?tmp:cap(tmp)):"";
+    const done=join(base,fin);ta.value=live?(done?done+" "+live:live):done;ta.scrollTop=ta.scrollHeight;
     ta.dispatchEvent(new Event("input",{bubbles:true}))};
    g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){R.g=null;o.interim.textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
    g.onend=()=>{base=join(base,fin);fin="";ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
