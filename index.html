@@ -2523,8 +2523,8 @@ function renderQueue(){
  if(!items.length){
   const match=i=>(who==="all"||i.u.id===who)&&(ty==="all"||i.x.kind===ty)&&(!from||dayOf(i.x.sentAt||i.x.at)>=from)&&(!to||dayOf(i.x.sentAt||i.x.at)<=to);
   const other=[["wait","в «Ждут ответа»",W],["done","в «Отвеченных»",D],["all","во «Всей истории»",sentAll()]].filter(o=>o[0]!==qStat).map(o=>[o[0],o[1],o[2].filter(match).length]).filter(o=>o[2]);
-  if(other.length){const tn={spread:"раскладов",quest:"квестов",exam:"Посвящений",question:"вопросов"}[ty]||"записей";
-   $("mq").innerHTML=`<div class="emptyq"><b>${qStat==="wait"?"Сейчас ничего не ждёт ответа":"Здесь пусто"}</b>Но ${tn} есть ${other.map(o=>`${o[1]}: ${o[2]}`).join(", ")}.<div class="drow" style="justify-content:center;margin-top:14px">${other.map(o=>`<button class="btn ghost sm" data-goto="${o[0]}">Открыть «${{wait:"Ждут ответа",done:"Отвеченные",all:"Вся история"}[o[0]]}»</button>`).join("")}</div></div>`;
+  if(other.length){const tn={spread:"расклады",quest:"квесты",exam:"Посвящения",question:"вопросы"}[ty]||"записи";
+   $("mq").innerHTML=`<div class="emptyq"><b>${qStat==="wait"?"Сейчас ничего не ждёт ответа":"Здесь пусто"}</b>Зато ${tn} есть ${other.map(o=>`${o[1]} (${o[2]})`).join(" и ")}.<div class="drow" style="justify-content:center;margin-top:14px">${other.map(o=>`<button class="btn ghost sm" data-goto="${o[0]}">Открыть «${{wait:"Ждут ответа",done:"Отвеченные",all:"Вся история"}[o[0]]}»</button>`).join("")}</div></div>`;
    $("mq").querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>{qStat=b.dataset.goto;renderQueue()});return}
  }
  if(!items.length){$("mq").innerHTML=all0.length?`<div class="emptyq"><b>За этот период ничего нет</b>Измени фильтр или нажми «Сбросить», чтобы увидеть всю очередь.</div>`:`<div class="emptyq"><b>Всё проверено</b>Новые расклады, квесты и Посвящения появятся здесь, как только ученицы их отправят.</div>`;return}
