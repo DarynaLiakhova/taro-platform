@@ -2176,7 +2176,7 @@ function addCat(name){name=(name||"").trim().replace(/\s+/g," ");if(!name)return
  if(name.length>24){toast("Короче, до 24 знаков");return null}
  const ex=cats().find(c=>c.toLowerCase()===name.toLowerCase());if(ex)return ex;cats().push(name);persist();return name}
 function delCat(name){S.cats=cats().filter(c=>c!==name);spreads.forEach(x=>{if(x.cat===name)x.cat=null});if(spCat===name)spCat="all";persist()}
-function catInput(onDone){const w=document.createElement("span");w.className="catnew";w.innerHTML='<input maxlength="24" placeholder="Например, Влад" aria-label="Название категории"><button type="button" class="cok" aria-label="Добавить">✓</button>';
+function catInput(onDone){const w=document.createElement("span");w.className="catnew";w.innerHTML='<input maxlength="24" placeholder="Название темы" aria-label="Название категории"><button type="button" class="cok" aria-label="Добавить">✓</button>';
  const i=w.querySelector("input"),ok=()=>{const n=addCat(i.value);onDone(n)};
  i.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();ok()}if(e.key==="Escape"){e.stopPropagation();onDone(null)}};w.querySelector(".cok").onclick=ok;
  setTimeout(()=>i.focus(),0);return w}
@@ -2528,7 +2528,7 @@ function applyQ(q){
 }
 const lastAct=x=>x.thread.length?x.thread[x.thread.length-1].at:(x.sentAt||x.at);
 let qStat="all";
-const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt).map(x=>({u,x})));
+const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt&&!(x.deletedAt&&x.mDismissed)).map(x=>({u,x})));
 const answeredAll=()=>sentAll().filter(i=>!i.x.deletedAt&&(i.x.status==="done"||i.x.status==="returned"));
 function renderQueue(){
  const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";$("qsA").textContent=sentAll().length||"";
