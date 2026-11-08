@@ -1061,6 +1061,19 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 @media (prefers-reduced-motion:reduce){.rdot{animation:none}}
 
 
+
+/* --- оплата на странице входа */
+.l-buy{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:860px;margin:40px auto 0;padding:0 16px}
+.lb-card{display:grid;gap:8px;align-content:start;padding:20px 22px;border-radius:16px;background:linear-gradient(180deg,#fdf1e3,#f6e2cc);border:1px solid rgba(201,162,78,.6);color:#3a1428}
+.lb-card.hl{box-shadow:0 0 0 2px #c9a24e inset,0 14px 30px rgba(0,0,0,.25)}
+.lb-card small{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a6f22}
+.lb-card b{font-family:var(--serif);font-weight:500;font-size:22px;line-height:1.15}
+.lb-card span{font-size:14px;color:#5e3a42}
+.lb-card .btn{justify-self:start;margin-top:6px;white-space:nowrap}
+.l-cta{margin-top:18px!important}
+.lp-buy{grid-column:2/4;justify-self:start;margin-top:2px}
+#wCourse{margin-left:0}
+@media (max-width:760px){.l-buy{grid-template-columns:1fr;padding:0;margin-top:20px;order:4}#v-login .l-cta{order:5}#v-login .band.lhow{order:6;margin-top:30px}.lb-card .btn{justify-self:stretch;text-align:center}.lp-buy .btn{white-space:nowrap}}
 /* --- страница входа: программа и «как устроено» */
 .lprog{display:none}
 @media (max-width:760px){
@@ -1168,7 +1181,8 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 <div class="band lhow"><div class="qrow"><div class="qc"><img src="assets/ic_progress.jpg" alt=""><span><b>Лекции и квесты</b><small>Видео, конспект и практика. Ступени открываются по порядку</small></span></div><div class="qc"><img src="assets/ic_sun.jpg" alt=""><span><b>Разборы с Леной</b><small>Присылаешь расклад или вопрос — Лена отвечает лично</small></span></div><div class="qc"><img src="assets/ic_book.jpg" alt=""><span><b>Колода и журнал</b><small>За лекции приходят арканы, к каждой карте — свои заметки</small></span></div></div></div>
 <div class="courses"><h2 class="sec-h">Семь ступеней пути</h2><p class="sec-sub">Каждая ступень открывает следующую. За лекции в твою колоду приходят арканы.</p><div class="stages"><div class="stg" style="background-image:url(assets/st3.jpg)"><span class="nm"><span class="t">Освобождение</span><em>1 888 ₽</em></span></div><div class="stg" style="background-image:url(assets/st1.jpg)"><span class="nm"><span class="t">Ясновидение</span><em>7 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/st4.jpg)"><span class="nm"><span class="t">Придворные</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/st6.jpg)"><span class="nm"><span class="t">Числовые и тузы</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/st5.jpg)"><span class="nm"><span class="t">Старшие арканы</span><em>3 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/st7.jpg)"><span class="nm"><span class="t">Таро-кинолента</span><em>1 111 ₽</em></span></div><div class="stg" style="background-image:url(assets/st2.jpg)"><span class="nm"><span class="t">Монетизация</span><em>подарок</em></span></div></div></div>
 <div class="lprog" id="lProg" aria-label="Программа обучения"></div>
-<div class="l-cta"><button class="btn" type="button" data-auth="up">Начать с первой ступени · 1 888 ₽</button><span>Уже учишься? <button class="link" type="button" data-auth="in">Войти</button></span></div>
+<div class="l-buy" id="lBuy"></div>
+<div class="l-cta"><span>Уже учишься? <button class="link" type="button" data-auth="in">Войти</button></span></div>
 </section>
 
 <!-- ========== ПРИВЕТСТВИЕ ========== -->
@@ -1184,7 +1198,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
     </div>
     <div class="buy">
       <div><div class="lab"><i></i>1 ступень</div><h3>Освобождение</h3><p>9 лекций, 1 квест и Посвящение. Доступ навсегда.</p></div>
-      <div class="drow"><button class="btn" id="wPay">Оплатить 1 888 ₽ и начать</button><button class="btn ghost" id="wLook">Сначала посмотреть</button></div>
+      <div class="drow"><button class="btn" id="wPay">Оплатить 1 888 ₽ и начать</button><button class="btn ghost" data-buy="course" id="wCourse">Весь курс сразу</button><button class="btn ghost" id="wLook">Сначала посмотреть</button></div>
     </div>
     
   </div>
@@ -1721,7 +1735,7 @@ function demoDB(){
   {id:4,to:"anna",t:"Лена ответила на расклад «Что ждёт меня в отношениях с сестрой?»",at:atDays(-3,14),read:false,go:{type:"spread",u:"anna",sid:U.anna.spreads[0].id}},
   {id:5,to:"anna",t:"Лена ответила на квест «вопрос подруги»",at:atDays(-1,15),read:true,go:{type:"spread",u:"anna",sid:U.anna.spreads[1].id}}],done:0}
 }
-function priceOfRaw(it){return it.kind==="stage"?BASE[it.n-1].price:it.kind==="fb"?FB_PRICE:SES_PRICE}
+function priceOfRaw(it){return it.kind==="course"?BASE.slice(0,6).reduce((a,b)=>a+b.price,0):it.kind==="stage"?BASE[it.n-1].price:it.kind==="fb"?FB_PRICE:SES_PRICE}
 let DB;
 const CLOUD=!window.__NO_SB&&!/claude/.test(location.hostname);
 try{DB=CLOUD?emptyDB():JSON.parse(localStorage.getItem(STORE))}catch(e){DB=null}
@@ -1752,8 +1766,9 @@ const noPay=u=>!!u&&(!!u.free||STAFF.includes(String(u.email||"").toLowerCase())
 const isFb=u=>!!u&&(noPay(u)||!!(u.fbUntil&&u.fbUntil>=TODAY));
 const owns=(u,n)=>noPay(u)||n===7||u.owned.includes(n);
 const gotOf=u=>{let g=0;for(let k=1;k<u.cur.stage;k++)g+=L(k)+1;return Math.min(78,g+Math.min(u.cur.lesson-1,L(u.cur.stage)))};
-const itemName=it=>it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь · 1 месяц":"5 личных сессий";
-const priceOf=it=>it.kind==="stage"?ST(it.n).price:it.kind==="fb"?FB_PRICE:SES_PRICE;
+const coursePrice=()=>DB.program.filter(s=>s.n<7).reduce((a,s)=>a+(+s.price||0),0);
+const itemName=it=>it.kind==="course"?"Весь курс · 7 ступеней":it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь · 1 месяц":"5 личных сессий";
+const priceOf=it=>it.kind==="course"?coursePrice():it.kind==="stage"?ST(it.n).price:it.kind==="fb"?FB_PRICE:SES_PRICE;
 const kindName=x=>x.kind==="question"?(x.lesson?`вопрос · лекция ${x.lesson.stage}.${x.lesson.idx}`:"вопрос"):x.kind==="exam"?`Посвящение · ${x.stage} ступень`:x.kind==="quest"?"квест":"расклад";
 const stLabel={journal:"в журнале",wait:"ждёт ответа",done:"мастер ответил",returned:"на доработку"};
 function notify(to,t,go){DB.notifs.unshift({id:Date.now()+Math.random(),to,t,at:nowISO(),read:false,go})}
@@ -1762,7 +1777,8 @@ const myNotifs=()=>DB.notifs.filter(n=>n.to===meKey());
 
 // ===== покупки =====
 function applyPurchase(u,it){
- if(it.kind==="stage"){if(!u.owned.includes(it.n))u.owned.push(it.n)}
+ if(it.kind==="course"){DB.program.forEach(s=>{if(s.n<7&&!u.owned.includes(s.n))u.owned.push(s.n)})}
+ else if(it.kind==="stage"){if(!u.owned.includes(it.n))u.owned.push(it.n)}
  else if(it.kind==="fb"){u.fbUntil=addDays(30,isFb(u)?u.fbUntil:TODAY);u.fbWarned=""}
  else u.sessions=(u.sessions||0)+5;
 }
@@ -1776,9 +1792,10 @@ let payItem=null,payDone=null;
 function openPay(it,done){
  payItem=it;payDone=done||null;lastFocus=document.activeElement;
  const price=priceOf(it);
- $("payTitle").textContent=it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь с Леной":"Личные сессии с Леной";
+ $("payTitle").textContent=it.kind==="course"?"Весь курс сразу":it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь с Леной":"Личные сессии с Леной";
  let li;
- if(it.kind==="stage"){const s=ST(it.n),q=s.lessons.filter(l=>l.kind==="quest").length;li=[`${s.lessons.length-q} ${plural(s.lessons.length-q,"лекция","лекции","лекций")} с видео и конспектами`,`${q} ${plural(q,"квест","квеста","квестов")} и Посвящение в конце`,`Новые арканы в колоду за каждую лекцию`,`Доступ навсегда`]}
+ if(it.kind==="course"){const n=DB.program.reduce((a,s)=>a+s.lessons.length,0);li=["Все 7 ступеней: от «Освобождения» до «Монетизации»",`${n} ${plural(n,"урок","урока","уроков")} с видео, конспектами и квестами`,"Ступени всё равно открываются по порядку, после Посвящения предыдущей","7-я ступень в подарок, доступ навсегда"]}
+ else if(it.kind==="stage"){const s=ST(it.n),q=s.lessons.filter(l=>l.kind==="quest").length;li=[`${s.lessons.length-q} ${plural(s.lessons.length-q,"лекция","лекции","лекций")} с видео и конспектами`,`${q} ${plural(q,"квест","квеста","квестов")} и Посвящение в конце`,`Новые арканы в колоду за каждую лекцию`,`Доступ навсегда`]}
  else if(it.kind==="fb")li=["Разбор каждого расклада, квеста и Посвящения",`Переписка с Леной под каждым разбором`,"Ответ пн–пт с 10 до 18 мск",isFb(S)?`Продлится до ${fmt(addDays(30,S.fbUntil))}`:"30 дней с момента оплаты"];
  else li=["5 встреч один на один с Леной","Разбор твоих реальных раскладов","После оплаты Лена напишет, чтобы договориться о времени"];
  $("payWhat").innerHTML=li.map(x=>`<li>${esc(x)}</li>`).join("");
@@ -1788,7 +1805,7 @@ function openPay(it,done){
 $("payGo").onclick=()=>{
  const m=document.querySelector("input[name=payM]:checked").value;
  recordPayment(S,payItem,m);persist();$("paydlg").hidden=true;
- toast(payItem.kind==="stage"?`${payItem.n} ступень открыта`:payItem.kind==="fb"?`Обратная связь до ${fmt(S.fbUntil)}`:"Сессии оплачены, Лена напишет тебе");
+ toast(payItem.kind==="course"?"Весь курс оплачен. Начинаем с первой ступени":payItem.kind==="stage"?`${payItem.n} ступень открыта`:payItem.kind==="fb"?`Обратная связь до ${fmt(S.fbUntil)}`:"Сессии оплачены, Лена напишет тебе");
  const d=payDone;payDone=null;if(d)d();else refresh();
 };
 $("payClose").onclick=()=>closeDlg("paydlg");
@@ -1862,7 +1879,11 @@ function goTo(g){
 
 // ===== вход =====
 document.querySelectorAll("#authSeg button").forEach(b=>b.onclick=()=>setAuth(b.dataset.a));
+let wantPay=null;
+function buyFlow(it){if(role==="student"&&S){if(noPay(S)){toast("У тебя доступ без оплат");return}openPay(it,()=>showView("path"))}else{wantPay=it;openAuth("up");toast(it.kind==="course"?"Сначала создай аккаунт — потом сразу оплата курса":"Сначала создай аккаунт — потом сразу оплата ступени")}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-buy]");if(!b)return;e.preventDefault();e.stopPropagation();buyFlow(b.dataset.buy==="course"?{kind:"course"}:{kind:"stage",n:+b.dataset.buy})},true);
 function loginStudent(u){
+ if(wantPay){const w=wantPay;wantPay=null;if(!noPay(u))setTimeout(()=>openPay(w,()=>showView("path")),120)}
  u.active=TODAY;
  if(!FREE&&isFb(u)&&daysLeft(u.fbUntil)<=3&&u.fbWarned!==u.fbUntil){u.fbWarned=u.fbUntil;notify(u.id,`Обратная связь заканчивается ${fmt(u.fbUntil)}. Продлить можно в профиле`,{type:"view",v:"profile"})}
  FREE=noPay(u);document.body.classList.toggle("free",FREE);
@@ -2419,10 +2440,13 @@ document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&
 
 
 /* ---- программа на странице входа (список, на телефоне) ---- */
-function renderLanding(){
+ function renderLanding(){
+ const lb=$("lBuy");if(lb&&DB.program){const p1=ST(1).price,pc=coursePrice();
+  lb.innerHTML=`<div class="lb-card"><small>Начать сейчас</small><b>Первая ступень · «${esc(short(ST(1)))}»</b><span>${L(1)} уроков и Посвящение. Дальше решишь сама.</span><button class="btn" data-buy="1">Оплатить ${rub(p1)}</button></div>
+  <div class="lb-card hl"><small>Всё сразу</small><b>Весь курс сразу</b><span>Все 7 ступеней, седьмая в подарок. Ступени открываются по порядку.</span><button class="btn" data-buy="course">Оплатить ${rub(pc)}</button></div>`}
  const box=$("lProg");if(!box||!DB.program)return;
  box.innerHTML=DB.program.map(s=>{const q=s.lessons.filter(l=>l.kind==="quest").length,lec=s.lessons.length-q;
-  return `<details class="lp"><summary><span class="lp-img" style="background-image:url(assets/st${STIMG[s.n]}.jpg)"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i></summary>
+  return `<details class="lp"><summary><span class="lp-img" style="background-image:url(assets/st${STIMG[s.n]}.jpg)"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i>${s.n===1?`<span class="lp-buy"><button type="button" class="btn sm" data-buy="1">Оплатить · ${rub(s.price)}</button></span>`:""}</summary>
   <ol>${s.lessons.map(l=>`<li>${esc(l.title)}${l.kind==="quest"?' <small>квест</small>':""}</li>`).join("")}<li class="ex">✦ ${esc(s.exam||"Посвящение")}</li></ol></details>`}).join("");
 }
 /* ---- Лена удаляет расклад или вопрос ---- */
@@ -2915,7 +2939,7 @@ function renderJournal(){
 }
 $("jSearch").addEventListener("input",renderJournal);
 // ===== диалоги =====
-function closeDlg(id){if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
 ["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg","qdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel").hidden){$("npanel").hidden=true;renderTabs();return}
  for(const id of ["xdlg","qdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
