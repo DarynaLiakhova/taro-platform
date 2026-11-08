@@ -1160,6 +1160,59 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
  #who .hreg{display:none}
  #who .hlink{border:1px solid rgba(212,173,90,.5);border-radius:999px;padding:6px 14px}
 }
+
+/* ===================== ЛЕНДИНГ ===================== */
+.lb-card .btn.lbo{background:#fffaf3!important;color:#8a2742!important;border:1.5px solid #8a2742!important;box-shadow:none!important}
+.lb-card .btn.lbo::before,.lb-card .btn.lbo::after{display:none}
+#v-login .band.lhow::before{content:"Как устроено обучение";display:block;text-align:center;font-family:var(--serif);font-size:clamp(24px,3vw,32px);color:#f8e9da;margin:4px 0 18px}
+#v-login{display:flex!important;flex-direction:column}
+#v-login[hidden]{display:none!important}
+#v-login .hero{order:1}#v-login .lwho{order:2}#v-login .lfor{order:3}#v-login .courses{order:4}#v-login .lprog{order:5}
+#v-login .band.lhow{order:6;margin-top:56px}#v-login .lrev{order:7}#v-login .lprice{order:8}#v-login .l-buy{order:9}
+#v-login .lfaq{order:10}#v-login .lfinal{order:11}#v-login .l-cta{order:12}
+.lsec{max-width:1100px;width:100%;margin:64px auto 0;padding:0 4px}
+.lsec .sec-sub{max-width:60ch;margin-left:auto;margin-right:auto}
+.sec-h.left{text-align:left}
+.ph-note{position:relative;border:1.5px dashed rgba(240,212,154,.55);border-radius:14px;background:rgba(255,250,243,.05);color:#e9d9c4}
+.ph-note .tb{position:absolute;top:-10px;left:14px;background:#8a2742;color:#fff3e6;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:2px 8px;border-radius:99px}
+.ph-note.txt{padding:16px 16px 12px;font-style:italic}
+.ph-note.txt p{margin:0}
+.lwho-in{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:40px;align-items:center}
+.lwho-ph{aspect-ratio:4/5;display:grid;place-items:center;text-align:center;font-family:var(--serif);font-size:20px}
+.lwho-ph small{font-family:var(--sans);font-size:13px;opacity:.8}
+.lwho-t{display:grid;gap:18px}
+.lfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.lfacts .ph-note{padding:18px 12px 12px;text-align:center;display:grid;gap:2px}
+.lfacts b{font-family:var(--serif);font-size:30px;color:#f0d49a;font-weight:500}
+.lfacts span{font-size:12.5px}
+.lfor-g,.lrev-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:22px}
+.lf{padding:20px;border-radius:14px;background:linear-gradient(180deg,#fdf1e3,#f6e2cc);border:1px solid rgba(201,162,78,.6);color:#3a1428;display:grid;gap:6px;align-content:start}
+.lf b{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.15}
+.lf span{font-size:14px;color:#5e3a42;line-height:1.45}
+.ph-note.rv{padding:26px 18px 16px;min-height:150px;display:grid;align-content:space-between;font-style:italic}
+.ph-note.rv p{margin:0;font-size:16px}.ph-note.rv small{font-style:normal;opacity:.75}
+#v-login .l-buy{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1100px;margin-top:22px}
+.faq{display:grid;gap:10px;max-width:760px;margin:22px auto 0}
+.faq details{border:1px solid rgba(201,162,78,.5);border-radius:12px;background:linear-gradient(180deg,#fdf1e3,#f6e2cc);color:#3a1428}
+.faq summary{list-style:none;cursor:pointer;padding:14px 44px 14px 16px;font-family:var(--serif);font-size:18px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:22px;color:#8a2742}
+.faq details[open] summary::after{content:"–"}
+.faq details>p,.faq details>.ph-note{margin:0 16px 16px;font-size:14.5px;line-height:1.5}
+.faq .ph-note{border-color:rgba(138,39,66,.45);color:#5e3a42;background:rgba(138,39,66,.04)}
+.lfinal{text-align:center}
+.lfinal .drow{margin-top:18px;gap:12px;flex-wrap:wrap}
+#v-login .l-cta{margin:22px auto 60px!important}
+@media (max-width:900px){.lfor-g,.lrev-g,#v-login .l-buy{grid-template-columns:1fr}}
+@media (max-width:760px){
+ .lsec{margin-top:46px;padding:0}
+ .lwho-in{grid-template-columns:1fr;gap:20px}
+ .lwho-ph{aspect-ratio:1/1;max-width:260px;width:100%;justify-self:center}
+ .sec-h.left{text-align:center}.lwho-t .lab{justify-content:center}
+ .lfacts{gap:8px}.lfacts b{font-size:24px}.lfacts span{font-size:11.5px}
+ .lfinal .btn{flex:1 1 100%}
+ #v-login .band.lhow{margin-top:40px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -1183,6 +1236,59 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 <div class="lprog" id="lProg" aria-label="Программа обучения"></div>
 <div class="l-buy" id="lBuy"></div>
 <div class="l-cta"><span>Уже учишься? <button class="link" type="button" data-auth="in">Войти</button></span></div>
+
+<div class="lsec lwho" aria-labelledby="whoH">
+ <div class="lwho-in">
+  <div class="lwho-ph ph-note"><span class="tb">тут будет</span><span>Фото Лены<br><small>портрет, лучше с картами</small></span></div>
+  <div class="lwho-t">
+   <div class="lab"><i></i>Кто ведёт</div>
+   <h2 class="sec-h left" id="whoH">Лена · Ellene Del Sol’</h2>
+   <div class="ph-note txt"><span class="tb">тут будет</span><p>3–4 предложения от Лены о себе: как пришла к Таро, в чём её подход, почему учит именно так.</p></div>
+   <div class="lfacts">
+    <div class="ph-note"><span class="tb">тут будет</span><b>—</b><span>лет практики</span></div>
+    <div class="ph-note"><span class="tb">тут будет</span><b>—</b><span>учениц</span></div>
+    <div class="ph-note"><span class="tb">тут будет</span><b>—</b><span>раскладов и консультаций</span></div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="lsec lfor" aria-labelledby="forH">
+ <h2 class="sec-h" id="forH">Кому подойдёт</h2>
+ <div class="lfor-g">
+  <div class="lf"><b>Только начинаешь</b><span>Карты пугают, «правил» слишком много. Первая ступень снимает страх и даёт опору.</span></div>
+  <div class="lf"><b>Знаешь значения, но не читаешь</b><span>Каждая карта по отдельности понятна, а сюжета не складывается. Учимся читать поток.</span></div>
+  <div class="lf"><b>Хочешь работать с людьми</b><span>Последняя ступень — про первых клиентов, цену и формат консультации.</span></div>
+ </div>
+</div>
+<div class="lsec lrev" aria-labelledby="revH">
+ <h2 class="sec-h" id="revH">Отзывы учениц</h2>
+ <p class="sec-sub">Настоящие слова учениц Лены: скриншоты или короткие цитаты с именем.</p>
+ <div class="lrev-g">
+  <div class="ph-note rv"><span class="tb">тут будет</span><p>Отзыв ученицы</p><small>имя · какую ступень прошла</small></div>
+  <div class="ph-note rv"><span class="tb">тут будет</span><p>Отзыв ученицы</p><small>имя · какую ступень прошла</small></div>
+  <div class="ph-note rv"><span class="tb">тут будет</span><p>Отзыв ученицы</p><small>имя · какую ступень прошла</small></div>
+ </div>
+</div>
+<div class="lsec lprice" aria-labelledby="priceH">
+ <h2 class="sec-h" id="priceH">Стоимость</h2>
+ <p class="sec-sub">Можно идти по одной ступени или взять весь курс. Оплата открывает доступ сразу.</p>
+</div>
+<div class="lsec lfaq" aria-labelledby="faqH">
+ <h2 class="sec-h" id="faqH">Частые вопросы</h2>
+ <div class="faq">
+  <details><summary>Как проходит обучение?</summary><p>Каждая ступень — это лекции с видео и конспектом, квесты-практики и Посвящение в конце. Ступени открываются по порядку: следующая — после Посвящения предыдущей. Всё в личном кабинете, с телефона или компьютера.</p></details>
+  <details><summary>Что даёт обратная связь?</summary><p>Ты присылаешь свои расклады и вопросы — Лена разбирает их лично, можно переписываться, отправлять фото и голосовые. Ответы пн–пт с 10 до 18 мск.</p></details>
+  <details><summary>Доступ к ступени ограничен по времени?</summary><p>Нет, оплаченная ступень остаётся у тебя навсегда, пересматривать лекции можно сколько угодно.</p></details>
+  <details><summary>Нужна ли своя колода? Какая?</summary><div class="ph-note txt"><span class="tb">тут будет</span><p>Ответ Лены.</p></div></details>
+  <details><summary>Сколько времени нужно в неделю?</summary><div class="ph-note txt"><span class="tb">тут будет</span><p>Ответ Лены.</p></div></details>
+  <details><summary>Как оплатить из-за рубежа?</summary><div class="ph-note txt"><span class="tb">тут будет</span><p>Ответ Лены: какие способы оплаты подключены.</p></div></details>
+ </div>
+</div>
+<div class="lsec lfinal">
+ <h2 class="sec-h">Готова начать путь?</h2>
+ <p class="sec-sub">Первая ступень — «Освобождение». Дальше решишь сама.</p>
+ <div class="drow" style="justify-content:center"><button class="btn" type="button" data-buy="1">Начать с первой ступени</button><button class="btn ghost" type="button" data-buy="course">Весь курс сразу</button></div>
+</div>
 </section>
 
 <!-- ========== ПРИВЕТСТВИЕ ========== -->
@@ -1880,8 +1986,8 @@ function goTo(g){
 // ===== вход =====
 document.querySelectorAll("#authSeg button").forEach(b=>b.onclick=()=>setAuth(b.dataset.a));
 let wantPay=null;
-function buyFlow(it){if(role==="student"&&S){if(noPay(S)){toast("У тебя доступ без оплат");return}openPay(it,()=>showView("path"))}else{wantPay=it;openAuth("up");toast(it.kind==="course"?"Сначала создай аккаунт — потом сразу оплата курса":"Сначала создай аккаунт — потом сразу оплата ступени")}}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-buy]");if(!b)return;e.preventDefault();e.stopPropagation();buyFlow(b.dataset.buy==="course"?{kind:"course"}:{kind:"stage",n:+b.dataset.buy})},true);
+function buyFlow(it){if(role==="student"&&S){if(noPay(S)){toast("У тебя доступ без оплат");return}openPay(it,()=>showView("path"))}else{wantPay=it;openAuth("up");toast(it.kind==="course"?"Сначала создай аккаунт — потом сразу оплата курса":it.kind==="fb"?"Сначала создай аккаунт — потом подключим обратную связь":"Сначала создай аккаунт — потом сразу оплата ступени")}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-buy]");if(!b)return;e.preventDefault();e.stopPropagation();buyFlow(b.dataset.buy==="course"?{kind:"course"}:b.dataset.buy==="fb"?{kind:"fb"}:{kind:"stage",n:+b.dataset.buy})},true);
 function loginStudent(u){
  if(wantPay){const w=wantPay;wantPay=null;if(!noPay(u))setTimeout(()=>openPay(w,()=>showView("path")),120)}
  u.active=TODAY;
@@ -2443,7 +2549,8 @@ document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&
  function renderLanding(){
  const lb=$("lBuy");if(lb&&DB.program){const p1=ST(1).price,pc=coursePrice();
   lb.innerHTML=`<div class="lb-card"><small>Начать сейчас</small><b>Первая ступень · «${esc(short(ST(1)))}»</b><span>${L(1)} уроков и Посвящение. Дальше решишь сама.</span><button class="btn" data-buy="1">Оплатить ${rub(p1)}</button></div>
-  <div class="lb-card hl"><small>Всё сразу</small><b>Весь курс сразу</b><span>Все 7 ступеней, седьмая в подарок. Ступени открываются по порядку.</span><button class="btn" data-buy="course">Оплатить ${rub(pc)}</button></div>`}
+  <div class="lb-card hl"><small>Всё сразу</small><b>Весь курс сразу</b><span>Все 7 ступеней, седьмая в подарок. Ступени открываются по порядку.</span><button class="btn" data-buy="course">Оплатить ${rub(pc)}</button></div>
+  <div class="lb-card"><small>К любой ступени</small><b>Обратная связь с Леной</b><span>Разборы твоих раскладов и вопросов, переписка с фото и голосом. Месяц.</span><button class="btn lbo" data-buy="fb">Подключить ${rub(FB_PRICE)}</button></div>`}
  const box=$("lProg");if(!box||!DB.program)return;
  box.innerHTML=DB.program.map(s=>{const q=s.lessons.filter(l=>l.kind==="quest").length,lec=s.lessons.length-q;
   return `<details class="lp"><summary><span class="lp-img" style="background-image:url(assets/st${STIMG[s.n]}.jpg)"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i>${s.n===1?`<span class="lp-buy"><button type="button" class="btn sm" data-buy="1">Оплатить · ${rub(s.price)}</button></span>`:""}</summary>
