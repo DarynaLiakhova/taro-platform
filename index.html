@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3b1527">
+<meta name="format-detection" content="telephone=no">
 <title>Путь Таролога</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1052,6 +1059,60 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 .vlab{display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#9a6f22}
 .vclip.on{margin:4px 0 6px}
 @media (prefers-reduced-motion:reduce){.rdot{animation:none}}
+
+/* ===================== МОБИЛЬНАЯ ВЕРСИЯ (доводка) ===================== */
+@media (max-width:760px){
+ /* шапка гостя: всё помещается */
+ .top.out .brand span,.top.out .logo span{letter-spacing:.06em}
+ #who .hlink{padding:6px 6px}
+ #who .hreg{padding:7px 12px;white-space:nowrap}
+ /* первый экран гостя: текст под глазом, а не на нём */
+ #v-login .hero:not(.me){height:470px!important}
+ #v-login .hero:not(.me) .hero-txt{top:41%!important;height:auto!important;gap:10px}
+ #v-login .hero:not(.me) .h-title{font-size:27px!important}
+ #v-login .hero:not(.me) .h-sub{font-size:14.5px!important;max-width:30ch}
+ #v-login .hero:not(.me) .hbtn{margin-top:6px!important}
+ /* плашки под первым экраном: в строку, компактно */
+ #v-login .qc{grid-template-columns:1fr!important;justify-items:center;text-align:center;padding:10px 6px!important;gap:4px!important;min-height:0!important}
+ #v-login .qc img{width:42px}#v-login .qc b{font-size:14px}
+ /* кнопки, которые не должны переноситься */
+ .l-cta .btn{font-size:15px;padding:12px 18px;white-space:nowrap}
+ /* окна — как «лист» на весь экран, крестик внутри */
+ .dlg{padding:0!important;place-items:end stretch}
+ .dlg .dbox{width:100%!important;max-width:none!important;max-height:calc(100dvh - 24px)!important;overflow:auto;border-radius:18px 18px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))!important}
+ .dlg .dx{position:sticky;top:0;float:right;margin:-6px -4px 0 0;z-index:2;width:36px;height:36px;font-size:22px}
+ /* кабинет: подпись ступени не лезет на глаз */
+ .hero.me{padding-top:72px!important;background-position:center 0!important}
+ /* расклады: переключатель статусов в одну строку с прокруткой */
+ #spFilter,.seg.qstat{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}
+ #spFilter::-webkit-scrollbar{display:none}
+ #spFilter button,.qstat button{white-space:nowrap;flex:none}
+ .sp-act .btn{white-space:nowrap;font-size:14px;padding:9px 14px}
+ /* темы — одна строка с прокруткой, чтобы не съедали экран */
+ .cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
+ .cats::-webkit-scrollbar{display:none}
+ .cats .cat,.cats .catw,.cats .catnew,.cats .catedit{flex:none}
+ .fbox .cats,.qbox .cats,.vbox .cats{flex-wrap:wrap;overflow:visible;margin-right:0;padding-right:0}
+ /* поля ввода: 16px, чтобы телефон не приближал страницу */
+ input,textarea,select{font-size:16px!important}
+ .pg-row{grid-template-columns:minmax(0,1fr)!important}
+ .pg-row input,.pg-row select,.pg-row textarea{min-width:0;width:100%}
+ .filt,.filt.pf5,.filt.qf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+ .filt .fld{min-width:0}.filt input,.filt select{min-width:0;width:100%}
+ .quick{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.quick button{flex:none;white-space:nowrap}
+ .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+ /* окна-листы: крестик в углу, не поверх текста */
+ .dlg .dx{position:absolute!important;top:10px!important;right:12px!important;float:none!important;margin:0!important;background:rgba(255,250,243,.92);border-radius:50%}
+ .dlg .dbox{position:relative}
+ .fld-h.chat-h{flex-wrap:wrap;row-gap:8px}
+ .chat-tools{margin-left:auto}
+ .finbox .lab{flex-wrap:wrap}
+}
+@media (max-width:380px){
+ .top .brand,.top .logo{font-size:13px}
+ #who .hreg{display:none}
+ #who .hlink{border:1px solid rgba(212,173,90,.5);border-radius:999px;padding:6px 14px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -3010,3 +3071,5 @@ function rReset(){clearInterval(pollT);ME=null;IS_M=false;remoteReady=false;rSta
 if(window.__DEMO){const n=document.createElement("p");n.className="demo-note";n.innerHTML="Демо-версия с примерами. Ученица: <b>anna@example.com</b> / <b>demo-pass</b>. Мастер: почта Лены.";$("fIn").prepend(n)}
 renderTabs();showView("login");
 </script>
+
+</html>
