@@ -1989,6 +1989,7 @@ let wantPay=null;
 function buyFlow(it){if(role==="student"&&S){if(noPay(S)){toast("У тебя доступ без оплат");return}openPay(it,()=>showView("path"))}else{wantPay=it;openAuth("up");toast(it.kind==="course"?"Сначала создай аккаунт — потом сразу оплата курса":it.kind==="fb"?"Сначала создай аккаунт — потом подключим обратную связь":"Сначала создай аккаунт — потом сразу оплата ступени")}}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-buy]");if(!b)return;e.preventDefault();e.stopPropagation();buyFlow(b.dataset.buy==="course"?{kind:"course"}:b.dataset.buy==="fb"?{kind:"fb"}:{kind:"stage",n:+b.dataset.buy})},true);
 function loginStudent(u){
+ touchActive(true);if(!CLOUD)try{localStorage.setItem(LOCAL_SESS,u.id)}catch(e){}
  if(wantPay){const w=wantPay;wantPay=null;if(!noPay(u))setTimeout(()=>openPay(w,()=>showView("path")),120)}
  u.active=TODAY;
  if(!FREE&&isFb(u)&&daysLeft(u.fbUntil)<=3&&u.fbWarned!==u.fbUntil){u.fbWarned=u.fbUntil;notify(u.id,`Обратная связь заканчивается ${fmt(u.fbUntil)}. Продлить можно в профиле`,{type:"view",v:"profile"})}
@@ -2013,7 +2014,7 @@ $("fIn").onsubmit=async e=>{
 $("forgot").onclick=async()=>{if(!CLOUD){toast("В рабочей версии сюда придёт ссылка для смены пароля");return}
  const em=$("inEmail").value.trim().toLowerCase();if(!em){$("inErr").textContent="Впиши почту, и мы пришлём ссылку для нового пароля.";$("inErr").hidden=false;$("inEmail").focus();return}
  try{await sb.recover(em);toast("Ссылка для нового пароля отправлена на почту")}catch(x){toast("Не получилось отправить письмо. Попробуй позже или напиши Лене")}};
-function loginMaster(){role="master";S=null;showView("mqueue");const un=myNotifs().filter(n=>!n.read).length;toast(un?`Здравствуй, Лена. Новых уведомлений: ${un}`:"Здравствуй, Лена")}
+function loginMaster(){touchActive(true);if(!CLOUD)try{localStorage.setItem(LOCAL_SESS,"master")}catch(e){}role="master";S=null;showView("mqueue");const un=myNotifs().filter(n=>!n.read).length;toast(un?`Здравствуй, Лена. Новых уведомлений: ${un}`:"Здравствуй, Лена")}
 $("fUp").onsubmit=async e=>{
  e.preventDefault();const name=$("upName").value.trim(),em=$("upEmail").value.trim().toLowerCase(),pw=$("upPass").value,err=$("upErr");
  if(!name||!em||!pw){err.textContent="Заполни имя, почту и пароль.";err.hidden=false;return}
@@ -2033,7 +2034,7 @@ $("fUp").onsubmit=async e=>{
 };
 $("wPay").onclick=()=>FREE?showView("path"):openPay({kind:"stage",n:1},()=>showView("path"));
 const wl=$("wLook");if(wl)wl.onclick=()=>showView("path");
-function logout(){FREE=false;document.body.classList.remove("free");if(CLOUD){sb.signOut();rReset()}role=null;S=null;["dlg","fdlg","vdlg","rdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg"].forEach(id=>$(id).hidden=true);$("npanel").hidden=true;showView("login");$("inEmail").value="";$("inPass").value=""}
+function logout(){try{localStorage.removeItem(LOCAL_SESS);localStorage.removeItem(ACT_KEY)}catch(e){}FREE=false;document.body.classList.remove("free");if(CLOUD){sb.signOut();rReset()}role=null;S=null;["dlg","fdlg","vdlg","rdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg"].forEach(id=>$(id).hidden=true);$("npanel").hidden=true;showView("login");$("inEmail").value="";$("inPass").value=""}
 
 // ===== мой путь =====
 function stateOf(n){if(n<cur.stage)return"done";if(n===cur.stage)return owns(S,n)?"now":"pay";return"lock"}
@@ -3052,6 +3053,12 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel
  for(const id of ["xdlg","qdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
 
 
+/* ===================== ОСТАЁМСЯ В КАБИНЕТЕ ===================== */
+const ACT_KEY="tp-last-active",LOCAL_SESS="tp-local-sess",STALE_MS=3*24*3600*1000;
+const staleSession=()=>{let t=0;try{t=+localStorage.getItem(ACT_KEY)||0}catch(e){}return t>0&&Date.now()-t>STALE_MS};
+let actT=0;function touchActive(force){const n=Date.now();if(!force&&n-actT<60000)return;actT=n;try{localStorage.setItem(ACT_KEY,String(n))}catch(e){}}
+["click","keydown","touchstart"].forEach(ev=>document.addEventListener(ev,()=>{if(role)touchActive()},{passive:true,capture:true}));
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&role)touchActive()});
 /* ===================== ОБЩАЯ БАЗА: Supabase ===================== */
 const SB_URL="https://gdkxyjlarmwigxfsggni.supabase.co",SB_KEY="sb_publishable_SHT3RC-aQieC0qOY664zZw_EoWViLAH";
 const SB_ON=!window.__NO_SB&&!/claude/.test(location.hostname);
@@ -3068,7 +3075,7 @@ let refreshing=null;
 async function sbToken(){
  const s=SBX.sess;if(!s)return null;
  if(s.expires_at-60>Date.now()/1000)return s.access_token;
- if(!refreshing)refreshing=sbRaw("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})},false).then(n=>{sbSave(n);return n.access_token},e=>{sbSave(null);throw e}).finally(()=>refreshing=null);
+ if(!refreshing)refreshing=sbRaw("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})},false).then(n=>{sbSave(n);return n.access_token},e=>{if(e&&e.status>=400&&e.status<500)sbSave(null);throw e}).finally(()=>refreshing=null);
  return refreshing;
 }
 async function sbRaw(path,opt,auth){
@@ -3239,11 +3246,19 @@ function rReset(){clearInterval(pollT);ME=null;IS_M=false;remoteReady=false;rSta
  const h=new URLSearchParams(location.hash.slice(1));
  if(h.get("access_token")){sbSave({access_token:h.get("access_token"),refresh_token:h.get("refresh_token"),expires_in:+h.get("expires_in")||3600});const rec=h.get("type")==="recovery";history.replaceState(null,"",location.pathname+location.search);
   sb.user().then(u=>afterAuth(u,{recovery:rec}),()=>sbSave(null));return}
- if(SBX.sess)sb.user().then(u=>afterAuth(u),()=>{sbSave(null)});
+ if(SBX.sess){if(staleSession()){sbSave(null);return}
+  const tryRestore=(n)=>sb.user().then(u=>afterAuth(u),e=>{if(e&&(e.status===401||e.status===403||(e.status>=400&&e.status<500))){sbSave(null);return}
+   if(n<3)setTimeout(()=>tryRestore(n+1),2000*(n+1));else toast("Нет связи с сервером. Обнови страницу, когда появится интернет")});
+  tryRestore(0)}
 })();
 
 if(window.__DEMO){const n=document.createElement("p");n.className="demo-note";n.innerHTML="Демо-версия с примерами. Ученица: <b>anna@example.com</b> / <b>demo-pass</b>. Мастер: почта Лены.";$("fIn").prepend(n)}
 renderTabs();showView("login");
+/* демо без сервера: вернуть в кабинет, если заходили меньше 3 дней назад */
+if(!CLOUD){try{const k=localStorage.getItem(LOCAL_SESS);
+ if(k&&staleSession())localStorage.removeItem(LOCAL_SESS);
+ else if(k==="master")loginMaster();
+ else if(k&&DB.users[k]){loginStudent(DB.users[k]);showView("path")}}catch(e){}}
 </script>
 
 </html>
