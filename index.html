@@ -986,6 +986,17 @@ body .tbl tr.us td{color:#8a2742;background:rgba(138,39,66,.06)}
 @media (max-width:760px){.sp-act{width:100%;justify-content:flex-start}.sp-act #spAdd,.sp-act #spAsk{flex:1 1 40%}.sp-act #spExp{margin-left:0}}
 .vfoot{align-items:center;gap:16px}.vfoot #mDel{margin-right:auto}
 .link.sure{font-weight:600}
+
+/* --- голосовые как в Telegram */
+.vmsg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;align-items:center;margin:4px 0}
+.vmsg audio{width:100%;height:36px;min-width:170px}
+.msg:has(.vmsg){width:min(320px,100%)}
+.tr-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(138,39,66,.35);background:#fffaf3;color:#8a2742;border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.tr-btn span{font-weight:400}
+.tr-btn.on{background:#8a2742;color:#fff3e6;border-color:#8a2742}
+.tr-txt{grid-column:1/-1;font-size:14px;line-height:1.45;color:#4a2a32;background:rgba(255,250,243,.7);border-left:3px solid #c9a24e;border-radius:6px;padding:8px 10px;white-space:pre-wrap}
+#cRec .link{color:#8a2742;font-size:13px;flex:none}
+@media (max-width:420px){.tr-btn span{display:none}}
 /* --- тест без оплат */
 .freebox{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px dashed rgba(176,138,62,.55);border-radius:12px;background:#fffaf3}
 .freebox b{display:block;font-size:14px;color:#3a1428}.freebox small{color:#7a4a52;font-size:12.5px}
@@ -2352,7 +2363,7 @@ function xTxt(p){
  p.groups.forEach(([c,list])=>{if(p.sc!=="one"){L.push("","═".repeat(40),`${c.toUpperCase()} · ${list.length} ${plural(list.length,"расклад","расклада","раскладов")}`,"═".repeat(40))}
   list.forEach(x=>{L.push("",`— ${fullDate(x.at)} —`,x.q,`Тема: ${catOf(u,x)} · ${kindName(x)} · ${stLabel[x.status]||""}`);if(x.bg)L.push("","Предыстория:",x.bg);if(x.cards)L.push("",`Карты: ${x.cards}`);
    if(x.desc)L.push("","Моя трактовка:",x.desc);if(x.voice)L.push(`(голосовое ${fmtT(x.voice.dur||0)} — есть в версии с фото)`);
-   const th=x.thread.filter(m=>m.t||m.img);if(th.length){L.push("","Переписка:");th.forEach(m=>L.push(`  ${who(m)}, ${fullDT(m.at)}: ${m.t}`))}
+   const th=x.thread.filter(m=>m.t||m.img||m.voice);if(th.length){L.push("","Переписка:");th.forEach(m=>L.push(`  ${who(m)}, ${fullDT(m.at)}: ${m.voice?`[голосовое ${fmtT(m.voice.dur||0)}${m.voice.tr?`: «${m.voice.tr}»`:""}] `:""}${m.t||""}`))}
    if(x.final)L.push("",`Итоговый расклад (${fullDT(x.final.at)}):`,x.final.t||"(голосом)");
    L.push("","· · ·")})});
  return L.join("\n")}
@@ -2479,12 +2490,12 @@ function makeRec(o){
   mr.ondataavailable=e=>{if(e.data&&e.data.size)R.chunks.push(e.data)};
   mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());if(R.stream===stream)R.stream=null;if(mr._discard||!R.chunks.length)return;
    const dur=Math.max(1,Math.round((Date.now()-R.t0)/1000)),b=new Blob(R.chunks,{type:mr.mimeType||"audio/webm"}),fr=new FileReader();
-   fr.onload=()=>{R.set({src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)});toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))};fr.readAsDataURL(b)};
+   fr.onload=()=>{const v={src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)};if(o.sink)v.tr=(R.tr||"").trim();R.set(v);if(o.onDone)o.onDone(v);else toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))};fr.readAsDataURL(b)};
   mr.start(1000);R.t0=Date.now();
   o.rec.hidden=false;o.mic.hidden=true;o.time.textContent="0:00";
-  o.interim.textContent=SR?"Идёт запись, текст появляется в поле выше":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
+  R.tr="";o.interim.textContent=o.sink?"Идёт запись…":SR?"Идёт запись, текст появляется в поле выше":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
   R.timer=setInterval(()=>{o.time.textContent=fmtT(Math.round((Date.now()-R.t0)/1000))},300);
-  if(SR){const ta=o.ta;let base=ta.value.replace(/\s+$/,""),fin="";
+  if(SR){const ta=o.ta;let base=o.sink?"":ta.value.replace(/\s+$/,""),fin="";
    const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
    const join=(a,b)=>!a?b:!b?a:a+(/[.!?…]$/.test(a)?" ":". ")+b;
    const g=new SR();R.g=g;g.lang="ru-RU";g.continuous=true;g.interimResults=true;
@@ -2496,10 +2507,12 @@ function makeRec(o){
      else tmp=tmp?tmp+" "+t:t}
     fin=parts.map(cap).reduce(join,"");
     const live=tmp&&!(fin.toLowerCase().endsWith(tmp.toLowerCase()))?(fin?tmp:cap(tmp)):"";
-    const done=join(base,fin);ta.value=live?(done?done+" "+live:live):done;ta.scrollTop=ta.scrollHeight;
+    const done=join(base,fin),full=live?(done?done+" "+live:live):done;
+    if(o.sink){R.tr=full;return}
+    ta.value=full;ta.scrollTop=ta.scrollHeight;
     ta.dispatchEvent(new Event("input",{bubbles:true}))};
    g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){R.g=null;o.interim.textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
-   g.onend=()=>{base=join(base,fin);fin="";ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
+   g.onend=()=>{base=join(base,fin);fin="";if(o.sink)R.tr=base;else ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
    try{g.start()}catch(_){}}
  };
  R.stop=discard=>{
@@ -2596,7 +2609,7 @@ function mountChatRec(x){
  const lab=document.querySelector('label[for="cTxt"]');
  const head=document.createElement("div");head.className="fld-h chat-h";lab.parentNode.insertBefore(head,lab);head.appendChild(lab);
  head.insertAdjacentHTML("beforeend",`<span class="chat-tools"><button type="button" class="micbtn" id="cPhoto"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Фото</span></button><input type="file" id="cPhotoIn" accept="image/*" hidden><button type="button" class="micbtn" id="cMic">${MIC_SVG}<span id="cMicTxt">Голосовое</span></button></span>`);
- ta.insertAdjacentHTML("afterend",`<div class="vrec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="btn sm" id="cStop">Готово</button></div>
+ ta.insertAdjacentHTML("afterend",`<div class="vrec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="link" id="cCancel">Отмена</button><button type="button" class="btn sm" id="cStop">Отправить</button></div>
  <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="cAudio" controls preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>`);
  ta.insertAdjacentHTML("afterend",`<div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><button type="button" class="link danger" id="cImgDel">Убрать фото</button></div>`);
  const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}};
@@ -2605,12 +2618,13 @@ function mountChatRec(x){
  $("cImgDel").onclick=()=>showImg(null);
  if(!cDraft.img){const d=dGet(dKey("cTxt","img"));if(d)cDraft.img=d}
  if(cDraft.img)showImg(cDraft.img);
- RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",done:SR?"Голосовое готово, расшифровка в поле — поправь и отправь":"Голосовое готово, нажми «Отправить»",onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
+ RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,onDone:v=>{const b=$("cSend");if(b){b.click()}else toast("Голосовое готово, выбери действие ниже")},onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
  if(!cDraft.voice){try{const v=JSON.parse(dGet(dKey("cTxt","voice"))||"null");if(v)cDraft.voice=v}catch(e){}}
  if(cDraft.voice)RC.set(cDraft.voice);
+ $("cCancel").onclick=()=>{RC.stop(true);toast("Запись отменена")};
  dRestore(["cTxt","edT"]);
 }
-const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vclip on"><span class="vlab">${MIC_SVG}Голосовое · ${fmtT(m.voice.dur||0)}</span><audio controls preload="metadata" src="${m.voice.src}"></audio></div>${m.t?'<div class="tr-lab">Расшифровка</div>':""}`:"";
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><audio controls preload="metadata" src="${m.voice.src}"></audio>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false">Aa<span>Расшифровка</span></button><div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
 
 const talkStarted=x=>(x.thread||[]).some(m=>m.from==="master"||m.from==="student");
 function submitSp(status){
@@ -2675,6 +2689,7 @@ function renderChat(){
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
  mountChatRec(x);
+ $("vBox").querySelectorAll(".tr-btn").forEach(b=>b.onclick=()=>{const t=b.nextElementSibling,o=t.hidden;t.hidden=!o;b.setAttribute("aria-expanded",o);b.classList.toggle("on",o)});
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
    $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
@@ -2697,7 +2712,7 @@ function renderChat(){
  const txt=()=>($("cTxt")?$("cTxt").value.trim():"");
  const hasV=()=>!!(RC&&RC.voice)||!!cDraft.img;
  const post=(from,t)=>{const v=RC&&RC.voice;if(RC&&RC.active()){toast("Сначала нажми «Готово», чтобы закончить запись");throw "rec"}
-  const im=cDraft.img;if(t||v||im){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid};if(im){m.img=im;m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}x.thread.push(m)}cDraft.voice=null;cDraft.img=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"]]);};
+  const im=cDraft.img;if(t||v||im){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid,tr:v.tr||""};if(im){m.img=im;m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}x.thread.push(m)}cDraft.voice=null;cDraft.img=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"]]);};
  const done=m=>{persist();renderChat();refresh();toast(m);const th=$("thread");if(th)th.scrollTop=th.scrollHeight};
  const cErr=m=>{const e=$("cErr");e.textContent=m;e.hidden=false;$("cTxt").focus()};
  if(me){
