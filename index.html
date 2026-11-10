@@ -622,6 +622,21 @@ textarea:focus{outline:none;border-color:var(--gold)}
 .meth label:has(input:checked){border-color:var(--gold);color:var(--ink);background:color-mix(in srgb,var(--gold) 8%,transparent)}
 .meth input{accent-color:var(--gold)}
 .meth small{margin-left:auto;font-size:11.5px;color:var(--dim)}
+.paysteps{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:14px;counter-reset:ps}
+.paybox .paysteps>li{display:grid;grid-template-columns:1fr;gap:8px;padding-left:34px;position:relative;counter-increment:ps}
+.paybox .paysteps>li::before{content:counter(ps);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-size:12px;color:var(--gold)}
+.paysteps>li>span{font-size:14px;color:var(--mute)}
+.paysteps .btn{justify-self:start;text-decoration:none}
+.paysteps em{font-style:normal;font-size:13px;color:var(--mute)}
+.paywait{font-size:15px;line-height:1.5;margin:14px 0}
+.preq{display:grid;gap:10px;margin:0 0 22px}
+.preq .pr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border:1px solid var(--gold);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.preq .pr b{font-weight:600}.preq .pr small{color:var(--mute);font-size:12.5px}
+.preq .pr .grow{flex:1}
+.plinks{border:1px solid var(--line);border-radius:12px;padding:6px 14px;margin:0 0 22px}
+.plinks summary{cursor:pointer;padding:8px 0;font-size:14px}
+.plinks .pl-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;padding:8px 0 12px}
+.plinks .fld input{width:100%}
 
 /* профиль */
 .pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -1484,12 +1499,17 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 <section class="view" id="v-mpay" hidden>
   <div class="sech">
     <div><div class="lab"><i></i>Кабинет мастера</div><h2>Оплаты</h2></div>
-    <p>Все покупки учениц. Оплаты через Tribute и картой в рабочей версии появляются здесь сами и сразу открывают доступ. Перевод на карту или наличные можно внести вручную.</p>
+    <p>Ученица платит по твоей ссылке в Tribute или PayPal и жмёт «Я оплатила». Заявка появляется здесь: проверь поступление у себя и подтверди, доступ откроется сам. Перевод на карту или наличные можно внести вручную.</p>
   </div>
+  <div class="preq" id="pReqs"></div>
+  <details class="plinks" id="pLinks"><summary>Ссылки на оплату</summary>
+    <p class="hint" style="margin:0 0 6px">Tribute: создай в боте @tribute цифровой товар на каждую покупку с той же ценой и вставь ссылку. PayPal: ссылка paypal.me, сумма в евро подставится сама по курсу.</p>
+    <div class="pl-g" id="plFields"></div>
+  </details>
   <div class="filt pf5">
     <div class="fld"><label for="pWho">Ученица</label><select id="pWho"></select></div>
     <div class="fld"><label for="pWhat">Покупка</label><select id="pWhat"><option value="all">Все покупки</option><option value="stage">Ступени</option><option value="fb">Обратная связь</option><option value="sessions">Личные сессии</option></select></div>
-    <div class="fld"><label for="pMethod">Способ</label><select id="pMethod"><option value="all">Любой</option><option>Tribute</option><option>Карта</option><option>Вручную</option></select></div>
+    <div class="fld"><label for="pMethod">Способ</label><select id="pMethod"><option value="all">Любой</option><option>Tribute</option><option>PayPal</option><option>Вручную</option></select></div>
     <div class="fld"><label for="pFrom">С</label><input type="date" id="pFrom"></div>
     <div class="fld"><label for="pTo">По</label><input type="date" id="pTo"></div>
   </div>
@@ -1634,12 +1654,18 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
     <div style="display:flex;justify-content:space-between;align-items:start;gap:12px"><div><div class="lab"><i></i>Оплата</div><h3 id="payTitle" style="font-size:1.8rem;margin-top:8px"></h3></div><button class="dx" id="payClose" aria-label="Закрыть">×</button></div>
     <ul id="payWhat"></ul>
     <div class="amt num" id="payAmt"></div>
+    <div id="payForm">
     <div class="meth">
-      <label><input type="radio" name="payM" value="Карта" checked>Карта или СБП<small>ЮKassa / Продамус</small></label>
-      <label><input type="radio" name="payM" value="Tribute">Telegram · Tribute<small>Stars или СБП</small></label>
+      <label><input type="radio" name="payM" value="Tribute" checked>Telegram · Tribute<small id="payTrH">карта или СБП</small></label>
+      <label><input type="radio" name="payM" value="PayPal">PayPal<small id="payPpH">карта или PayPal</small></label>
     </div>
-    <button class="btn" id="payGo"></button>
-    <p class="hint">В прототипе оплата условная: кнопка сразу засчитывает покупку.</p>
+    <ol class="paysteps">
+      <li><span>Оплати по ссылке</span><a class="btn" id="payGo" target="_blank" rel="noopener"></a><em id="payNoLink" hidden>Лена ещё не добавила ссылку для этого способа. Выбери другой или напиши ей.</em></li>
+      <li><span>Вернись сюда и нажми</span><div class="fld"><label for="payNote">Комментарий для Лены, если нужно</label><input id="payNote" maxlength="200" placeholder="Например: платила с карты мамы, имя Ольга"></div><button class="btn ghost" id="payDone">Я оплатила</button></li>
+    </ol>
+    <p class="hint">Лена проверит поступление и откроет доступ. Обычно в течение дня, придёт уведомление.</p>
+    </div>
+    <div id="payWait" hidden><p class="paywait"></p><button class="btn ghost" id="payWaitOk">Хорошо</button></div>
   </div>
 </div>
 
@@ -1817,7 +1843,7 @@ let sidN=100;
 const msg=(from,d,t,h)=>({from,t,at:atDays(d,h)});
 const sp=(kind,d,q,cards,desc,status,thread,extra)=>Object.assign({id:++sidN,kind,at:atDays(d,10),sentAt:status==="journal"?null:atDays(d,10),q,cards,desc,status,thread:thread||[],img:null,unreadS:false,unreadM:status==="wait"},extra||{});
 function mkU(id,name,email,stage,lesson,owned,fb,j,a,extra){return Object.assign({id,name,email,pass:"demo",cur:{stage,lesson},owned,fbUntil:fb===null?null:addDays(fb),joined:addDays(j),active:addDays(a),streak:0,drawn:"",reward:null,notes:{},spreads:[],sessions:0,prefs:{email:true,tg:false},tg:"",fbWarned:""},extra||{})}
-function emptyDB(){return{program:defaultProgram(),users:{},payments:[],notifs:[],done:0}}
+function emptyDB(){return{program:defaultProgram(),users:{},payments:[],payReqs:[],notifs:[],done:0}}
 function demoDB(){
  const U={};
  U.anna=mkU("anna","Анна","anna@example.com",2,4,[1,2],18,-41,0,{pass:"demo-pass",streak:9,
@@ -1916,15 +1942,51 @@ function openPay(it,done){
  else if(it.kind==="fb")li=["Разбор каждого расклада, квеста и Посвящения",`Переписка с Леной под каждым разбором`,"Ответ пн–пт с 10 до 18 мск",isFb(S)?`Продлится до ${fmt(addDays(30,S.fbUntil))}`:"30 дней с момента оплаты"];
  else li=["5 встреч один на один с Леной","Разбор твоих реальных раскладов","После оплаты Лена напишет, чтобы договориться о времени"];
  $("payWhat").innerHTML=li.map(x=>`<li>${esc(x)}</li>`).join("");
- $("payAmt").textContent=rub(price);$("payGo").textContent=`Оплатить ${rub(price)}`;
- $("paydlg").hidden=false;$("payGo").focus();
+ $("payAmt").textContent=rub(price);$("payNote").value="";
+ const pend=reqs().find(r=>r.u===S.id&&r.st==="wait"&&itKey(r.item)===itKey(it));
+ $("payForm").hidden=!!pend;$("payWait").hidden=!pend;
+ if(pend)$("payWait").querySelector(".paywait").textContent=`Ты отметила оплату ${fmtDT(pend.at)} (${pend.method}). Лена проверит поступление и откроет доступ, придёт уведомление.`;
+ const L=links();if(!document.querySelector("input[name=payM]:checked"))document.querySelector("input[name=payM]").checked=true;
+ if(!L.tr[itKey(it)]&&L.pp)document.querySelector("input[name=payM][value=PayPal]").checked=true;
+ payLink();$("paydlg").hidden=false;(pend?$("payWaitOk"):$("payGo")).focus();
 }
-$("payGo").onclick=()=>{
- const m=document.querySelector("input[name=payM]:checked").value;
- recordPayment(S,payItem,m);persist();$("paydlg").hidden=true;
- toast(payItem.kind==="course"?"Весь курс оплачен. Начинаем с первой ступени":payItem.kind==="stage"?`${payItem.n} ступень открыта`:payItem.kind==="fb"?`Обратная связь до ${fmt(S.fbUntil)}`:"Сессии оплачены, Лена напишет тебе");
+/* ===== оплата по ссылке + подтверждение Леной ===== */
+const itKey=it=>it.kind==="stage"?"stage:"+it.n:it.kind;
+const reqs=()=>DB.payReqs||(DB.payReqs=[]);
+function links(){const L=DB.links||(DB.links={});L.tr=L.tr||{};L.pp=L.pp||"";L.rate=+L.rate||0;return L}
+const eurOf=it=>{const r=links().rate;return r?Math.ceil(priceOf(it)/r):0};
+function payLink(){
+ const m=(document.querySelector("input[name=payM]:checked")||{}).value,L=links(),it=payItem,a=$("payGo");
+ let url="",lab="";
+ if(m==="PayPal"){const e=eurOf(it);url=L.pp?L.pp.replace(/\/+$/,"")+(e&&/paypal\.me\//i.test(L.pp)?`/${e}EUR`:""):"";lab=e?`Оплатить ${e} € в PayPal`:"Открыть PayPal"}
+ else{url=L.tr[itKey(it)]||"";lab=`Оплатить ${rub(priceOf(it))} в Tribute`}
+ if(!/^https:\/\//i.test(url))url="";
+ $("payPpH").textContent=eurOf(it)?`≈ ${eurOf(it)} €`:"карта или PayPal";
+ a.textContent=lab;a.hidden=!url;$("payNoLink").hidden=!!url;if(url)a.href=url;else a.removeAttribute("href");
+}
+document.querySelectorAll("input[name=payM]").forEach(r=>r.addEventListener("change",payLink));
+$("payDone").onclick=()=>{
+ const m=document.querySelector("input[name=payM]:checked").value,it=payItem;
+ const amount=m==="PayPal"&&eurOf(it)?eurOf(it):priceOf(it),cur=m==="PayPal"&&eurOf(it)?"EUR":"RUB";
+ reqs().push({id:Date.now(),u:S.id,item:it,amount:priceOf(it),paid:amount,cur,method:m,note:$("payNote").value.trim(),at:nowISO(),st:"wait"});
+ notify("master",`${S.name} отметила оплату: ${itemName(it).toLowerCase()} · ${m}. Проверь и подтверди`,{type:"view",v:"mpay"});
+ persist();$("paydlg").hidden=true;toast("Заявка у Лены. Как только она подтвердит оплату, доступ откроется");
  const d=payDone;payDone=null;if(d)d();else refresh();
 };
+$("payWaitOk").onclick=()=>closeDlg("paydlg");
+/* подтверждённую заявку применяем к ученице ровно один раз (и у Лены, и у ученицы) */
+function syncReqs(){let ch=false;
+ reqs().forEach(r=>{if(r.st!=="ok")return;const u=DB.users[r.u];if(!u)return;u.appliedReqs=u.appliedReqs||[];
+  if(!u.appliedReqs.includes(r.id)){u.appliedReqs.push(r.id);applyPurchase(u,r.item);ch=true}});
+ return ch}
+function decideReq(id,ok){
+ const r=reqs().find(x=>x.id===id);if(!r||r.st!=="wait")return;const u=DB.users[r.u];
+ r.st=ok?"ok":"no";r.decAt=nowISO();
+ if(ok){DB.payments.push({id:Date.now(),u:r.u,item:r.item,amount:r.amount,method:r.method,at:nowISO()});syncReqs();
+  notify(r.u,`Лена подтвердила оплату: ${itemName(r.item).toLowerCase()} открыта`,{type:"view",v:"path"})}
+ else notify(r.u,`Лена не нашла оплату: ${itemName(r.item).toLowerCase()}. Напиши ей, разберётесь`,{type:"view",v:"profile"});
+ persist();refresh();toast(ok?`Доступ открыт: ${u?u.name:""}`:"Заявка отклонена, ученица получит уведомление");
+}
 $("payClose").onclick=()=>closeDlg("paydlg");
 
 // ===== навигация =====
@@ -1949,7 +2011,7 @@ function waitingAll(){return Object.values(DB.users).flatMap(u=>u.spreads.filter
 function renderTabs(){
  const top=document.querySelector(".top");top.classList.toggle("out",!role);
  const tabs=role==="master"
-  ?[["mqueue",`Проверка${waitingAll().length?`<span class="badge">${waitingAll().length}</span>`:""}`],["mstudents","Ученицы"],...(FREE?[]:[["mpay","Оплаты"]]),["mprog","Программа"],["mstats","Статистика"],["mech","Концепт"]]
+  ?[["mqueue",`Проверка${waitingAll().length?`<span class="badge">${waitingAll().length}</span>`:""}`],["mstudents","Ученицы"],...(FREE?[]:[["mpay",`Оплаты${reqs().filter(r=>r.st==="wait").length?`<span class="badge">${reqs().filter(r=>r.st==="wait").length}</span>`:""}`]]),["mprog","Программа"],["mstats","Статистика"],["mech","Концепт"]]
   :[["path","Мой путь"],["deck","Колода"],["spreads",`Расклады${S&&S.spreads.some(x=>x.unreadS)?'<span class="badge">•</span>':""}`],["journal","Журнал"]];
  const map={lesson:"path",exam:"path",welcome:"path",market:"mech",profile:""};
  const cv=map[curView()]||curView();
@@ -2909,7 +2971,21 @@ function renderStudentCard(){
 }
 
 // ===== мастер: оплаты =====
-function renderPay(){
+function renderPayReqs(){
+ const w=reqs().filter(r=>r.st==="wait").sort((a,b)=>a.at.localeCompare(b.at));
+ $("pReqs").innerHTML=w.length?`<div class="lab"><i></i>Ждут подтверждения · ${w.length}</div>`+w.map(r=>{const u=DB.users[r.u];return `<div class="pr"><b>${esc(u?u.name:"—")}</b><span>${esc(itemName(r.item))}</span><span class="num">${r.cur==="EUR"?r.paid+" €":rub(r.amount)}</span><span class="fbc on">${esc(r.method)}</span><small>${fmtDT(r.at)}${r.note?" · «"+esc(r.note)+"»":""}</small><span class="grow"></span><button class="btn sm" data-rok="${r.id}">Подтвердить</button><button class="btn sm ghost" data-rno="${r.id}">Не пришло</button></div>`}).join(""):"";
+ $("pReqs").querySelectorAll("[data-rok]").forEach(b=>b.onclick=()=>decideReq(+b.dataset.rok,true));
+ $("pReqs").querySelectorAll("[data-rno]").forEach(b=>b.onclick=()=>decideReq(+b.dataset.rno,false));
+ const L=links(),f=$("plFields");
+ if(!f.contains(document.activeElement)){
+  const items=[...DB.program.filter(s=>s.n<7).map(s=>({k:"stage:"+s.n,l:`Tribute · ${s.n} ступень`,it:{kind:"stage",n:s.n}})),{k:"course",l:"Tribute · весь курс",it:{kind:"course"}},{k:"fb",l:"Tribute · обратная связь",it:{kind:"fb"}},{k:"sessions",l:"Tribute · 5 сессий",it:{kind:"sessions"}}];
+  f.innerHTML=`<div class="fld"><label for="plPp">PayPal · ссылка paypal.me</label><input id="plPp" data-pl="pp" placeholder="https://paypal.me/имя" value="${esc(L.pp)}"></div><div class="fld"><label for="plRate">Курс: сколько ₽ в 1 €</label><input id="plRate" data-pl="rate" inputmode="decimal" placeholder="например 100" value="${L.rate||""}"></div>`+
+   items.map(i=>`<div class="fld"><label>${esc(i.l)} · ${rub(priceOf(i.it))}</label><input data-pl="tr" data-k="${i.k}" placeholder="https://t.me/tribute/app?startapp=…" value="${esc(L.tr[i.k]||"")}"></div>`).join("");
+  f.querySelectorAll("input").forEach(x=>x.onchange=()=>{const L=links(),v=x.value.trim();
+   if(x.dataset.pl==="pp")L.pp=v;else if(x.dataset.pl==="rate")L.rate=+v.replace(",",".")||0;else L.tr[x.dataset.k]=v;
+   persist();toast("Ссылка сохранена")})}
+}
+function renderPay(){renderPayReqs();
  const ws=$("pWho"),wv=ws.value||"all",us=Object.values(DB.users);
  ws.innerHTML=`<option value="all">Все ученицы</option>`+us.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join("");ws.value=us.some(u=>u.id===wv)?wv:"all";
  const w=ws.value,k=$("pWhat").value,m=$("pMethod").value,f=$("pFrom").value,t=$("pTo").value;
@@ -3119,12 +3195,12 @@ function ownerOf(p,d){
  if(p.startsWith("p/"))return null;
  if(p.startsWith("u/"))return p.slice(2);
  if(p.startsWith("s/")||p.startsWith("m/"))return p.slice(2).split("~")[0];
- if(p.startsWith("pay/"))return d.u||ME;
+ if(p.startsWith("pay/")||p.startsWith("pr/"))return d.u||ME;
  if(p.startsWith("n/"))return d.to==="master"?(d.go&&d.go.u)||ME:d.to;
  return ME;
 }
 function rSerialize(db){
- const o={};o["p/program"]={program:db.program};
+ const o={};o["p/program"]={program:db.program,links:db.links||null};
  Object.values(db.users).forEach(u=>{
   const rest=Object.assign({},u);delete rest.spreads;delete rest.pass;o["u/"+rkey(u.id)]=JSON.parse(JSON.stringify(rest));
   (u.spreads||[]).forEach(x=>{
@@ -3138,11 +3214,12 @@ function rSerialize(db){
    o["s/"+k]=b});
  });
  db.payments.forEach(p=>o["pay/"+rkey(p.id)]=p);
+ (db.payReqs||[]).forEach(r=>o["pr/"+rkey(r.id)]=r);
  db.notifs.forEach(n=>o["n/"+rkey(n.id)]=n);
  return o;
 }
 function rDeserialize(m){
- const db={program:(m["p/program"]||{}).program||null,users:{},payments:[],notifs:[],done:0};
+ const db={program:(m["p/program"]||{}).program||null,links:(m["p/program"]||{}).links||null,users:{},payments:[],payReqs:[],notifs:[],done:0};
  for(const p in m)if(p.startsWith("u/")){const d=JSON.parse(JSON.stringify(m[p]));d.spreads=[];if(!d.notes)d.notes={};db.users[d.id]=d}
  for(const p in m){const d=m[p];
   if(p.startsWith("s/")){const u=db.users[d.uid];if(!u)continue;const x=JSON.parse(JSON.stringify(d)),k=p.slice(2);delete x.uid;
@@ -3154,6 +3231,7 @@ function rDeserialize(m){
    (x.thread||[]).forEach(mm=>{if(mm.voice&&mm.voice.n){let s="";for(let i=0;i<mm.voice.n;i++){const c=m[`m/${k}~tv${mm.voice.vid}~${i}`];if(!c){s="";break}s+=c.d}mm.voice.src=s;delete mm.voice.n}});
    u.spreads.push(x)}
   else if(p.startsWith("pay/"))db.payments.push(JSON.parse(JSON.stringify(d)));
+  else if(p.startsWith("pr/"))db.payReqs.push(JSON.parse(JSON.stringify(d)));
   else if(p.startsWith("n/"))db.notifs.push(JSON.parse(JSON.stringify(d)));
  }
  Object.values(db.users).forEach(u=>u.spreads.sort((a,b)=>a.id-b.id));
@@ -3206,7 +3284,7 @@ function rApply(){
  for(const p in rPend){if(rPend[p].data)m[p]=rPend[p].data;else delete m[p]}
  const nd=rDeserialize(m);if(!nd.program)nd.program=DB.program||defaultProgram();
  rState={};for(const p in m)rState[p]=stable(m[p]);
- DB=nd;sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
+ DB=nd;if(syncReqs())setTimeout(persist,0);sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
  rRebind();
 }
 function rRebind(){
