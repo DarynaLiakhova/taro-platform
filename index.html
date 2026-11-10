@@ -1075,16 +1075,16 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 
 /* --- оплата на странице входа */
 .l-buy{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:860px;margin:40px auto 0;padding:0 16px}
-.lb-card{display:grid;gap:8px;align-content:start;padding:20px 22px;border-radius:16px;background:linear-gradient(180deg,#fdf1e3,#f6e2cc);border:1px solid rgba(201,162,78,.6);color:#3a1428}
+.lb-card{display:flex;flex-direction:column;gap:8px;padding:20px 22px;border-radius:16px;background:linear-gradient(180deg,#fdf1e3,#f6e2cc);border:1px solid rgba(201,162,78,.6);color:#3a1428}
 .lb-card.hl{box-shadow:0 0 0 2px #c9a24e inset,0 14px 30px rgba(0,0,0,.25)}
 .lb-card small{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a6f22}
 .lb-card b{font-family:var(--serif);font-weight:500;font-size:22px;line-height:1.15}
 .lb-card span{font-size:14px;color:#5e3a42}
-.lb-card .btn{justify-self:start;margin-top:6px;white-space:nowrap}
+.lb-card .btn{align-self:flex-start;margin-top:auto;white-space:nowrap}
 .l-cta{margin-top:18px!important}
 .lp-buy{grid-column:2/4;justify-self:start;margin-top:2px}
 #wCourse{margin-left:0}
-@media (max-width:760px){.l-buy{grid-template-columns:1fr;padding:0;margin-top:20px;order:4}#v-login .l-cta{order:5}#v-login .band.lhow{order:6;margin-top:30px}.lb-card .btn{justify-self:stretch;text-align:center}.lp-buy .btn{white-space:nowrap}}
+@media (max-width:760px){.l-buy{grid-template-columns:1fr;padding:0;margin-top:20px;order:4}#v-login .l-cta{order:5}#v-login .band.lhow{order:6;margin-top:30px}.lb-card .btn{align-self:stretch;text-align:center}.lp-buy .btn{white-space:nowrap}}
 /* --- страница входа: программа и «как устроено» */
 .lprog{display:none}
 @media (max-width:760px){
