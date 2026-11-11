@@ -1391,6 +1391,30 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 @media (max-width:760px){html.vdlg-on body>:not(.dlg):not(.toast){visibility:hidden}}
 .tg-body{transform:translateZ(0)}
 .vh-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+
+/* composer как в Telegram: 😊 | поле | 📎 | ● микрофон/отправить */
+.tg-row{align-items:flex-end;gap:0;padding:0 2px}
+.tg-row .tg-mic,.tg-row .tg-send{width:44px;height:44px;margin-left:4px;border-radius:50%;background:var(--tg-acc);color:#fff}
+.tg-row .tg-mic:hover{background:#2b7fd4}
+.tg-row .tg-send.busy{opacity:.55;pointer-events:none}
+#cEmoBtn.on{color:var(--tg-acc)}
+.tg-emo{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:2px;max-height:190px;overflow:auto;padding:4px 2px;border-bottom:1px solid #eee}
+.tg-emo[hidden]{display:none}
+.tg-emo button{all:unset;cursor:pointer;font-size:26px;line-height:40px;text-align:center;border-radius:8px}
+.tg-emo button:hover{background:#f1f1f1}
+.tg-att{display:flex;gap:8px;overflow-x:auto;padding:4px 6px 2px;align-items:center}
+.tg-att[hidden]{display:none}
+.tg-att .att{position:relative;flex:none;width:64px;height:64px;border-radius:10px;overflow:hidden;background:#eee}
+.tg-att .att img,.tg-att .att video{width:100%;height:100%;object-fit:cover;display:block}
+.tg-att .att i{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-style:normal;font-size:20px;text-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none}
+.tg-att .att-x{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:15px;line-height:20px;padding:0;cursor:pointer}
+.tg-att small{flex:none;font-size:13px;color:var(--tg-sub);padding:0 4px}
+.tg .album{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:-2px -5px 6px -7px;border-radius:11px;overflow:hidden;width:calc(100% + 12px);min-width:220px}
+.tg .album.n3>:first-child{grid-column:1/-1}
+.tg .album .msg-img,.tg .album .msg-vid{margin:0;width:100%;height:150px;max-height:none;border-radius:0;object-fit:cover}
+.tg .album.n3>:first-child{height:190px}
+.tg .msg-vid{display:block;max-width:100%;max-height:340px;border-radius:11px;margin:-2px -5px 6px -7px;width:calc(100% + 12px);background:#000}
+.tg .vid-miss{display:block;padding:20px;text-align:center;color:var(--tg-sub);font-size:13px}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2846,20 +2870,62 @@ document.addEventListener("click",e=>{
   a.addEventListener("ended",()=>{box.classList.remove("playing");[...wv.children].forEach(b=>b.classList.remove("on"));dl.textContent=tot})}
  a.play().catch(()=>toast("Не получилось воспроизвести голосовое"));
 });
+const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢","😭","😅","🙏","👍","👎","👏","🙌","💪","❤️","💔","🔥","✨","🌙","☀️","⭐","🌹","🌸","🔮","🃏","🕯️","💫","👀","🤍","💜","😌","😉","🙈","🤞","✅","❗"];
+const MAX_IMGS=10,MAX_VID=50*1024*1024;
+function albumHTML(m){
+ const ims=[m.img,...(m.more||[])].filter(Boolean),vs=m.vids||[],n=ims.length+vs.length;if(!n)return "";
+ const cells=ims.map(d=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0">`).concat(vs.map(v=>v.local?`<video class="msg-vid" src="${v.src}" controls playsinline preload="metadata"></video>`:`<video class="msg-vid" data-path="${esc(v.path)}" controls playsinline preload="metadata"></video>`));
+ return n===1?cells[0]:`<div class="album n${Math.min(n,4)}">${cells.join("")}</div>`;
+}
+/* видео лежит в хранилище Supabase; ссылка на просмотр — временная, кешируем на 50 минут */
+const VURL={};
+async function vidURL(path){const c=VURL[path];if(c&&c.exp>Date.now())return c.url;
+ const j=await sbRaw(`/storage/v1/object/sign/media/${path.split("/").map(enc).join("/")}`,{method:"POST",body:JSON.stringify({expiresIn:3600})});
+ const url=SB_URL+"/storage/v1"+(j.signedURL||j.signedUrl);VURL[path]={url,exp:Date.now()+50*60000};return url}
+function hydrateVids(root){(root||document).querySelectorAll("video[data-path]:not([src])").forEach(v=>{vidURL(v.dataset.path).then(u=>{v.src=u},()=>{v.replaceWith(Object.assign(document.createElement("span"),{className:"vid-miss",textContent:"Видео недоступно"}))})})}
+async function uploadVid(f){
+ if(!CLOUD)return {local:true,src:URL.createObjectURL(f),type:f.type,size:f.size};
+ const ext=(f.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4",path=`${chatU.id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.${ext}`;
+ const t=await sbToken(),r=await fetch(`${SB_URL}/storage/v1/object/media/${path}`,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+t,"Content-Type":f.type||"video/mp4","x-upsert":"false"},body:f});
+ if(!r.ok){const tx=await r.text().catch(()=>"");throw{status:r.status,message:tx}}
+ return {path,type:f.type,size:f.size}}
+let vidBusy=false;
+function withVids(fn){
+ const vs=cDraft.vids||[];if(!vs.length||cDraft.upl)return fn();
+ if(vidBusy)return;vidBusy=true;const b=$("cSend")||$("cSendRev2");if(b)b.classList.add("busy");if(CLOUD)toast("Загружаю видео…");
+ Promise.all(vs.map(v=>uploadVid(v.file))).then(list=>{vidBusy=false;cDraft.upl=list;fn()},e=>{vidBusy=false;if(b)b.classList.remove("busy");
+  toast(e&&(e.status===400||e.status===404)?"Хранилище для видео ещё не настроено. Нужно один раз запустить storage.sql в Supabase":e&&e.status===413?"Видео слишком большое, максимум 50 МБ":"Не получилось загрузить видео. Проверь интернет")});
+}
 function mountChatRec(x){
  const ta=$("cTxt");if(!ta){RC=null;return}
- if(cDraft.sid!==x.id)cDraft={sid:x.id,voice:null,img:null};
+ if(cDraft.sid!==x.id)cDraft={sid:x.id,voice:null,imgs:[],vids:[]};
+ cDraft.imgs=cDraft.imgs||[];cDraft.vids=cDraft.vids||[];
  const send=$("cSend")||$("cSendRev2");
- const upd=()=>{const has=!!(ta.value.trim()||cDraft.img);if(send)send.hidden=!has;$("cMic").hidden=!!(send&&has)||!!(RC&&RC.active())};
- const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}upd()};
+ const upd=()=>{const has=!!(ta.value.trim()||cDraft.imgs.length||cDraft.vids.length);if(send)send.hidden=!has;$("cMic").hidden=!!(send&&has)||!!(RC&&RC.active())};
+ const saveImgs=()=>{try{const k=dKey("cTxt","imgs");cDraft.imgs.length?localStorage.setItem(k,JSON.stringify(cDraft.imgs)):localStorage.removeItem(k)}catch(e){}};
+ const drawAtt=()=>{const box=$("cImgBox"),n=cDraft.imgs.length+cDraft.vids.length;box.hidden=!n;
+  box.innerHTML=cDraft.imgs.map((d,i)=>`<span class="att"><img src="${d}" alt=""><button type="button" class="att-x" data-ri="${i}" aria-label="Убрать фото">×</button></span>`).join("")+
+   cDraft.vids.map((v,i)=>`<span class="att vid"><video src="${v.url}" muted playsinline preload="metadata"></video><i>▶</i><button type="button" class="att-x" data-rv="${i}" aria-label="Убрать видео">×</button></span>`).join("")+
+   (n?`<small>${n} ${plural(n,"вложение","вложения","вложений")}</small>`:"");
+  box.querySelectorAll("[data-ri]").forEach(b=>b.onclick=()=>{cDraft.imgs.splice(+b.dataset.ri,1);saveImgs();drawAtt()});
+  box.querySelectorAll("[data-rv]").forEach(b=>b.onclick=()=>{const v=cDraft.vids.splice(+b.dataset.rv,1)[0];try{URL.revokeObjectURL(v.url)}catch(e){}drawAtt()});
+  upd()};
  $("cPhoto").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cPhotoIn").click()}};
- $("cPhotoIn").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readPhoto(f,showImg)};
- $("cImgDel").onclick=()=>showImg(null);
+ $("cPhotoIn").onchange=e=>{const fs=[...e.target.files];e.target.value="";let skip=0,pend=0;
+  fs.forEach(f=>{
+   if(f.type.startsWith("video/")){if(f.size>MAX_VID){toast("Видео больше 50 МБ, такое не отправить");return}cDraft.vids.push({file:f,url:URL.createObjectURL(f),name:f.name});drawAtt()}
+   else if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt()})}
+  });
+  if(skip)toast(`Можно до ${MAX_IMGS} фото в одном сообщении`)};
+ /* эмодзи */
+ const eb=$("cEmoBtn"),ep=$("cEmo");
+ eb.onclick=()=>{ep.hidden=!ep.hidden;eb.setAttribute("aria-expanded",!ep.hidden);eb.classList.toggle("on",!ep.hidden)};
+ ep.querySelectorAll("[data-emo]").forEach(b=>b.onclick=()=>{const e=b.dataset.emo,a=ta.selectionStart??ta.value.length,z=ta.selectionEnd??a;ta.value=ta.value.slice(0,a)+e+ta.value.slice(z);const p=a+e.length;try{ta.setSelectionRange(p,p)}catch(_){}ta.dispatchEvent(new Event("input",{bubbles:true}))});
  RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,
   onDone:v=>{const b=$("cSend")||$("cSendRev");if(b){b.click()}else toast("Голосовое готово, выбери действие над полем")},
   onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
- if(!cDraft.img){const d=dGet(dKey("cTxt","img"));if(d)cDraft.img=d}
- if(cDraft.img)showImg(cDraft.img);
+ if(!cDraft.imgs.length){try{const a=JSON.parse(dGet(dKey("cTxt","imgs"))||"null");if(Array.isArray(a))cDraft.imgs=a.filter(Boolean);else{const d=dGet(dKey("cTxt","img"));if(d)cDraft.imgs=[d]}}catch(e){}}
+ drawAtt();
  if(!cDraft.voice){try{const v=JSON.parse(dGet(dKey("cTxt","voice"))||"null");if(v)cDraft.voice=v}catch(e){}}
  if(cDraft.voice)RC.set(cDraft.voice);
  $("cCancel").onclick=()=>{RC.stop(true);upd();toast("Запись отменена")};
@@ -2867,6 +2933,16 @@ function mountChatRec(x){
  ta.addEventListener("input",()=>{autoH(ta);upd()});
  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&FINE()){e.preventDefault();const b=$("cSend")||$("cSendRev");if(b)b.click()}});
  autoH(ta);upd();
+}
+/* лента «прилипает» к последнему сообщению, когда открывается клавиатура или растёт поле ввода — как в Telegram */
+let tgStick=true,tgRO=null;
+function stickChat(){
+ const tb=$("thread");if(!tb)return;
+ tb.addEventListener("scroll",()=>{tgStick=tb.scrollHeight-tb.scrollTop-tb.clientHeight<40},{passive:true});
+ if(tgRO)tgRO.disconnect();
+ if(window.ResizeObserver){tgRO=new ResizeObserver(()=>{if(tgStick)tb.scrollTop=tb.scrollHeight});tgRO.observe(tb)}
+ tb.querySelectorAll("img,video").forEach(m=>m.addEventListener(m.tagName==="IMG"?"load":"loadedmetadata",()=>{if(tgStick)tb.scrollTop=tb.scrollHeight},{once:true}));
+ hydrateVids(tb);
 }
 
 const talkStarted=x=>(x.thread||[]).some(m=>m.from==="master"||m.from==="student");
@@ -2923,8 +2999,8 @@ function renderChat(){
   if(m.from==="system"){html+=`<div class="msg sys"><span>${esc(m.t)}</span></div>`;return}
   const out=mine(m),nx=x.thread[i+1],tail=!nx||nx.from!==m.from||dayOf(nx.at)!==d;
   const canEd=me&&m.from==="master"&&editMsg==null&&!x.mDeletedAt;
-  const only=(m.img||(m.voice&&m.voice.src))&&!m.t;
-  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${m.img?`<img class="msg-img" src="${m.img}" alt="Фото" tabindex="0">`:""}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${meta(m.at,m.edited,i,out)}</div>
+  const only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
+  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${meta(m.at,m.edited,i,out)}</div>
    <div class="bmenu" hidden>${m.t?`<button type="button" data-copy="${i}">Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">Изменить</button>`:""}</div></div>`;
  });
  if(!x.thread.length&&x.status==="wait")html+=`<div class="msg sys"><span>${me?(x.kind==="question"?"Ученица ждёт ответа":"Ученица ждёт разбора"):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление"}</span></div>`;
@@ -2932,13 +3008,15 @@ function renderChat(){
  /* низ: поле ввода или плашка */
  const SEND_SVG='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" fill="currentColor"/></svg>';
  const comp=(keys,send)=>`<div class="comp tg-comp">
-  <div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><span>Фото</span><button type="button" class="tg-x" id="cImgDel" aria-label="Убрать фото">×</button></div>
+  <div class="tg-att" id="cImgBox" hidden></div>
+  <div class="tg-emo" id="cEmo" hidden>${EMO.map(e=>`<button type="button" data-emo="${e}">${e}</button>`).join("")}</div>
   <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое готово</span><audio id="cAudio" preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>
   ${keys?`<div class="tg-keys">${keys}</div>`:""}
-  <div class="tg-row"><label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*" class="vh-file">
+  <div class="tg-row"><button type="button" class="tg-ic" id="cEmoBtn" aria-label="Эмодзи" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.2 14.2a4.6 4.6 0 0 0 7.6 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
    <textarea id="cTxt" rows="1" placeholder="Сообщение" aria-label="Сообщение"></textarea>
-   <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
-   ${send?`<button type="button" class="tg-send" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
+   <label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото или видео"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*,video/*" multiple class="vh-file">
+   <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
+   ${send?`<button type="button" class="tg-send on" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
   <div class="tg-rec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="tg-cancel" id="cCancel">Отмена</button><button type="button" class="tg-send on" id="cStop" aria-label="Отправить голосовое">${SEND_SVG}</button></div>
   <p class="ferr" id="cErr" hidden></p></div>`;
  let foot="";
@@ -2983,7 +3061,7 @@ function renderChat(){
   ${pin}
   <div class="tg-body" id="thread">${html}</div>
   ${foot}</div>`;
- const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;
+ const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;tgStick=atBottom;stickChat();
  /* меню */
  const mb=$("tgMenuBtn"),mn=$("tgMenu");
  mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
@@ -3017,9 +3095,9 @@ function renderChat(){
  const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];if(m.t===t){editMsg=null;renderChat();return}m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
  const ec=$("edCancel");if(ec)ec.onclick=()=>{dClear(["edT"]);editMsg=null;renderChat()};
  const txt=()=>($("cTxt")?$("cTxt").value.trim():"");
- const hasV=()=>!!(RC&&RC.voice)||!!cDraft.img;
+ const hasV=()=>!!(RC&&RC.voice)||!!(cDraft.imgs&&cDraft.imgs.length)||!!(cDraft.vids&&cDraft.vids.length);
  const post=(from,t)=>{const v=RC&&RC.voice;if(RC&&RC.active()){toast("Сначала отправь или отмени запись");throw "rec"}
-  const im=cDraft.img;if(t||v||im){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid,tr:v.tr||""};if(im){m.img=im;m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}x.thread.push(m)}cDraft.voice=null;cDraft.img=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"]]);};
+  const ims=cDraft.imgs||[],vs=cDraft.upl||[];if(t||v||ims.length||vs.length){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid,tr:v.tr||""};if(ims.length){m.img=ims[0];if(ims.length>1)m.more=ims.slice(1);m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}if(vs.length)m.vids=vs;x.thread.push(m)}cDraft.voice=null;cDraft.imgs=[];cDraft.vids=[];cDraft.upl=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"],["cTxt","imgs"]]);};
  const done=m=>{persist();renderChat();refresh();if(m)toast(m);const th=$("thread");if(th)th.scrollTop=th.scrollHeight};
  const cErr=m=>{const e=$("cErr");e.textContent=m;e.hidden=false;$("cTxt").focus()};
  if(me){
@@ -3042,6 +3120,7 @@ function renderChat(){
    else{const k=spreads.findIndex(s=>s.id===x.id);if(k>-1)spreads.splice(k,1)}
    persist();closeDlg("vdlg");refresh();toast("Расклад удалён")};
  }
+ ["cSend","cPass","cRet","cSendRev","cSendRev2"].forEach(id=>{const b=$(id);if(!b||!b.onclick)return;const f=b.onclick;b.onclick=()=>withVids(f)});
 }
 
 // ===== профиль =====
@@ -3455,7 +3534,9 @@ function rSerialize(db){
    if(b.img){b.imgN=put("img",b.img);b.img=null}
    if(b.voice&&b.voice.src){b.voiceN=put("voice",b.voice.src);b.voice.src=""}
    if(b.final&&b.final.voice&&b.final.voice.src){const fv=b.final.voice;fv.vid=rkey(fv.vid||"fin");fv.n=put("tv"+fv.vid,fv.src);fv.src=""}
-   (b.thread||[]).forEach(m=>{if(m.img){const iid=rkey(m.iid||m.at);m.iid=iid;m.imgN=put("ti"+iid,m.img);m.img=null}});
+   (b.thread||[]).forEach(m=>{if(m.img){const iid=rkey(m.iid||m.at);m.iid=iid;m.imgN=put("ti"+iid,m.img);m.img=null}
+    if(m.more&&m.more.length){const iid=m.iid||(m.iid=rkey(m.at));m.moreN=m.more.map((d,j)=>put("ti"+iid+"m"+j,d));delete m.more}
+    if(m.vids)m.vids=m.vids.filter(v=>!v.local)});
    (b.thread||[]).forEach(m=>{if(m.voice&&m.voice.src){const vid=rkey(m.voice.vid||m.at);m.voice.vid=vid;m.voice.n=put("tv"+vid,m.voice.src);m.voice.src=""}});
    o["s/"+k]=b});
  });
@@ -3473,7 +3554,8 @@ function rDeserialize(m){
     for(let i=0;i<n;i++){const c=m[`m/${k}~${f}~${i}`];if(!c){s=null;break}s+=c.d}
     if(f==="img")x.img=s;else if(x.voice)x.voice.src=s||""}
    if(x.final&&x.final.voice&&x.final.voice.n){const fv=x.final.voice;let s="";for(let i=0;i<fv.n;i++){const c=m[`m/${k}~tv${fv.vid}~${i}`];if(!c){s="";break}s+=c.d}fv.src=s;delete fv.n}
-   (x.thread||[]).forEach(mm=>{if(mm.imgN){let s="";for(let i=0;i<mm.imgN;i++){const c=m[`m/${k}~ti${mm.iid}~${i}`];if(!c){s="";break}s+=c.d}mm.img=s||null;delete mm.imgN}});
+   (x.thread||[]).forEach(mm=>{if(mm.imgN){let s="";for(let i=0;i<mm.imgN;i++){const c=m[`m/${k}~ti${mm.iid}~${i}`];if(!c){s="";break}s+=c.d}mm.img=s||null;delete mm.imgN}
+    if(mm.moreN){mm.more=mm.moreN.map((n,j)=>{let s="";for(let i=0;i<n;i++){const c=m[`m/${k}~ti${mm.iid}m${j}~${i}`];if(!c)return "";s+=c.d}return s}).filter(Boolean);delete mm.moreN}});
    (x.thread||[]).forEach(mm=>{if(mm.voice&&mm.voice.n){let s="";for(let i=0;i<mm.voice.n;i++){const c=m[`m/${k}~tv${mm.voice.vid}~${i}`];if(!c){s="";break}s+=c.d}mm.voice.src=s;delete mm.voice.n}});
    u.spreads.push(x)}
   else if(p.startsWith("pay/"))db.payments.push(JSON.parse(JSON.stringify(d)));
