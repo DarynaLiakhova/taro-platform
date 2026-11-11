@@ -2855,7 +2855,10 @@ const autoH=t=>{t.style.height="auto";t.style.height=Math.min(t.scrollHeight,160
 let pinOpen=false;
 function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charCodeAt(0))>>>0;let s="";
  for(let i=0;i<30;i++){h=(h*1103515245+12345)>>>0;const v=4+((h>>>16)%15);s+=`<i style="height:${v}px"></i>`}return s}
-const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button>`:""}<audio preload="none" src="${m.voice.src}"></audio>${m.voice.tr?`<div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
+/* аудио не вставляем в разметку целиком (это сотни КБ текста на каждое голосовое) — подставляем при нажатии */
+const VSRC=new Map();
+const vKey=v=>{const k=v.vid||("v"+v.src.length+"_"+v.src.slice(-24));VSRC.set(k,v.src);return k};
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button>`:""}<audio preload="none" data-vk="${vKey(m.voice)}"></audio>${m.voice.tr?`<div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
 document.addEventListener("click",e=>{
  const tb=e.target.closest(".tr-btn");
  if(tb){const t=tb.closest(".vmsg").querySelector(".tr-txt");if(t){const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o)}return}
@@ -2863,6 +2866,7 @@ document.addEventListener("click",e=>{
  const box=pb.closest(".vmsg"),a=box.querySelector("audio"),wv=box.querySelector(".vwave"),dl=box.querySelector(".vdur"),tot=dl.textContent;
  document.querySelectorAll(".vmsg audio").forEach(o=>{if(o!==a&&!o.paused)o.pause()});
  if(!a.paused){a.pause();return}
+ if(!a.getAttribute("src")&&a.dataset.vk){const src=VSRC.get(a.dataset.vk);if(src)a.src=src}
  if(!a._b){a._b=1;
   a.addEventListener("timeupdate",()=>{const d=isFinite(a.duration)&&a.duration>0?a.duration:0;if(d){const n=Math.round(a.currentTime/d*wv.children.length);[...wv.children].forEach((b,i)=>b.classList.toggle("on",i<n))}dl.textContent=fmtT(Math.floor(a.currentTime))});
   a.addEventListener("play",()=>box.classList.add("playing"));
