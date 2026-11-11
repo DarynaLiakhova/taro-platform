@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#3b1527">
 <meta name="format-detection" content="telephone=no">
 <title>Путь Таролога</title>
@@ -1378,7 +1378,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 
 /* клавиатура на телефоне: окно сжимается до видимой части, поле ввода не прячется */
 .abox{max-height:100%;overflow-y:auto;overscroll-behavior:contain}
-.dlg{height:var(--vvh,100%);top:var(--vvt,0px);bottom:auto}
+.dlg{height:var(--vvh,100%);bottom:auto}
 .dlg .dbox{max-height:100%}
 html.kb .abox .a-sun,html.kb .abox .a-sub{display:none}
 html.kb .abox{padding-top:20px!important;gap:10px}
@@ -3593,10 +3593,11 @@ if(!CLOUD){try{const k=localStorage.getItem(LOCAL_SESS);
 
 /* ---- телефонная клавиатура ---- */
 (function(){const vv=window.visualViewport,R=document.documentElement;if(!vv)return;
- const f=()=>{R.style.setProperty("--vvh",vv.height+"px");R.style.setProperty("--vvt",vv.offsetTop+"px");R.classList.toggle("kb",vv.height<window.innerHeight*.78)};
- vv.addEventListener("resize",f);vv.addEventListener("scroll",f);f()})();
-document.addEventListener("focusin",e=>{const t=e.target;if(!t.matches||!t.matches("input,textarea,select")||!t.closest(".dlg"))return;
- setTimeout(()=>{try{t.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}},350)});
+ let last=0,raf=0;
+ const f=()=>{raf=0;const h=Math.round(vv.height);if(Math.abs(h-last)<2)return;last=h;R.style.setProperty("--vvh",h+"px");R.classList.toggle("kb",h<window.innerHeight*.78)};
+ vv.addEventListener("resize",()=>{if(!raf)raf=requestAnimationFrame(f)});f()})();
+document.addEventListener("focusin",e=>{const t=e.target;if(!t.matches||!t.matches("input,textarea,select")||!t.closest(".dlg")||t.closest(".tg"))return;
+ setTimeout(()=>{if(document.activeElement!==t)return;const r=t.getBoundingClientRect(),vh=window.visualViewport?visualViewport.height:innerHeight;if(r.top<0||r.bottom>vh)try{t.scrollIntoView({block:"nearest"})}catch(_){}},350)});
 </script>
 
 </html>
