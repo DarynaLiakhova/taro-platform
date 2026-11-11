@@ -1375,6 +1375,14 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
  .tg-h{padding-top:calc(8px + env(safe-area-inset-top,0px))}
  .tg .msg{max-width:88%}
 }
+
+/* клавиатура на телефоне: окно сжимается до видимой части, поле ввода не прячется */
+.abox{max-height:100%;overflow-y:auto;overscroll-behavior:contain}
+.dlg{height:var(--vvh,100%);top:var(--vvt,0px);bottom:auto}
+.dlg .dbox{max-height:100%}
+html.kb .abox .a-sun,html.kb .abox .a-sub{display:none}
+html.kb .abox{padding-top:20px!important;gap:10px}
+@media (max-width:760px){.dlg .dbox{max-height:calc(var(--vvh,100dvh) - 12px)!important}.dlg#vdlg .dbox.tgbox{height:var(--vvh,100dvh)!important;max-height:var(--vvh,100dvh)!important}}
 </style>
 
 <header class="top"><div class="wrap">
@@ -3582,6 +3590,13 @@ if(!CLOUD){try{const k=localStorage.getItem(LOCAL_SESS);
  if(k&&staleSession())localStorage.removeItem(LOCAL_SESS);
  else if(k==="master")loginMaster();
  else if(k&&DB.users[k]){loginStudent(DB.users[k]);showView("path")}}catch(e){}}
+
+/* ---- телефонная клавиатура ---- */
+(function(){const vv=window.visualViewport,R=document.documentElement;if(!vv)return;
+ const f=()=>{R.style.setProperty("--vvh",vv.height+"px");R.style.setProperty("--vvt",vv.offsetTop+"px");R.classList.toggle("kb",vv.height<window.innerHeight*.78)};
+ vv.addEventListener("resize",f);vv.addEventListener("scroll",f);f()})();
+document.addEventListener("focusin",e=>{const t=e.target;if(!t.matches||!t.matches("input,textarea,select")||!t.closest(".dlg"))return;
+ setTimeout(()=>{try{t.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}},350)});
 </script>
 
 </html>
