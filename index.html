@@ -1383,6 +1383,14 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 html.kb .abox .a-sun,html.kb .abox .a-sub{display:none}
 html.kb .abox{padding-top:20px!important;gap:10px}
 @media (max-width:760px){.dlg .dbox{max-height:calc(var(--vvh,100dvh) - 12px)!important}.dlg#vdlg .dbox.tgbox{height:var(--vvh,100dvh)!important;max-height:var(--vvh,100dvh)!important}}
+
+/* пока открыто окно: фон замирает (иначе на Android мигает размытая шапка с колокольчиком) */
+html.dlg-on .top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+html.dlg-on body *{animation-play-state:paused!important}
+html.dlg-on .dlg *{animation-play-state:running!important}
+@media (max-width:760px){html.vdlg-on body>:not(.dlg):not(.toast){visibility:hidden}}
+.tg-body{transform:translateZ(0)}
+.vh-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2844,7 +2852,7 @@ function mountChatRec(x){
  const send=$("cSend")||$("cSendRev2");
  const upd=()=>{const has=!!(ta.value.trim()||cDraft.img);if(send)send.hidden=!has;$("cMic").hidden=!!(send&&has)||!!(RC&&RC.active())};
  const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}upd()};
- $("cPhoto").onclick=()=>$("cPhotoIn").click();
+ $("cPhoto").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cPhotoIn").click()}};
  $("cPhotoIn").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readPhoto(f,showImg)};
  $("cImgDel").onclick=()=>showImg(null);
  RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,
@@ -2927,7 +2935,7 @@ function renderChat(){
   <div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><span>Фото</span><button type="button" class="tg-x" id="cImgDel" aria-label="Убрать фото">×</button></div>
   <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое готово</span><audio id="cAudio" preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>
   ${keys?`<div class="tg-keys">${keys}</div>`:""}
-  <div class="tg-row"><button type="button" class="tg-ic" id="cPhoto" aria-label="Прикрепить фото"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><input type="file" id="cPhotoIn" accept="image/*" hidden>
+  <div class="tg-row"><label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*" class="vh-file">
    <textarea id="cTxt" rows="1" placeholder="Сообщение" aria-label="Сообщение"></textarea>
    <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
    ${send?`<button type="button" class="tg-send" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
@@ -3598,6 +3606,11 @@ if(!CLOUD){try{const k=localStorage.getItem(LOCAL_SESS);
  vv.addEventListener("resize",()=>{if(!raf)raf=requestAnimationFrame(f)});f()})();
 document.addEventListener("focusin",e=>{const t=e.target;if(!t.matches||!t.matches("input,textarea,select")||!t.closest(".dlg")||t.closest(".tg"))return;
  setTimeout(()=>{if(document.activeElement!==t)return;const r=t.getBoundingClientRect(),vh=window.visualViewport?visualViewport.height:innerHeight;if(r.top<0||r.bottom>vh)try{t.scrollIntoView({block:"nearest"})}catch(_){}},350)});
+
+/* отмечаем, что открыто окно (для заморозки фона) */
+(function(){const R=document.documentElement,ds=[...document.querySelectorAll(".dlg")];
+ const f=()=>{R.classList.toggle("dlg-on",ds.some(d=>!d.hidden));const v=document.getElementById("vdlg");R.classList.toggle("vdlg-on",!!v&&!v.hidden)};
+ const mo=new MutationObserver(f);ds.forEach(d=>mo.observe(d,{attributes:true,attributeFilter:["hidden"]}));f()})();
 </script>
 
 </html>
