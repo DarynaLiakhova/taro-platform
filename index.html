@@ -2871,7 +2871,7 @@ document.addEventListener("click",e=>{
  a.play().catch(()=>toast("Не получилось воспроизвести голосовое"));
 });
 const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢","😭","😅","🙏","👍","👎","👏","🙌","💪","❤️","💔","🔥","✨","🌙","☀️","⭐","🌹","🌸","🔮","🃏","🕯️","💫","👀","🤍","💜","😌","😉","🙈","🤞","✅","❗"];
-const MAX_IMGS=10,MAX_VID=50*1024*1024;
+const MAX_IMGS=5,MAX_VID=50*1024*1024;
 function albumHTML(m){
  const ims=[m.img,...(m.more||[])].filter(Boolean),vs=m.vids||[],n=ims.length+vs.length;if(!n)return "";
  const cells=ims.map(d=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0">`).concat(vs.map(v=>v.local?`<video class="msg-vid" src="${v.src}" controls playsinline preload="metadata"></video>`:`<video class="msg-vid" data-path="${esc(v.path)}" controls playsinline preload="metadata"></video>`));
@@ -2913,14 +2913,11 @@ function mountChatRec(x){
  $("cPhoto").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cPhotoIn").click()}};
  $("cPhotoIn").onchange=e=>{const fs=[...e.target.files];e.target.value="";let skip=0,pend=0;
   fs.forEach(f=>{
-   if(f.type.startsWith("video/")){if(f.size>MAX_VID){toast("Видео больше 50 МБ, такое не отправить");return}cDraft.vids.push({file:f,url:URL.createObjectURL(f),name:f.name});drawAtt()}
-   else if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt()})}
+   if(f.type.startsWith("video/")){toast("Видео пока отправить нельзя, только фото");return}
+   if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt()})}
   });
   if(skip)toast(`Можно до ${MAX_IMGS} фото в одном сообщении`)};
- /* эмодзи */
- const eb=$("cEmoBtn"),ep=$("cEmo");
- eb.onclick=()=>{ep.hidden=!ep.hidden;eb.setAttribute("aria-expanded",!ep.hidden);eb.classList.toggle("on",!ep.hidden)};
- ep.querySelectorAll("[data-emo]").forEach(b=>b.onclick=()=>{const e=b.dataset.emo,a=ta.selectionStart??ta.value.length,z=ta.selectionEnd??a;ta.value=ta.value.slice(0,a)+e+ta.value.slice(z);const p=a+e.length;try{ta.setSelectionRange(p,p)}catch(_){}ta.dispatchEvent(new Event("input",{bubbles:true}))});
+
  RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,
   onDone:v=>{const b=$("cSend")||$("cSendRev");if(b){b.click()}else toast("Голосовое готово, выбери действие над полем")},
   onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
@@ -3009,12 +3006,11 @@ function renderChat(){
  const SEND_SVG='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" fill="currentColor"/></svg>';
  const comp=(keys,send)=>`<div class="comp tg-comp">
   <div class="tg-att" id="cImgBox" hidden></div>
-  <div class="tg-emo" id="cEmo" hidden>${EMO.map(e=>`<button type="button" data-emo="${e}">${e}</button>`).join("")}</div>
   <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое готово</span><audio id="cAudio" preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>
   ${keys?`<div class="tg-keys">${keys}</div>`:""}
-  <div class="tg-row"><button type="button" class="tg-ic" id="cEmoBtn" aria-label="Эмодзи" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8.2 14.2a4.6 4.6 0 0 0 7.6 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+  <div class="tg-row">
    <textarea id="cTxt" rows="1" placeholder="Сообщение" aria-label="Сообщение"></textarea>
-   <label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото или видео"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*,video/*" multiple class="vh-file">
+   <label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото (до 5)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*" multiple class="vh-file">
    <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
    ${send?`<button type="button" class="tg-send on" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
   <div class="tg-rec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="tg-cancel" id="cCancel">Отмена</button><button type="button" class="tg-send on" id="cStop" aria-label="Отправить голосовое">${SEND_SVG}</button></div>
