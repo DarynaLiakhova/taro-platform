@@ -1240,6 +1240,141 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
  #v-login .band.lhow{margin-top:40px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ===== чат как в Telegram ===== */
+#vdlg{--tg-acc:#3390ec;--tg-head:#fff;--tg-txt:#000;--tg-sub:#707579;--tg-in:#fff;--tg-out:#eeffde;--tg-meta-in:#a1aab3;--tg-meta-out:#5fae54;--tg-sys:rgba(70,90,60,.42)}
+#vdlg .dbox.tgbox{display:flex;flex-direction:column;width:min(620px,100%);height:min(920px,100%);max-height:100%;padding:0;gap:0;overflow:hidden;border-radius:14px;border:0;background:#fff;grid-template-columns:none}
+.tg{display:flex;flex-direction:column;height:100%;min-height:0;position:relative;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--tg-txt);font-size:15px;line-height:1.38;letter-spacing:0}
+.tg button{font-family:inherit;letter-spacing:0;text-transform:none}
+.tg-h{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 6px;background:var(--tg-head);border-bottom:1px solid #e7e7e7;position:relative;z-index:3;flex:none}
+.tg-back,.tg-ic{width:40px;height:40px;border-radius:50%;border:0;background:none;color:#707579;display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.tg-back:hover,.tg-ic:hover{background:#f1f1f1}
+.tg-ava{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:600;font-size:18px;background:linear-gradient(180deg,hsl(var(--h) 70% 66%),hsl(var(--h) 62% 52%))}
+.tg-ti{min-width:0;flex:1;display:grid;gap:1px}
+.tg-ti b{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000}
+.tg-ti small{font-size:13.5px;color:var(--tg-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-ti small .st{all:unset;color:var(--tg-acc)!important;background:none!important;padding:0!important;border:0!important;font:inherit!important;letter-spacing:0!important;text-transform:none!important}
+.tg-menu{position:absolute;right:8px;top:52px;min-width:240px;max-width:min(330px,calc(100vw - 24px));background:#fff;border-radius:12px;box-shadow:0 6px 28px rgba(0,0,0,.2);padding:6px 0;display:grid;z-index:5}
+.tg-menu>button{all:unset;cursor:pointer;padding:11px 18px;font-size:15px;color:#000}
+.tg-menu>button:hover{background:#f4f4f5}
+.tg-menu>button.danger,.tg-menu>button.sure{color:#e53935}
+.tg-menu .lockhint{margin:4px 18px;font-size:12.5px;color:var(--tg-sub);line-height:1.35}
+.tg-mcats{padding:8px 18px 10px;border-bottom:1px solid #eee;margin-bottom:4px;display:grid;gap:6px}
+.tg-mcats small{font-size:12.5px;color:var(--tg-sub)}
+.tg-mcats .cat{font-family:inherit;font-size:13px}
+/* закреплённое */
+.tg .finbox.tg-pin{border:0;border-bottom:1px solid #e7e7e7;border-radius:0;background:#fff}
+.tg-pin{display:flex;align-items:flex-start;gap:10px;padding:7px 12px;background:#fff;border-bottom:1px solid #e7e7e7;cursor:pointer;flex:none;position:relative;z-index:2;border-radius:0;margin:0;box-shadow:none}
+.tg-pin .pin-l{width:2px;align-self:stretch;background:var(--tg-acc);border-radius:2px;flex:none}
+.tg-pin .pin-c{min-width:0;flex:1;display:grid;gap:2px}
+.tg-pin .pin-c b{font-size:14px;color:var(--tg-acc);font-weight:600}
+.tg-pin .fin-t{margin:0;font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-pin.open .fin-t{white-space:pre-wrap;max-height:40vh;overflow:auto}
+.tg-pin .fin-d{font-size:12px;color:var(--tg-sub)}
+.tg-pin .link{all:unset;cursor:pointer;color:var(--tg-acc);font-size:14px}
+.tg-pin .pin-ic{color:#a1aab3;flex:none;margin-top:4px}
+.tg-sheet{position:absolute;left:0;right:0;top:58px;z-index:4;background:#fff;padding:14px 16px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:grid;gap:10px;max-height:calc(100% - 58px);overflow:auto;border-radius:0 0 14px 14px;margin:0}
+.tg-sheet-h{display:grid}.tg-sheet-h b{font-size:16px}.tg-sheet-h small{color:var(--tg-sub);font-size:13px}
+.tg-sheet textarea{min-height:120px;font-family:inherit;font-size:15px}
+/* лента */
+.tg-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;
+ background-color:#b9cf9a;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23395a2a' stroke-opacity='.13' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z'/%3E%3Cpath d='M98 22a10 10 0 1 0 10 13 8 8 0 1 1-10-13z'/%3E%3Crect x='56' y='60' width='18' height='28' rx='3'/%3E%3Ccircle cx='65' cy='74' r='4'/%3E%3Cpath d='M112 92l2 5 5 2-5 2-2 5-2-5-5-2 5-2z'/%3E%3Cpath d='M18 104c6-8 14-8 20 0M22 112c4-4 8-4 12 0'/%3E%3Ccircle cx='120' cy='60' r='2'/%3E%3Ccircle cx='40' cy='60' r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+ linear-gradient(150deg,#d6dbab 0%,#a9c98f 38%,#8dbb86 64%,#cfd7a6 100%);background-size:140px 140px,100% 100%}
+.tg-day{align-self:center;margin:8px 0 6px}
+.tg-day span{display:inline-block;background:var(--tg-sys);color:#fff;font-size:13px;font-weight:500;padding:3px 10px;border-radius:12px}
+.tg .msg{display:flex;flex-direction:column;max-width:min(82%,460px);margin:0;padding:0;border:0;background:none;box-shadow:none;position:relative}
+.tg .msg.out{align-self:flex-end;align-items:flex-end}
+.tg .msg.in{align-self:flex-start;align-items:flex-start}
+.tg .msg.tail{margin-bottom:6px}
+.tg .msg.sys{align-self:center;max-width:90%;margin:6px 0}
+.tg .msg.sys span{background:var(--tg-sys);color:#fff;font-size:13.5px;padding:4px 12px;border-radius:14px;text-align:center;display:inline-block}
+.tg .bub{position:relative;padding:6px 9px 6px 11px;border-radius:15px;background:var(--tg-in);box-shadow:0 1px 1px rgba(0,0,0,.13);min-width:70px;word-wrap:break-word;overflow-wrap:anywhere;cursor:default}
+.tg .msg.out .bub{background:var(--tg-out)}
+.tg .msg.in.tail .bub{border-bottom-left-radius:4px}
+.tg .msg.out.tail .bub{border-bottom-right-radius:4px}
+.tg .bub p{margin:0;white-space:pre-wrap;font-size:15px;line-height:1.38;color:#000;display:inline}
+.tg .bub p+.meta{margin-left:12px}
+.tg .meta{letter-spacing:0!important;font-family:inherit;font-variant-numeric:normal;float:right;position:relative;top:6px;margin:0 -2px 0 10px;font-size:12px;color:var(--tg-meta-in);display:inline-flex;align-items:center;gap:3px;line-height:1;white-space:nowrap;user-select:none}
+.tg .msg.out .meta{color:var(--tg-meta-out)}
+.tg .tk{display:inline-flex;font-style:normal}
+.tg .bub::after{content:"";display:block;clear:both}
+.tg .msg-img{display:block;max-width:100%;max-height:340px;border-radius:11px;margin:-2px -5px 6px -7px;width:calc(100% + 12px);object-fit:cover;cursor:zoom-in;aspect-ratio:auto}
+.tg .bub.media .msg-img{margin-bottom:4px}
+.tg .msg.editing .bub{outline:2px solid var(--tg-acc)}
+.tg .orig .bub{min-width:min(260px,100%)}
+.tg .o-kind{font-size:12.5px;color:var(--tg-acc);font-weight:500;margin-bottom:1px}
+.tg .msg.out .o-kind{color:#4a9a3f}
+.tg .o-kind .ctag{all:unset}
+.tg .o-title{display:block;font-weight:600;font-size:15.5px;margin-bottom:4px}
+.tg .o-sec{margin:4px 0 2px}
+.tg .o-sec small{display:block;font-size:12.5px;color:var(--tg-sub);margin-bottom:1px}
+.tg .o-sec p{display:block}
+.tg .orig .vmsg{margin-top:6px}
+/* меню сообщения */
+.tg .bmenu{background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.2);display:grid;padding:4px 0;margin-top:4px;z-index:2;min-width:150px}
+.tg .bmenu[hidden]{display:none}
+.tg .bmenu button{all:unset;cursor:pointer;padding:9px 16px;font-size:14.5px}
+.tg .bmenu button:hover{background:#f4f4f5}
+/* голосовые */
+.tg .vmsg,.vmsg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px 10px;min-width:220px;margin:2px 0 4px;padding:0;border:0;background:none}
+.vplay{width:44px;height:44px;border-radius:50%;border:0;background:var(--tg-acc,#3390ec);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.tg .msg.out .vplay{background:#5fbe58}
+.vplay .i-pause{display:none}.vmsg.playing .i-pause{display:block}.vmsg.playing .i-play{display:none}
+.vw{display:grid;gap:3px;min-width:0}
+.vwave{display:flex;align-items:flex-end;gap:2px;height:20px;--p:0;--c:#c4d6e8;--a:var(--tg-acc,#3390ec)}
+.tg .msg.out .vwave{--c:#a9d89f;--a:#4fae4e}
+.vwave i{flex:1;max-width:3px;min-width:2px;border-radius:2px;background:var(--c)}
+.vwave i.on{background:var(--a)}
+.vdur{font-size:12.5px;color:var(--tg-meta-in,#888)}
+.tg .msg.out .vdur{color:var(--tg-meta-out)}
+.vmsg audio{display:none}
+.tr-btn{all:unset;cursor:pointer;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--tg-acc,#3390ec);background:rgba(51,144,236,.12)}
+.tg .msg.out .tr-btn{color:#4a9a3f;background:rgba(79,174,78,.15)}
+.tr-btn.on{background:var(--tg-acc,#3390ec);color:#fff}
+.tg .msg.out .tr-btn.on{background:#4fae4e;color:#fff}
+.tr-txt{border:0!important;background:none!important;margin:0!important;border-radius:0!important;padding:2px 0 0!important;grid-column:1/-1;font-size:14.5px;line-height:1.38;white-space:pre-wrap;color:#000;padding-top:2px}
+/* низ */
+.tg-comp{flex:none;background:#fff;border-top:1px solid #e7e7e7;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;margin:0;border-radius:0}
+.tg-row{display:flex;align-items:flex-end;gap:2px}
+.tg-comp textarea{flex:1;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;outline:0;resize:none;font-family:inherit;font-size:16px;line-height:1.35;padding:9px 6px;min-height:40px;max-height:160px;color:#000;border-radius:0}
+.tg-comp textarea::placeholder{color:#9aa3ab}
+.tg-send{width:40px;height:40px;border-radius:50%;border:0;background:none;color:var(--tg-acc);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.tg-send.on,.tg-rec .tg-send{background:var(--tg-acc);color:#fff}
+.tg-send[hidden],.tg-ic[hidden]{display:none}
+.tg-comp:has(.tg-rec:not([hidden])) .tg-row{display:none}
+.tg-rec{display:flex;align-items:center;gap:10px;padding:2px 2px 2px 12px;min-height:44px}
+.tg-rec[hidden]{display:none}
+.tg-rec .rdot{width:10px;height:10px;border-radius:50%;background:#e53935;animation:tgblink 1s infinite}
+@keyframes tgblink{50%{opacity:.25}}
+.tg-rec .rt{font-variant-numeric:tabular-nums;font-size:15px;min-width:40px}
+.tg-rec .interim{flex:1;font-size:13px;color:var(--tg-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-cancel{all:unset;cursor:pointer;color:var(--tg-acc);font-size:15px;padding:6px 8px}
+.tg-keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;padding:0 2px}
+.tg-key{border:0;border-radius:10px;background:#f1f6fd;color:var(--tg-acc);font-size:15px;font-weight:500;padding:11px 10px;cursor:pointer}
+.tg-key:hover{background:#e5effc}
+.tg-comp .cimg{display:flex;align-items:center;gap:10px;padding:4px 8px;border-left:2px solid var(--tg-acc);margin:2px 6px}
+.tg-comp .cimg[hidden]{display:none}
+.tg-comp .cimg img{width:42px;height:42px;object-fit:cover;border-radius:6px}
+.tg-comp .cimg span{flex:1;font-size:14px;color:var(--tg-acc)}
+.tg-comp .vclip{display:flex;align-items:center;gap:10px;padding:4px 8px;margin:0 6px;font-size:14px}
+.tg-comp .vclip[hidden]{display:none}
+.tg-comp .vclip audio{display:none}
+.tg-x{width:32px;height:32px;border-radius:50%;border:0;background:none;color:#8a949c;font-size:24px;line-height:1;cursor:pointer;flex:none;padding:0}
+.tg-edit{display:flex;align-items:center;gap:12px;padding:2px 4px 2px 10px;color:var(--tg-acc)}
+.tg-edit div{flex:1;min-width:0;display:grid;border-left:2px solid var(--tg-acc);padding-left:8px}
+.tg-edit b{font-size:14px;font-weight:600}
+.tg-edit small{font-size:14px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-comp .ferr{margin:0 10px;font-size:13px;color:#e53935}
+.tg-bar{flex:none;background:#fff;border-top:1px solid #e7e7e7;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));display:grid;gap:8px;font-size:14px;color:#333;margin:0;border-radius:0;text-align:center}
+.tg-bar b{font-weight:600}
+.tg-join{all:unset;cursor:pointer;text-align:center;color:var(--tg-acc);font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.02em;padding:8px}
+.tg-join:hover{background:#f4f8fd;border-radius:8px}
+@media (max-width:760px){
+ .dlg#vdlg{padding:0!important;place-items:stretch}
+ .dlg#vdlg .dbox.tgbox{width:100%!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;padding:0!important}
+ .tg-h{padding-top:calc(8px + env(safe-area-inset-top,0px))}
+ .tg .msg{max-width:88%}
+}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2667,28 +2802,56 @@ $("qSend").onclick=()=>{
 };
 /* голос в переписке: черновик живёт, пока окно открыто, даже если чат перерисовался */
 let RC=null,cDraft={sid:null,voice:null,img:null};
+/* ---- чат в стиле Telegram ---- */
+const hm=at=>{try{return new Date(at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}catch(e){return ""}};
+function dLong(at){const k=dayOf(at);if(k===TODAY)return "Сегодня";const y=new Date(TODAY+"T12:00:00");y.setDate(y.getDate()-1);if(k===isoDay(y))return "Вчера";
+ const d=new Date(at),o={day:"numeric",month:"long"};if(d.getFullYear()!==new Date().getFullYear())o.year="numeric";return d.toLocaleDateString("ru-RU",o)}
+const TK1='<svg viewBox="0 0 18 12" width="16" height="11" aria-label="Доставлено"><path d="M1.5 6.5l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TK2='<svg viewBox="0 0 18 12" width="16" height="11" aria-label="Прочитано"><path d="M1.5 6.5l3.5 3.5 7-8M7.5 9.5l.6.5 7-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const PIN_SVG='<svg class="pin-ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v6l-1 1-1-1v-6H7v-2l3-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const hueOf=s=>{let h=0;for(const c of String(s||""))h=(h*31+c.charCodeAt(0))%360;return h};
+const FINE=()=>{try{return matchMedia("(pointer:fine)").matches}catch(e){return false}};
+const autoH=t=>{t.style.height="auto";t.style.height=Math.min(t.scrollHeight,160)+"px"};
+let pinOpen=false;
+function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charCodeAt(0))>>>0;let s="";
+ for(let i=0;i<30;i++){h=(h*1103515245+12345)>>>0;const v=4+((h>>>16)%15);s+=`<i style="height:${v}px"></i>`}return s}
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button>`:""}<audio preload="none" src="${m.voice.src}"></audio>${m.voice.tr?`<div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
+document.addEventListener("click",e=>{
+ const tb=e.target.closest(".tr-btn");
+ if(tb){const t=tb.closest(".vmsg").querySelector(".tr-txt");if(t){const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o)}return}
+ const pb=e.target.closest(".vplay");if(!pb)return;
+ const box=pb.closest(".vmsg"),a=box.querySelector("audio"),wv=box.querySelector(".vwave"),dl=box.querySelector(".vdur"),tot=dl.textContent;
+ document.querySelectorAll(".vmsg audio").forEach(o=>{if(o!==a&&!o.paused)o.pause()});
+ if(!a.paused){a.pause();return}
+ if(!a._b){a._b=1;
+  a.addEventListener("timeupdate",()=>{const d=isFinite(a.duration)&&a.duration>0?a.duration:0;if(d){const n=Math.round(a.currentTime/d*wv.children.length);[...wv.children].forEach((b,i)=>b.classList.toggle("on",i<n))}dl.textContent=fmtT(Math.floor(a.currentTime))});
+  a.addEventListener("play",()=>box.classList.add("playing"));
+  a.addEventListener("pause",()=>box.classList.remove("playing"));
+  a.addEventListener("ended",()=>{box.classList.remove("playing");[...wv.children].forEach(b=>b.classList.remove("on"));dl.textContent=tot})}
+ a.play().catch(()=>toast("Не получилось воспроизвести голосовое"));
+});
 function mountChatRec(x){
  const ta=$("cTxt");if(!ta){RC=null;return}
  if(cDraft.sid!==x.id)cDraft={sid:x.id,voice:null,img:null};
- const lab=document.querySelector('label[for="cTxt"]');
- const head=document.createElement("div");head.className="fld-h chat-h";lab.parentNode.insertBefore(head,lab);head.appendChild(lab);
- head.insertAdjacentHTML("beforeend",`<span class="chat-tools"><button type="button" class="micbtn" id="cPhoto"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Фото</span></button><input type="file" id="cPhotoIn" accept="image/*" hidden><button type="button" class="micbtn" id="cMic">${MIC_SVG}<span id="cMicTxt">Голосовое</span></button></span>`);
- ta.insertAdjacentHTML("afterend",`<div class="vrec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="link" id="cCancel">Отмена</button><button type="button" class="btn sm" id="cStop">Отправить</button></div>
- <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="cAudio" controls preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>`);
- ta.insertAdjacentHTML("afterend",`<div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><button type="button" class="link danger" id="cImgDel">Убрать фото</button></div>`);
- const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}};
+ const send=$("cSend")||$("cSendRev2");
+ const upd=()=>{const has=!!(ta.value.trim()||cDraft.img);if(send)send.hidden=!has;$("cMic").hidden=!!(send&&has)||!!(RC&&RC.active())};
+ const showImg=d=>{cDraft.img=d||null;$("cImgBox").hidden=!d;if(d)$("cImg").src=d;try{const k=dKey("cTxt","img");d?localStorage.setItem(k,d):localStorage.removeItem(k)}catch(e){}upd()};
  $("cPhoto").onclick=()=>$("cPhotoIn").click();
  $("cPhotoIn").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readPhoto(f,showImg)};
  $("cImgDel").onclick=()=>showImg(null);
+ RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,
+  onDone:v=>{const b=$("cSend")||$("cSendRev");if(b){b.click()}else toast("Голосовое готово, выбери действие над полем")},
+  onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
  if(!cDraft.img){const d=dGet(dKey("cTxt","img"));if(d)cDraft.img=d}
  if(cDraft.img)showImg(cDraft.img);
- RC=makeRec({ta,mic:$("cMic"),micTxt:$("cMicTxt"),rec:$("cRec"),time:$("cRecT"),interim:$("cInterim"),stop:$("cStop"),clip:$("cClip"),audio:$("cAudio"),del:$("cClipDel"),label:"Голосовое",sink:true,onDone:v=>{const b=$("cSend");if(b){b.click()}else toast("Голосовое готово, выбери действие ниже")},onChange:v=>{cDraft.voice=v;try{const k=dKey("cTxt","voice");v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k)}catch(e){}}});
  if(!cDraft.voice){try{const v=JSON.parse(dGet(dKey("cTxt","voice"))||"null");if(v)cDraft.voice=v}catch(e){}}
  if(cDraft.voice)RC.set(cDraft.voice);
- $("cCancel").onclick=()=>{RC.stop(true);toast("Запись отменена")};
- dRestore(["cTxt","edT"]);
+ $("cCancel").onclick=()=>{RC.stop(true);upd();toast("Запись отменена")};
+ dRestore(["cTxt"]);
+ ta.addEventListener("input",()=>{autoH(ta);upd()});
+ ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&FINE()){e.preventDefault();const b=$("cSend")||$("cSendRev");if(b)b.click()}});
+ autoH(ta);upd();
 }
-const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><audio controls preload="metadata" src="${m.voice.src}"></audio>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false">Aa<span>Расшифровка</span></button><div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
 
 const talkStarted=x=>(x.thread||[]).some(m=>m.from==="master"||m.from==="student");
 function submitSp(status){
@@ -2712,87 +2875,152 @@ $("fClose").onclick=()=>closeDlg("fdlg");
 let chatU=null,chatS=null,chatRole=null,editMsg=null,finEdit=false;
 function openChat(uid,sid,r){
  const u=DB.users[uid];if(!u)return;const x=u.spreads.find(s=>s.id===sid);if(!x||(x.deletedAt&&r==="student")){toast("Этот расклад удалён");return}
- chatU=u;chatS=x;chatRole=r;editMsg=null;
+ chatU=u;chatS=x;chatRole=r;editMsg=null;pinOpen=false;finEdit=false;
  if(r==="student")x.unreadS=false;else x.unreadM=false;readFor(sid);persist();
  if($("vdlg").hidden)lastFocus=document.activeElement;
  renderChat();$("vdlg").hidden=false;refresh();
- const t=$("cTxt");(t||$("vClose")).focus();
+ const t=$("cTxt");(t&&FINE()?t:$("vClose")).focus();
  const th=$("thread");if(th)th.scrollTop=th.scrollHeight;
 }
 function renderChat(){
  const u=chatU,x=chatS,r=chatRole,me=r==="master";
- const who=m=>m.from==="master"?MASTER.name:m.from==="student"?(me?u.name:"Ты"):"Платформа";
- const thread=x.thread.map((m,i)=>`<div class="msg ${m.from==="master"?"m":m.from==="student"?"s":"sys"}"><header><b>${esc(who(m))}</b><span>${fmtDT(m.at)}${m.edited?" · изменено":""}</span></header>${editMsg===i?`<textarea id="edT">${esc(m.t)}</textarea><div class="drow"><button class="btn sm" id="edSave">Сохранить</button><button class="btn ghost sm" id="edCancel">Отмена</button></div>`:`${m.img?`<img class="msg-img" src="${m.img}" alt="Фото" tabindex="0">`:""}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}`}${me&&m.from==="master"&&editMsg!==i?`<button class="ed" data-e="${i}">изменить</button>`:""}</div>`).join("");
- let comp="";
- if(x.mDeletedAt&&!me)comp=`<div class="gone-note"><b>Лена удалила ${x.kind==="question"?"этот вопрос":"этот расклад"} ${fullDT(x.mDeletedAt)}.</b> Переписка закрыта: писать сюда больше нельзя. Посмотреть можно здесь, а сохранить себе — через «Экспорт» вверху.</div>`;
- else if(x.deletedAt&&me)comp=`<div class="gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя. Расклад и переписка остались только у тебя.<div class="drow" style="margin-top:10px"><button class="btn ghost sm" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div></div>`;
+ const tbOld=$("thread"),atBottom=!tbOld||tbOld.scrollHeight-tbOld.scrollTop-tbOld.clientHeight<90,prevTop=tbOld?tbOld.scrollTop:0;
+ const mine=m=>me?m.from==="master":m.from==="student";
+ /* «прочитано»: собеседник ещё не открыл чат → у моих последних сообщений одна галочка */
+ const otherUnread=me?!!x.unreadS:!!x.unreadM;
+ let lastOther=-1;x.thread.forEach((m,i)=>{if(m.from!=="system"&&!mine(m))lastOther=i});
+ const ticks=(i,out)=>out?`<i class="tk ${otherUnread&&i>lastOther?"":"rd"}">${otherUnread&&i>lastOther?TK1:TK2}</i>`:"";
+ const meta=(at,ed,i,out)=>`<span class="meta">${ed?"изм. ":""}${hm(at)}${ticks(i,out)}</span>`;
+ /* исходник: расклад или вопрос — первое сообщение ученицы */
+ const oOut=!me,oAt=x.sentAt||x.at;
+ const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${x.img}" alt="Фото расклада" tabindex="0">`:""}
+  <div class="o-kind">${esc(kindName(x))}${x.cat?` · <span class="ctag">${esc(x.cat)}</span>`:""}</div>
+  <b class="o-title" id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</b>
+  ${x.bg?`<div class="o-sec"><small>Предыстория</small><p>${esc(x.bg)}</p></div>`:""}
+  ${x.cards?`<div class="o-sec"><small>Карты</small><p>${esc(x.cards)}</p></div>`:""}
+  ${x.score?`<div class="o-sec"><small>Тест</small><p>${esc(x.score)}</p></div>`:""}
+  ${x.desc?`<div class="o-sec"><small>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</small><p>${esc(x.desc)}</p></div>`:""}
+  ${x.voice&&x.voice.src?voiceMsg({voice:x.voice}):""}${meta(oAt,false,-1,oOut&&!!x.sentAt)}</div></div>`;
+ let html="",day=dayOf(oAt);html+=`<div class="tg-day"><span>${dLong(oAt)}</span></div>`+origin;
+ x.thread.forEach((m,i)=>{
+  const d=dayOf(m.at);if(d!==day){day=d;html+=`<div class="tg-day"><span>${dLong(m.at)}</span></div>`}
+  if(m.from==="system"){html+=`<div class="msg sys"><span>${esc(m.t)}</span></div>`;return}
+  const out=mine(m),nx=x.thread[i+1],tail=!nx||nx.from!==m.from||dayOf(nx.at)!==d;
+  const canEd=me&&m.from==="master"&&editMsg==null&&!x.mDeletedAt;
+  const only=(m.img||(m.voice&&m.voice.src))&&!m.t;
+  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${m.img?`<img class="msg-img" src="${m.img}" alt="Фото" tabindex="0">`:""}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${meta(m.at,m.edited,i,out)}</div>
+   <div class="bmenu" hidden>${m.t?`<button type="button" data-copy="${i}">Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">Изменить</button>`:""}</div></div>`;
+ });
+ if(!x.thread.length&&x.status==="wait")html+=`<div class="msg sys"><span>${me?(x.kind==="question"?"Ученица ждёт ответа":"Ученица ждёт разбора"):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление"}</span></div>`;
+ if(!x.thread.length&&x.status==="journal"&&!me)html+=`<div class="msg sys"><span>Расклад пока только в твоём журнале. Отправь его Лене кнопкой внизу</span></div>`;
+ /* низ: поле ввода или плашка */
+ const SEND_SVG='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" fill="currentColor"/></svg>';
+ const comp=(keys,send)=>`<div class="comp tg-comp">
+  <div class="cimg" id="cImgBox" hidden><img id="cImg" alt="Фото к сообщению"><span>Фото</span><button type="button" class="tg-x" id="cImgDel" aria-label="Убрать фото">×</button></div>
+  <div class="vclip" id="cClip" hidden><span class="vlab">${MIC_SVG}Голосовое готово</span><audio id="cAudio" preload="metadata"></audio><button type="button" class="link danger" id="cClipDel">Удалить</button></div>
+  ${keys?`<div class="tg-keys">${keys}</div>`:""}
+  <div class="tg-row"><button type="button" class="tg-ic" id="cPhoto" aria-label="Прикрепить фото"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><input type="file" id="cPhotoIn" accept="image/*" hidden>
+   <textarea id="cTxt" rows="1" placeholder="Сообщение" aria-label="Сообщение"></textarea>
+   <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
+   ${send?`<button type="button" class="tg-send" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
+  <div class="tg-rec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="tg-cancel" id="cCancel">Отмена</button><button type="button" class="tg-send on" id="cStop" aria-label="Отправить голосовое">${SEND_SVG}</button></div>
+  <p class="ferr" id="cErr" hidden></p></div>`;
+ let foot="";
+ if(x.mDeletedAt&&!me)foot=`<div class="tg-bar gone-note"><b>Лена удалила ${x.kind==="question"?"этот вопрос":"этот расклад"} ${fullDT(x.mDeletedAt)}.</b> Писать сюда больше нельзя. Сохранить переписку можно через меню ⋮ → «Экспорт».</div>`;
+ else if(x.deletedAt&&me)foot=`<div class="tg-bar gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя.<button type="button" class="tg-join" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div>`;
+ else if(me&&editMsg!=null&&x.thread[editMsg]){const m=x.thread[editMsg];
+  foot=`<div class="comp tg-comp"><div class="tg-edit"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><div><b>Редактирование</b><small>${esc(m.t)}</small></div><button type="button" class="tg-x" id="edCancel" aria-label="Отменить">×</button></div>
+   <div class="tg-row"><textarea id="edT" rows="1" aria-label="Текст сообщения">${esc(m.t)}</textarea><button type="button" class="tg-send on" id="edSave" aria-label="Сохранить"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`}
  else if(me){
-  if(x.kind==="exam"&&x.status==="wait")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий к Посвящению</label><textarea id="cTxt" placeholder="Что получилось, что доработать…"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cPass">Засчитать Посвящение</button><button class="btn ghost" id="cRet">Вернуть на доработку</button></div></div>`;
-  else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>${x.thread.some(m=>m.from==="master")||x.kind==="question"?"Ответить":"Разбор"}</label><textarea id="cTxt" placeholder="${x.kind==="question"?"Твой ответ на вопрос…":"Что ученица увидела верно, на что обратить внимание…"}"></textarea><p class="ferr" id="cErr" hidden></p><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">${esc(u.name)} получит уведомление</small></div></div>`;
+  if(x.kind==="exam"&&x.status==="wait")foot=comp(`<button type="button" class="tg-key" id="cPass">✓ Засчитать Посвящение</button><button type="button" class="tg-key" id="cRet">↺ Вернуть на доработку</button>`,"");
+  else foot=comp("","cSend");
  }else if(!x.mDeletedAt){
-  if(!isFb(u))comp=`<div class="lockline">Задать вопрос Лене и получить разбор можно на тарифе <b>с обратной связью · ${rub(FB_PRICE)} в месяц</b>. <button class="link" id="cBuy">Подключить</button></div>`;
-  else if(x.status==="journal")comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Комментарий для Лены, если хочешь</label><textarea id="cTxt" placeholder="В чём сомневаешься, на что посмотреть…"></textarea><div class="drow"><button class="btn" id="cSendRev">Отправить на разбор</button></div></div>`;
-  else if(x.kind==="exam"&&x.status==="returned")comp=`<div class="drow"><button class="btn" id="cFix">Исправить Посвящение</button></div>`;
-  else comp=`<div class="comp"><label class="lab" for="cTxt"><i></i>Написать Лене</label><textarea id="cTxt" placeholder="Уточнить, переспросить, рассказать, как сбылось…"></textarea><div class="drow"><button class="btn" id="cSend">Отправить</button><small style="color:var(--dim)">Ответ пн–пт с 10 до 18 мск</small></div></div>`;
+  if(!isFb(u))foot=`<div class="tg-bar lockline"><button type="button" class="tg-join" id="cBuy">Подключить обратную связь · ${rub(FB_PRICE)} в месяц</button></div>`;
+  else if(x.status==="journal")foot=comp(`<button type="button" class="tg-key" id="cSendRev">Отправить Лене на разбор</button>`,"cSendRev2");
+  else if(x.kind==="exam"&&x.status==="returned")foot=`<div class="tg-bar"><button type="button" class="tg-join" id="cFix">Исправить Посвящение</button></div>`;
+  else foot=comp("","cSend");
  }
+ /* закреплённое: итоговый расклад */
  const own=!me&&!x.deletedAt&&x.kind!=="exam",locked=talkStarted(x);
- const hasM=x.thread.some(m=>m.from==="master"),fin=x.final;
- const finBlock=!x.mDeletedAt&&(hasM||fin)&&x.kind!=="exam"&&x.kind!=="question"?`<div class="finbox" id="finBox"><div class="lab"><i></i>Итоговый расклад <small>после разбора с Леной</small></div>${finEdit?`<div class="fld-h chat-h"><span></span><button type="button" class="micbtn" id="finMic">${MIC_SVG}<span id="finMicTxt">Надиктовать</span></button></div><textarea id="finT" placeholder="Как ты теперь читаешь этот расклад: что поменялось после разбора, к какому выводу пришла">${fin?esc(fin.t):""}</textarea><div class="vrec" id="finRec" hidden><span class="rdot"></span><span class="rt" id="finRecT">0:00</span><span class="interim" id="finInterim"></span><button type="button" class="btn sm" id="finStop">Готово</button></div><div class="vclip" id="finClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="finAudio" controls></audio><button type="button" class="link danger" id="finDel">Удалить</button></div><div class="drow"><button class="btn sm" id="finSave">Сохранить итог</button><button class="btn ghost sm" id="finCancel">Отмена</button></div>`:fin?`${fin.voice&&fin.voice.src?voiceMsg({voice:fin.voice,t:fin.t}):""}<p class="fin-t">${esc(fin.t)}</p><small class="fin-d">${fullDT(fin.at)}${fin.edited?" · изменено":""}</small>${!me&&!x.deletedAt?` <button class="link" id="finOpen">изменить</button>`:""}`:(!me&&!x.deletedAt?`<p class="hint2">Когда обсудите с Леной, запиши, как ты теперь читаешь расклад. Исходная трактовка останется как была.</p><button class="btn ghost sm" id="finOpen">Написать итоговый расклад</button>`:`<p class="hint2">Ученица ещё не записала итог.</p>`)}</div>`:"";
- $("vBox").className="dbox vbox chatbox"+(x.kind==="question"&&!x.img?" qchat":"");
- $("vBox").innerHTML=`<div>${imgOf(x)}</div>
-  <div class="dside"><button class="dx" id="vClose" aria-label="Закрыть">×</button>
-   <div class="drow"><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span><span class="kind">${kindName(x)}</span><small>${fmt(x.at)}</small>${me?`<button class="link" id="cWho">${esc(u.name)}</button>`:""}<button class="link cexp" type="button" data-exp="${x.id}">Экспорт</button></div>
-   ${!me&&!x.deletedAt?`<div class="vcats"><span class="flab">Тема</span><div class="cats sm" id="vCats"></div></div>`:x.cat?`<span class="ctag">${esc(x.cat)}</span>`:""}<h3 id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</h3>${x.bg?`<div class="bgbox"><div class="lab"><i></i>Предыстория</div><p>${esc(x.bg)}</p></div>`:""}${x.cards?`<p class="src">${esc(x.cards)}</p>`:""}${x.score?`<p class="src">Тест: ${esc(x.score)}</p>`:""}
-   <div class="lab"><i></i>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</div>${x.desc?`<p style="font-size:14.5px;white-space:pre-wrap">${esc(x.desc)}</p>`:""}${x.voice?`<div class="vclip on"><span class="vlab"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Голосовое · ${fmtT(x.voice.dur||0)}</span><audio controls preload="metadata" src="${x.voice.src}"></audio></div>`:""}
-   ${x.thread.length?`<div class="lab"><i></i>Переписка</div><div class="thread" id="thread">${thread}</div>`:(x.status==="wait"?`<p class="hint2">${me?(x.kind==="question"?"Ученица ждёт ответа.":"Ученица ждёт разбора."):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление."}</p>`:"")}
-   ${finBlock}
-   ${comp}
-   ${own?`<div class="drow">${x.kind==="question"||x.mDeletedAt?"":locked?`<span class="hint2 lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</span>`:`<button class="btn ghost sm" id="vEdit">Изменить расклад</button>`}<button class="del" id="vDel" style="background:none;border:0;padding:0;font-size:12px;color:var(--dim)">удалить ${x.kind==="question"?"вопрос":"расклад"}</button></div>`:""}
-   <div class="vfoot">${me?`<button type="button" class="link danger" id="mDel">Удалить навсегда</button>`:""}<button type="button" class="btn ghost sm" id="vClose2">Закрыть</button></div>
-  </div>`;
+ const hasM=x.thread.some(m=>m.from==="master"),fin=x.final,finOk=!x.mDeletedAt&&(hasM||fin)&&x.kind!=="exam"&&x.kind!=="question";
+ let pin="";
+ if(finOk&&finEdit)pin=`<div class="finbox tg-sheet" id="finBox"><div class="tg-sheet-h"><b>Итоговый расклад</b><small>после разбора с Леной</small></div><div class="fld-h chat-h"><span></span><button type="button" class="micbtn" id="finMic">${MIC_SVG}<span id="finMicTxt">Надиктовать</span></button></div><textarea id="finT" placeholder="Как ты теперь читаешь этот расклад: что поменялось после разбора, к какому выводу пришла">${fin?esc(fin.t):""}</textarea><div class="vrec" id="finRec" hidden><span class="rdot"></span><span class="rt" id="finRecT">0:00</span><span class="interim" id="finInterim"></span><button type="button" class="btn sm" id="finStop">Готово</button></div><div class="vclip" id="finClip" hidden><span class="vlab">${MIC_SVG}Голосовое</span><audio id="finAudio" controls></audio><button type="button" class="link danger" id="finDel">Удалить</button></div><div class="drow"><button class="btn sm" id="finSave">Сохранить итог</button><button class="btn ghost sm" id="finCancel">Отмена</button></div></div>`;
+ else if(finOk&&fin)pin=`<div class="finbox tg-pin${pinOpen?" open":""}" id="finBox" tabindex="0" role="button" aria-expanded="${pinOpen}"><span class="pin-l"></span><div class="pin-c"><b>Итоговый расклад</b><p class="fin-t">${esc(fin.t||"Голосовое")}</p>${pinOpen?`${fin.voice&&fin.voice.src?voiceMsg({voice:fin.voice}):""}<small class="fin-d">${fullDT(fin.at)}${fin.edited?" · изменено":""}</small>${own?` <button type="button" class="link" id="finOpen">изменить</button>`:""}`:""}</div>${PIN_SVG}</div>`;
+ else if(finOk&&own)pin=`<div class="finbox tg-pin" id="finBox"><span class="pin-l"></span><div class="pin-c"><b>Итоговый расклад</b><button type="button" class="link" id="finOpen">Записать, как ты теперь читаешь расклад</button></div>${PIN_SVG}</div>`;
+ /* меню ⋮ */
+ const mi=[];
+ if(own&&!x.mDeletedAt)mi.push(`<div class="tg-mcats"><small>Тема</small><div class="cats sm" id="vCats"></div></div>`);
+ if(me)mi.push(`<button type="button" id="cWho">Карточка ученицы</button>`);
+ mi.push(`<button type="button" class="cexp" data-exp="${x.id}">Экспорт</button>`);
+ if(own&&x.kind!=="question"&&!x.mDeletedAt)mi.push(locked?`<p class="lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</p>`:`<button type="button" id="vEdit">Изменить расклад</button>`);
+ if(own)mi.push(`<button type="button" class="danger" id="vDel">Удалить ${x.kind==="question"?"вопрос":"расклад"}</button>`);
+ if(me)mi.push(`<button type="button" class="danger" id="mDel">Удалить навсегда</button>`);
+ mi.push(`<button type="button" id="vClose2">Закрыть чат</button>`);
+ const other=me?u.name:MASTER.name;
+ $("vBox").className="dbox tgbox";
+ $("vBox").innerHTML=`<div class="tg">
+  <header class="tg-h"><button type="button" class="tg-back" id="vClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+   <span class="tg-ava" style="--h:${hueOf(other)}">${esc((other||"?").trim().charAt(0).toUpperCase())}</span>
+   <div class="tg-ti"><b>${esc(other)}</b><small><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span> · ${esc(kindName(x))}</small></div>
+   <button type="button" class="tg-ic" id="tgMenuBtn" aria-label="Меню" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg></button>
+   <div class="tg-menu" id="tgMenu" hidden>${mi.join("")}</div></header>
+  ${pin}
+  <div class="tg-body" id="thread">${html}</div>
+  ${foot}</div>`;
+ const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;
+ /* меню */
+ const mb=$("tgMenuBtn"),mn=$("tgMenu");
+ mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
+ $("vBox").onclick=e=>{const mbt=e.target.closest("#tgMenu > button");if(!mn.hidden&&e.target.isConnected&&(!e.target.closest("#tgMenu")||(mbt&&mbt.id!=="vDel"&&mbt.id!=="mDel"))){mn.hidden=true;mb.setAttribute("aria-expanded","false")}
+  const b=e.target.closest(".msg .bub");document.querySelectorAll("#vBox .bmenu").forEach(m=>{if(!b||m.parentNode!==b.parentNode)m.hidden=true});
+  if(b&&!e.target.closest("button,audio,img,a,.vmsg")){const m=b.parentNode.querySelector(".bmenu");if(m&&m.children.length)m.hidden=!m.hidden}};
+ $("vBox").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=x.thread[+b.dataset.copy].t;try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}b.parentNode.hidden=true});
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
  mountChatRec(x);
- $("vBox").querySelectorAll(".tr-btn").forEach(b=>b.onclick=()=>{const t=b.nextElementSibling,o=t.hidden;t.hidden=!o;b.setAttribute("aria-expanded",o);b.classList.toggle("on",o)});
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
    $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
  $("vBox").querySelectorAll(".msg-img").forEach(im=>{const z=()=>openZoom(im.src);im.onclick=z;im.onkeydown=e=>{if(e.key==="Enter")z()}});
- {const fo=$("finOpen");if(fo)fo.onclick=()=>{finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
+ {const pb=$("finBox");if(pb&&pb.classList.contains("tg-pin")&&fin)pb.onclick=e=>{if(e.target.closest("button,audio,.vmsg"))return;pinOpen=!pinOpen;renderChat()}}
+ {const fo=$("finOpen");if(fo)fo.onclick=e=>{e.stopPropagation();finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
  if(finEdit&&$("finT")){dRestore(["finT"]);
   const FR=makeRec({ta:$("finT"),mic:$("finMic"),micTxt:$("finMicTxt"),rec:$("finRec"),time:$("finRecT"),interim:$("finInterim"),stop:$("finStop"),clip:$("finClip"),audio:$("finAudio"),del:$("finDel"),label:"Надиктовать",done:"Готово, текст в поле"});
   if(x.final&&x.final.voice&&x.final.voice.src)FR.set(x.final.voice);
   $("finCancel").onclick=()=>{FR.stop(true);finEdit=false;renderChat()};
   $("finSave").onclick=()=>{if(FR.active()){toast("Сначала нажми «Готово»");return}const t=$("finT").value.trim();if(!t&&!FR.voice){$("finT").focus();toast("Напиши итог или надиктуй его");return}
    const was=!!x.final;x.final={t,at:nowISO(),edited:was,voice:FR.voice?{src:FR.voice.src,dur:FR.voice.dur,vid:FR.voice.vid||("f"+Date.now().toString(36))}:null};
-   x.unreadM=true;dClear(["finT"]);finEdit=false;
+   x.unreadM=true;dClear(["finT"]);finEdit=false;pinOpen=false;
    notify("master",`${u.name} ${was?"обновила":"записала"} итоговый расклад к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});
-   persist();renderChat();refresh();toast("Итог сохранён, Лена увидит его в разборе")};
+   persist();renderChat();refresh();toast("Итог сохранён и закреплён вверху чата")};
  }
  const w=$("cWho");if(w)w.onclick=()=>{closeDlg("vdlg");openStudent(u.id)};
- $("vBox").querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{editMsg=+b.dataset.e;renderChat();$("edT").focus()});
- const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
- const ec=$("edCancel");if(ec)ec.onclick=()=>{editMsg=null;renderChat()};
+ $("vBox").querySelectorAll("[data-e]").forEach(b=>b.onclick=e=>{e.stopPropagation();editMsg=+b.dataset.e;renderChat();const t=$("edT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}});
+ if($("edT")){const t=$("edT");dRestore(["edT"]);autoH(t);t.addEventListener("input",()=>autoH(t));
+  t.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&FINE()){e.preventDefault();$("edSave").click()}else if(e.key==="Escape"){e.stopPropagation();$("edCancel").click()}})}
+ const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];if(m.t===t){editMsg=null;renderChat();return}m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
+ const ec=$("edCancel");if(ec)ec.onclick=()=>{dClear(["edT"]);editMsg=null;renderChat()};
  const txt=()=>($("cTxt")?$("cTxt").value.trim():"");
  const hasV=()=>!!(RC&&RC.voice)||!!cDraft.img;
- const post=(from,t)=>{const v=RC&&RC.voice;if(RC&&RC.active()){toast("Сначала нажми «Готово», чтобы закончить запись");throw "rec"}
+ const post=(from,t)=>{const v=RC&&RC.voice;if(RC&&RC.active()){toast("Сначала отправь или отмени запись");throw "rec"}
   const im=cDraft.img;if(t||v||im){const m={from,t:t||"",at:nowISO()};if(v)m.voice={src:v.src,dur:v.dur,vid:v.vid,tr:v.tr||""};if(im){m.img=im;m.iid=Date.now().toString(36)+Math.random().toString(36).slice(2,5)}x.thread.push(m)}cDraft.voice=null;cDraft.img=null;dClear(["cTxt"],[["cTxt","voice"],["cTxt","img"]]);};
- const done=m=>{persist();renderChat();refresh();toast(m);const th=$("thread");if(th)th.scrollTop=th.scrollHeight};
+ const done=m=>{persist();renderChat();refresh();if(m)toast(m);const th=$("thread");if(th)th.scrollTop=th.scrollHeight};
  const cErr=m=>{const e=$("cErr");e.textContent=m;e.hidden=false;$("cTxt").focus()};
  if(me){
-  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t&&!hasV())return cErr("Напиши ответ или запиши голосовое.");try{post("master",t)}catch(e){return}if(x.status==="wait")x.status="done";x.unreadS=true;DB.done++;
-   notify(u.id,`Лена ответила ${x.kind==="exam"?"по Посвящению":x.kind==="quest"?"на квест":"на расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done(`Ответ отправлен, ${u.name} получит уведомление`)};
+  const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t&&!hasV())return;try{post("master",t)}catch(e){return}if(x.status==="wait")x.status="done";x.unreadS=true;DB.done++;
+   notify(u.id,`Лена ответила ${x.kind==="exam"?"по Посвящению":x.kind==="quest"?"на квест":"на расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done()};
   const p=$("cPass");if(p)p.onclick=()=>{try{post("master",txt())}catch(e){return}x.thread.push({from:"system",t:"Посвящение засчитано. Следующая ступень открыта.",at:nowISO()});x.status="done";x.unreadS=true;passStage(u,true);DB.done++;done("Посвящение засчитано, ученице открыта следующая ступень")};
   const rt=$("cRet");if(rt)rt.onclick=()=>{const t=txt();if(!t&&!hasV())return cErr("Напиши, что доработать, иначе ученица не поймёт, что исправить.");try{post("master",t)}catch(e){return}x.status="returned";x.unreadS=true;DB.done++;
    notify(u.id,`Лена вернула Посвящение ${x.stage} ступени на доработку`,{type:"spread",u:u.id,sid:x.id});done("Посвящение возвращено с комментарием")};
  }else{
   const b=$("cBuy");if(b)b.onclick=()=>openPay({kind:"fb"},()=>{renderChat();refresh()});
-  const sr=$("cSendRev");if(sr)sr.onclick=()=>{try{post("student",txt())}catch(e){return}x.status="wait";x.sentAt=nowISO();x.unreadM=true;notify("master",`${u.name} прислала ${x.kind==="quest"?"квест":"расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Отправлено Лене")};
+  const sendRev=()=>{try{post("student",txt())}catch(e){return}x.status="wait";x.sentAt=nowISO();x.unreadM=true;notify("master",`${u.name} прислала ${x.kind==="quest"?"квест":"расклад"} «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Отправлено Лене")};
+  const sr=$("cSendRev");if(sr)sr.onclick=sendRev;const sr2=$("cSendRev2");if(sr2)sr2.onclick=sendRev;
   const s=$("cSend");if(s)s.onclick=()=>{const t=txt();if(!t&&!hasV()){$("cTxt").focus();return}try{post("student",t)}catch(e){return}const wasDone=x.status!=="wait";if(x.kind!=="exam"||x.status==="wait"){x.status="wait";if(wasDone)x.sentAt=nowISO()}x.unreadM=true;
-   notify("master",`${u.name} ${wasDone?"задала вопрос":"дописала"} к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done("Сообщение отправлено Лене")};
+   notify("master",`${u.name} ${wasDone?"задала вопрос":"дописала"} к «${x.q.replace("Квест: ","")}»`,{type:"spread",u:u.id,sid:x.id});done()};
   const f=$("cFix");if(f)f.onclick=()=>{closeDlg("vdlg");openExam(x.stage)};
   const ve=$("vEdit");if(ve)ve.onclick=()=>{$("vdlg").hidden=true;openForm(x)};
-  const vd=$("vDel");if(vd)vd.onclick=()=>{if(vd.dataset.c!=="1"){vd.dataset.c="1";vd.textContent=x.mDeletedAt?"нажми ещё раз, чтобы удалить":x.sentAt?"нажми ещё раз · Лена увидит, что расклад удалён":"нажми ещё раз, чтобы удалить";return}
+  const vd=$("vDel");if(vd)vd.onclick=()=>{if(vd.dataset.c!=="1"){vd.dataset.c="1";vd.textContent=x.mDeletedAt?"Нажми ещё раз, чтобы удалить":x.sentAt?"Нажми ещё раз · Лена увидит, что расклад удалён":"Нажми ещё раз, чтобы удалить";return}
    if(x.mDeletedAt){const k=spreads.findIndex(s=>s.id===x.id);if(k>-1)spreads.splice(k,1)}
    else if(x.sentAt){x.deletedAt=nowISO();x.unreadM=true;x.mDismissed=false;notify("master",`${S.name} удалила расклад «${x.q}»`,{type:"spread",u:S.id,sid:x.id})}
    else{const k=spreads.findIndex(s=>s.id===x.id);if(k>-1)spreads.splice(k,1)}
