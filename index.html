@@ -1933,6 +1933,7 @@ function recordPayment(u,it,method,amount,at){
 }
 let payItem=null,payDone=null;
 function openPay(it,done){
+ if(it.kind==="fb"&&S&&!owns(S,1)){toast("Обратная связь — для учениц курса. Сначала оплати первую ступень или весь курс");it={kind:"stage",n:1}}
  payItem=it;payDone=done||null;lastFocus=document.activeElement;
  const price=priceOf(it);
  $("payTitle").textContent=it.kind==="course"?"Весь курс сразу":it.kind==="stage"?`${it.n} ступень · ${short(ST(it.n))}`:it.kind==="fb"?"Обратная связь с Леной":"Личные сессии с Леной";
@@ -1953,7 +1954,8 @@ function openPay(it,done){
 /* ===== оплата по ссылке + подтверждение Леной ===== */
 const itKey=it=>it.kind==="stage"?"stage:"+it.n:it.kind;
 const reqs=()=>DB.payReqs||(DB.payReqs=[]);
-function links(){const L=DB.links||(DB.links={});L.tr=L.tr||{};L.pp=L.pp||"";L.rate=+L.rate||0;return L}
+const DEF_TR={"stage:1":"https://t.me/tribute/app?startapp=dTSj"};
+function links(){const L=DB.links||(DB.links={});L.tr=Object.assign({},DEF_TR,L.tr||{});L.pp=L.pp||"";L.rate=+L.rate||0;return L}
 const eurOf=it=>{const r=links().rate;return r?Math.ceil(priceOf(it)/r):0};
 function payLink(){
  const m=(document.querySelector("input[name=payM]:checked")||{}).value,L=links(),it=payItem,a=$("payGo");
@@ -2626,7 +2628,7 @@ document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&
  const lb=$("lBuy");if(lb&&DB.program){const p1=ST(1).price,pc=coursePrice();
   lb.innerHTML=`<div class="lb-card"><small>Начать сейчас</small><b>Первая ступень · «${esc(short(ST(1)))}»</b><span>${L(1)} уроков и Посвящение. Дальше решишь сама.</span><button class="btn" data-buy="1">Оплатить ${rub(p1)}</button></div>
   <div class="lb-card hl"><small>Всё сразу</small><b>Весь курс сразу</b><span>Все 7 ступеней, седьмая в подарок. Ступени открываются по порядку.</span><button class="btn" data-buy="course">Оплатить ${rub(pc)}</button></div>
-  <div class="lb-card"><small>К любой ступени</small><b>Обратная связь с Леной</b><span>Разборы твоих раскладов и вопросов, переписка с фото и голосом. Месяц.</span><button class="btn lbo" data-buy="fb">Подключить ${rub(FB_PRICE)}</button></div>`}
+  <div class="lb-card"><small>Для учениц курса</small><b>Обратная связь с Леной</b><span>Разборы твоих раскладов и вопросов, переписка с фото и голосом. Месяц. Подключается после оплаты первой ступени или курса.</span><button class="btn lbo" data-buy="fb">Подключить ${rub(FB_PRICE)}</button></div>`}
  const box=$("lProg");if(!box||!DB.program)return;
  box.innerHTML=DB.program.map(s=>{const q=s.lessons.filter(l=>l.kind==="quest").length,lec=s.lessons.length-q;
   return `<details class="lp"><summary><span class="lp-img" style="background-image:url(assets/st${STIMG[s.n]}.jpg)"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i>${s.n===1?`<span class="lp-buy"><button type="button" class="btn sm" data-buy="1">Оплатить · ${rub(s.price)}</button></span>`:""}</summary>
