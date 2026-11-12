@@ -2992,16 +2992,32 @@ async function vidURL(path){const c=VURL[path];if(c&&c.exp>Date.now())return c.u
  const j=await sbRaw(`/storage/v1/object/sign/media/${path.split("/").map(enc).join("/")}`,{method:"POST",body:JSON.stringify({expiresIn:3600})});
  const url=SB_URL+"/storage/v1"+(j.signedURL||j.signedUrl);VURL[path]={url,exp:Date.now()+50*60000};return url}
 function hydrateVids(root){(root||document).querySelectorAll("video[data-path]:not([src])").forEach(v=>{vidURL(v.dataset.path).then(u=>{v.src=v.closest(".vthumb")?u+"#t=0.1":u},()=>{v.replaceWith(Object.assign(document.createElement("span"),{className:"vid-miss",textContent:"Видео недоступно"}))})})}
+/* видео грузим кусками по 6 МБ (протокол TUS, так советует Supabase для файлов больше 6 МБ):
+   обычная загрузка больших файлов зависала на середине. Кусок, который не прошёл, повторяем до 3 раз */
+const TUS_CHUNK=6*1024*1024;
+function xhrReq(method,url,headers,body,onProg,timeout){return new Promise((res,rej)=>{const x=new XMLHttpRequest();x.open(method,url);
+ Object.entries(headers).forEach(([k,v])=>x.setRequestHeader(k,v));x.timeout=timeout||120000;
+ if(onProg&&x.upload)x.upload.onprogress=e=>{if(e.lengthComputable)onProg(e.loaded)};
+ x.onload=()=>x.status>=200&&x.status<300?res(x):rej({status:x.status,message:x.responseText});
+ x.onerror=()=>rej({status:0});x.ontimeout=()=>rej({status:0,timeout:true});x.send(body||null)})}
 async function uploadVid(f,onProg){
  if(!CLOUD)return {local:true,src:URL.createObjectURL(f),type:f.type,size:f.size};
  const ext=(f.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4",path=`${chatU.id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.${ext}`;
- const t=await sbToken();
- /* XHR, а не fetch — чтобы показывать проценты загрузки */
- await new Promise((res,rej)=>{const x=new XMLHttpRequest();x.open("POST",`${SB_URL}/storage/v1/object/media/${path}`);
-  x.setRequestHeader("apikey",SB_KEY);x.setRequestHeader("Authorization","Bearer "+t);x.setRequestHeader("Content-Type",f.type||"video/mp4");x.setRequestHeader("x-upsert","false");
-  x.upload.onprogress=e=>{if(e.lengthComputable&&onProg)onProg(e.loaded/e.total)};
-  x.onload=()=>x.status>=200&&x.status<300?res():rej({status:x.status,message:x.responseText});x.onerror=()=>rej({status:0});x.send(f)});
- return {path,type:f.type,size:f.size}}
+ const type=f.type||(ext==="mov"?"video/quicktime":"video/mp4"),b64=v=>btoa(unescape(encodeURIComponent(v)));
+ const base=async()=>({apikey:SB_KEY,Authorization:"Bearer "+await sbToken(),"Tus-Resumable":"1.0.0"});
+ const cr=await xhrReq("POST",`${SB_URL}/storage/v1/upload/resumable`,Object.assign(await base(),{"Upload-Length":String(f.size),"x-upsert":"false",
+  "Upload-Metadata":`bucketName ${b64("media")},objectName ${b64(path)},contentType ${b64(type)},cacheControl ${b64("3600")}`}),null,null,30000);
+ let loc=cr.getResponseHeader("Location");if(!loc)throw{status:500,message:"no location"};if(!/^https?:/.test(loc))loc=SB_URL+(loc.startsWith("/")?"":"/")+loc;
+ let off=0;
+ while(off<f.size){const end=Math.min(off+TUS_CHUNK,f.size),chunk=f.slice(off,end);let tries=0;
+  for(;;){try{const r=await xhrReq("PATCH",loc,Object.assign(await base(),{"Upload-Offset":String(off),"Content-Type":"application/offset+octet-stream"}),chunk,l=>onProg&&onProg((off+l)/f.size),120000);
+    off=+(r.getResponseHeader("Upload-Offset")||end);break}
+   catch(e){if(++tries>=3||(e.status>=400&&e.status<500&&e.status!==409))throw e;
+    /* узнаём у сервера, сколько уже дошло, и продолжаем с этого места */
+    try{const h=await xhrReq("HEAD",loc,await base(),null,null,20000);off=+(h.getResponseHeader("Upload-Offset")||off)}catch(_){}
+    await new Promise(r=>setTimeout(r,1500*tries))}}
+  if(onProg)onProg(off/f.size)}
+ return {path,type,size:f.size}}
 let vidBusy=false;
 function withVids(fn){
  const vs=cDraft.vids||[];if(!vs.length||cDraft.upl)return fn();
@@ -3010,7 +3026,7 @@ function withVids(fn){
   const pc=Math.round(p*100);el.querySelector(".upl-t").textContent=pc<100?`Видео загружается… ${pc}%`:"Почти готово…";el.querySelector("i").style.width=pc+"%"};
  if(CLOUD)prog(0);
  Promise.all(vs.map(v=>uploadVid(v.file,prog))).then(list=>{vidBusy=false;cDraft.upl=list;fn()},e=>{vidBusy=false;if(b)b.classList.remove("busy");const box=$("cImgBox");if(box){box.classList.remove("uploading");const el=box.querySelector(".upl");if(el)el.remove()}
-  toast(e&&(e.status===400||e.status===404)?"Хранилище для видео ещё не настроено. Нужно один раз запустить storage.sql в Supabase":e&&e.status===413?"Видео слишком большое, максимум 50 МБ":"Не получилось загрузить видео. Проверь интернет")});
+  toast(e&&e.status===413?"Видео слишком большое, максимум 50 МБ":e&&(e.status===400||e.status===404)?"Хранилище не приняло видео"+(e.message&&/mime|type/i.test(e.message)?": такой формат не поддерживается":"")+". Попробуй ещё раз или другой файл":e&&e.timeout?"Загрузка видео оборвалась: слишком медленный интернет. Нажми отправить ещё раз":"Не получилось загрузить видео. Проверь интернет и нажми отправить ещё раз")});
 }
 function mountChatRec(x){
  const ta=$("cTxt");if(!ta){RC=null;return}
