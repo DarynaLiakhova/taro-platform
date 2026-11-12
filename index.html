@@ -3257,7 +3257,6 @@ function renderChat(){
  else if(finOk&&own)pin=`<div class="finbox tg-pin" id="finBox"><span class="pin-l"></span><div class="pin-c"><b>Итоговый расклад</b><button type="button" class="link" id="finOpen">Записать, как ты теперь читаешь расклад</button></div>${PIN_SVG}</div>`;
  /* меню ⋮ */
  const mi=[];
- if(own&&!x.mDeletedAt)mi.push(`<div class="tg-mcats"><small>Тема</small><div class="cats sm" id="vCats"></div></div>`);
  if(me)mi.push(`<button type="button" id="cWho">Карточка ученицы</button>`);
  {const n=chatMedia(x).length;if(n)mi.push(`<button type="button" id="tgMedia">Фото и видео · ${n}</button>`)}
  mi.push(`<button type="button" class="cexp" data-exp="${x.id}">Экспорт</button>`);
