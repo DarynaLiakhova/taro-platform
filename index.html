@@ -1498,6 +1498,12 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .tg-row .tg-send.busy{opacity:1;background:var(--tg-acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23fff' stroke-width='2.4' stroke-dasharray='42 60' stroke-linecap='round'/%3E%3C/svg%3E") center/26px no-repeat;animation:tgspin 1s linear infinite}
 .tg-row .tg-send.busy svg{visibility:hidden}
 @keyframes tgspin{to{transform:rotate(360deg)}}
+
+.tr-btn.busy{pointer-events:none;background:linear-gradient(90deg,rgba(51,144,236,.12),rgba(51,144,236,.35),rgba(51,144,236,.12));background-size:200% 100%;animation:trshim 1s linear infinite}
+@keyframes trshim{to{background-position:-200% 0}}
+.tr-txt.wait{color:var(--tg-sub,#888)!important;font-style:italic}
+.tr-txt.fresh{animation:trin .6s ease-out}
+@keyframes trin{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2948,10 +2954,14 @@ function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charC
 /* аудио не вставляем в разметку целиком (это сотни КБ текста на каждое голосовое) — подставляем при нажатии */
 const VSRC=new Map();
 const vKey=v=>{const k=v.vid||("v"+v.src.length+"_"+v.src.slice(-24));VSRC.set(k,v.src);return k};
-const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div><button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button><audio preload="none" data-vk="${vKey(m.voice)}" data-dur="${m.voice.dur||0}"></audio><div class="tr-txt${m.voice.tr?"":" none"}" hidden>${m.voice.tr?esc(m.voice.tr):"Браузер не смог расшифровать эту запись. Расшифровка работает в Chrome, а на компьютере ещё и в Safari, если включена «Диктовка»."}</div></div>`:"";
+const TR_OPEN=new Set();
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg" data-vk="${vKey(m.voice)}"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div><button type="button" class="tr-btn${TR_OPEN.has(vKey(m.voice))&&m.voice.tr?" on":""}" aria-expanded="${TR_OPEN.has(vKey(m.voice))&&!!m.voice.tr}" aria-label="Расшифровка" title="Расшифровка">Aa</button><audio preload="none" data-vk="${vKey(m.voice)}" data-dur="${m.voice.dur||0}"></audio><div class="tr-txt${m.voice.tr?"":" none"}${TR_FRESH.has(vKey(m.voice))?" fresh":""}"${TR_OPEN.has(vKey(m.voice))&&m.voice.tr?"":" hidden"}>${m.voice.tr?esc(m.voice.tr):CLOUD?"":"Расшифровка на сервере работает только на настоящем сайте, не в демо."}</div></div>`:"";
 document.addEventListener("click",e=>{
  const tb=e.target.closest(".tr-btn");
- if(tb){const t=tb.closest(".vmsg").querySelector(".tr-txt");if(t){const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o)}return}
+ if(tb){const box=tb.closest(".vmsg"),t=box.querySelector(".tr-txt");if(!t)return;
+  /* записи нет текста — расшифровываем на сервере (Groq), как в Telegram Premium */
+  if(t.classList.contains("none")&&CLOUD&&!tb.classList.contains("busy")){transcribeVoice(box,tb,t);return}
+  const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o);if(o&&box.dataset.vk)TR_OPEN.add(box.dataset.vk);else TR_OPEN.delete(box.dataset.vk);return}
  const pb=e.target.closest(".vplay");if(!pb)return;
  const box=pb.closest(".vmsg"),a=box.querySelector("audio"),wv=box.querySelector(".vwave"),dl=box.querySelector(".vdur"),tot=dl.textContent;
  document.querySelectorAll(".vmsg audio").forEach(o=>{if(o!==a&&!o.paused)o.pause()});
@@ -3909,6 +3919,28 @@ document.addEventListener("keydown",e=>{
  if(e.key!=="Enter"||e.shiftKey||e.isComposing||!FINE())return;const v=$("vdlg");if(!v||v.hidden||document.getElementById("ctxLayer")||document.getElementById("galOv")&&!$("galOv").hidden)return;
  const a=document.activeElement;if(a&&a.matches&&a.matches("input,textarea,select,button,a,[contenteditable],label"))return;
  const b=$("cSend")||$("cSendRev");if(b&&!b.hidden){e.preventDefault();b.click()}});
+
+/* ---- расшифровка голосового на сервере: Supabase Edge Function «transcribe» → Groq Whisper ---- */
+const TR_FRESH=new Set();
+function voiceByKey(vk){const x=chatS;if(!x)return null;if(x.voice&&x.voice.src&&vKey(x.voice)===vk)return x.voice;
+ for(const m of x.thread){if(m.voice&&m.voice.src&&vKey(m.voice)===vk)return m.voice}if(x.final&&x.final.voice&&x.final.voice.src&&vKey(x.final.voice)===vk)return x.final.voice;return null}
+function msgByVoice(v){const x=chatS;return x?x.thread.find(m=>m.voice===v)||null:null}
+async function transcribeVoice(box,tb,t){
+ const vk=box.dataset.vk,v=voiceByKey(vk);if(!v){toast("Не нашла это голосовое");return}
+ tb.classList.add("busy");t.hidden=false;t.classList.add("wait");t.textContent="Расшифровываю…";
+ try{
+  const blob=await (await fetch(v.src)).blob(),ty=blob.type||"audio/webm",ext=/mp4|m4a|aac/.test(ty)?"m4a":/ogg/.test(ty)?"ogg":/wav/.test(ty)?"wav":/mpeg|mp3/.test(ty)?"mp3":"webm";
+  const fd=new FormData();fd.append("file",new File([blob],"voice."+ext,{type:ty}));
+  const tok=await sbToken(),r=await fetch(`${SB_URL}/functions/v1/transcribe`,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+tok},body:fd});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw{status:r.status,j};
+  const text=(j.text||"").trim();
+  v.tr=text||"…";const m=msgByVoice(v);if(m)m.u=nowISO();
+  TR_OPEN.add(vk);TR_FRESH.add(vk);setTimeout(()=>TR_FRESH.delete(vk),1500);
+  persist();renderChat();if(!text)toast("В записи не нашлось слов");
+ }catch(e){tb.classList.remove("busy");t.classList.remove("wait");
+  t.textContent=e&&e.status===404?"Расшифровка ещё не подключена: в Supabase нет функции transcribe.":e&&e.status===429?"Слишком много расшифровок подряд, попробуй через минуту.":e&&e.j&&e.j.error==="no_key"?"В Supabase не добавлен ключ GROQ_API_KEY.":e&&e.status===401?"Нужно заново войти на платформу.":"Не получилось расшифровать. Проверь интернет и попробуй ещё раз."}
+}
 </script>
 
 </html>
