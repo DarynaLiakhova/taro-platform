@@ -1446,6 +1446,41 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .gal-p{left:10px}.gal-nx{right:10px}
 .gal-p[hidden],.gal-nx[hidden]{display:none}
 @media (max-width:760px){.gal-p,.gal-nx{display:none}}
+
+/* меню сообщения как в Telegram */
+.ctx-layer{position:absolute;inset:0;z-index:7;background:rgba(0,0,0,.28);animation:ctxin .14s ease-out}
+@keyframes ctxin{from{opacity:0}}
+.ctx-ghost{position:absolute;margin:0;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.25)!important}
+.ctx-ghost .bmenu{display:none}
+.tg .bub.ctx-ghost.out{background:var(--tg-out)}.ctx-ghost.out .meta{color:var(--tg-meta-out)}
+.ctx-layer .bmenu{display:contents}
+.ctx-layer .rxbar{position:absolute;display:flex;gap:2px;padding:5px 8px;background:#fff;border:0;border-radius:28px;box-shadow:0 6px 24px rgba(0,0,0,.22);margin:0;animation:ctxpop .16s ease-out}
+.ctx-layer .rxbar button{all:unset;cursor:pointer;font-size:26px;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;transition:transform .12s}
+.ctx-layer .rxbar button:hover,.ctx-layer .rxbar button:focus-visible{transform:scale(1.2)}
+.ctx-layer .rxbar button.on{background:#e3effd}
+.ctx-layer .bm-card{position:absolute;min-width:220px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);padding:6px 0;display:grid;animation:ctxpop .16s ease-out;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+@keyframes ctxpop{from{opacity:0;transform:scale(.92)}}
+.ctx-layer .bm-card button{all:unset;cursor:pointer;display:flex;align-items:center;gap:16px;padding:11px 18px;font-size:16px;color:#000}
+.ctx-layer .bm-card button svg{color:#707579;flex:none}
+.ctx-layer .bm-card button:hover,.ctx-layer .bm-card button:focus-visible{background:#f4f4f5}
+.ctx-layer .bm-card button.danger,.ctx-layer .bm-card button.danger svg{color:#e53935}
+.ctx-layer .bm-card button[data-sel]{border-bottom:1px solid #eee}
+.ctx-layer .bm-card button[data-pin]{border-top:1px solid #eee}
+/* выбор сообщений */
+.tg-selh{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 6px;background:#fff;border-bottom:1px solid #e7e7e7;flex:none}
+.tg-selh b{font-size:18px;font-weight:600;min-width:24px}
+.tg-selh .tg-txtbtn{all:unset;cursor:pointer;color:var(--tg-acc);font-size:15px;margin-right:auto;padding:6px 8px}
+.tg-selh .tg-ic.danger{color:#e53935}
+.tg-selh .tg-ic:disabled{opacity:.35;cursor:default}
+.tg-h[hidden]{display:none}
+.tg-body.selmode .msg:not(.sys){cursor:pointer;padding-left:34px;max-width:100%;align-self:stretch}
+.tg-body.selmode .msg.out{align-items:flex-end}
+.tg-body.selmode .msg .bub{max-width:min(82%,460px)}
+.selc{position:absolute;left:4px;bottom:6px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.msg.picked .selc{background:var(--tg-acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m7 12.5 3.2 3.2L17 9' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
+.tg-body.selmode .msg.picked{background:rgba(51,144,236,.12);border-radius:8px}
+.selfoot .tg-join.danger,.selfoot .tg-join.sure{color:#e53935}
+.selfoot span{color:var(--tg-sub)}
 </style>
 
 <header class="top"><div class="wrap">
@@ -3004,7 +3039,7 @@ $("fClose").onclick=()=>closeDlg("fdlg");
 let chatU=null,chatS=null,chatRole=null,editMsg=null,finEdit=false;
 function openChat(uid,sid,r){
  const u=DB.users[uid];if(!u)return;const x=u.spreads.find(s=>s.id===sid);if(!x||(x.deletedAt&&r==="student")){toast("Этот расклад удалён");return}
- chatU=u;chatS=x;chatRole=r;editMsg=null;pinOpen=false;finEdit=false;
+ chatU=u;chatS=x;chatRole=r;editMsg=null;pinOpen=false;finEdit=false;selMode=false;SEL.clear();
  if(r==="student")x.unreadS=false;else x.unreadM=false;readFor(sid);persist();
  if($("vdlg").hidden)lastFocus=document.activeElement;
  renderChat();$("vdlg").hidden=false;refresh();
@@ -3012,6 +3047,7 @@ function openChat(uid,sid,r){
  const th=$("thread");if(th)th.scrollTop=th.scrollHeight;
 }
 /* ---- действия с сообщением: реакции, закреп, удаление; фото и видео чата ---- */
+let selMode=false;const SEL=new Set();
 const RX=["👍","❤️","🙏","🔥","😂","😢"];
 function rxHTML(m){const r=m.r||{},a=[r.s,r.m].filter(Boolean);if(!a.length)return "";
  const c={};a.forEach(e=>c[e]=(c[e]||0)+1);return `<span class="rxs">${Object.entries(c).map(([e,n])=>`<span class="rx">${e}${n>1?` <b>${n}</b>`:""}</span>`).join("")}</span>`}
@@ -3067,6 +3103,49 @@ function bindMsgActions(x,u,me){
   pm.onclick=e=>{if(e.target.closest("#pinOff"))return;go()};pm.onkeydown=e=>{if(e.key==="Enter")go()};
   $("pinOff").onclick=e=>{e.stopPropagation();x.pin=null;touch();persist();renderChat();toast("Сообщение откреплено")}}
 }
+const IC={
+ copy:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>',
+ edit:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v6l-1 1-1-1v-6H7v-2l3-3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+ sel:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m8 12.5 3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ del:'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>'};
+/* меню сообщения поверх чата, как в Telegram: реакции сверху, действия снизу, остальное притемнено */
+function closeCtx(){const L=document.getElementById("ctxLayer");if(!L)return;const m=L._menu,h=L._home;if(m&&h&&h.isConnected){m.hidden=true;h.appendChild(m)}L.remove()}
+function openCtx(msg){
+ const menu=msg.querySelector(".bmenu");if(!menu||!menu.querySelector("button"))return;
+ closeCtx();const tg=msg.closest(".tg"),bub=msg.querySelector(".bub"),T=tg.getBoundingClientRect(),B=bub.getBoundingClientRect(),out=msg.classList.contains("out");
+ const L=document.createElement("div");L.id="ctxLayer";L.className="ctx-layer";L._menu=menu;L._home=msg;
+ const ghost=bub.cloneNode(true);ghost.classList.add("ctx-ghost");if(out)ghost.classList.add("out");
+ Object.assign(ghost.style,{left:(B.left-T.left)+"px",top:(B.top-T.top)+"px",width:B.width+"px"});
+ L.appendChild(ghost);menu.hidden=false;L.appendChild(menu);tg.appendChild(L);
+ /* куда поставить: реакции над сообщением, карточку под ним; если не влезает — всё выше или ниже, в пределах окна */
+ const rx=menu.querySelector(".rxbar"),card=menu.querySelector(".bm-card"),W=T.width,H=T.height,pad=8;
+ const rh=rx?rx.offsetHeight:0,ch=card.offsetHeight,rw=rx?rx.offsetWidth:0,cw=card.offsetWidth;
+ const bx=B.left-T.left,by=B.top-T.top,bb=B.bottom-T.top,bw=B.width;
+ const hx=w=>Math.max(pad,Math.min(W-w-pad,out?bx+bw-w:bx));
+ let rTop=by-rh-8,cTop=bb+8;
+ if(cTop+ch>H-pad){cTop=Math.max(pad+rh+8,by-ch-8);rTop=cTop-rh-8}
+ if(rTop<pad){rTop=pad;if(cTop<rTop+rh+8)cTop=rTop+rh+8}
+ if(cTop+ch>H-pad)cTop=H-pad-ch;
+ if(rx)Object.assign(rx.style,{left:hx(rw)+"px",top:rTop+"px"});
+ Object.assign(card.style,{left:hx(cw)+"px",top:cTop+"px"});
+ L.onclick=e=>{if(!e.target.closest(".rxbar,.bm-card"))closeCtx()};
+ const k=e=>{if(e.key==="Escape"){e.stopImmediatePropagation();closeCtx();document.removeEventListener("keydown",k,true)}};document.addEventListener("keydown",k,true);
+ const f=card.querySelector("button");if(f)f.focus({preventScroll:true});
+}
+function bindSelect(x,u,me){
+ const V=$("vBox"),liveIdx=()=>x.thread.map((m,i)=>[m,i]).filter(([m])=>!m.del&&m.from!=="system").map(([,i])=>i);
+ V.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{e.stopPropagation();closeCtx();selMode=true;SEL.clear();SEL.add(+b.dataset.sel);renderChat()});
+ const ts=$("tgSelect");if(ts)ts.onclick=()=>{selMode=true;SEL.clear();renderChat()};
+ const sx=$("selX");if(sx)sx.onclick=()=>{selMode=false;SEL.clear();renderChat()};
+ const sa=$("selAll");if(sa)sa.onclick=()=>{const all=liveIdx();if(SEL.size===all.length)SEL.clear();else all.forEach(i=>SEL.add(i));renderChat()};
+ const sc=$("selCopy");if(sc)sc.onclick=()=>{const t=[...SEL].sort((a,b)=>a-b).map(i=>x.thread[i]).filter(m=>m.t).map(m=>`${m.from==="master"?MASTER.name:u.name}, ${fullDT(m.at)}:\n${m.t}`).join("\n\n");
+  if(!t){toast("В выбранных сообщениях нет текста");return}try{navigator.clipboard.writeText(t).then(()=>toast("Скопировано"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}};
+ const del=b=>{if(b.dataset.c!=="1"){b.dataset.c="1";b.classList.add("sure");if(b.id==="selDel2")b.textContent=`Точно удалить ${SEL.size}? Нажми ещё раз`;else toast("Нажми ещё раз, чтобы удалить у обоих");return}
+  const now=nowISO();let n=0;SEL.forEach(i=>{const m=x.thread[i];if(!m||m.del)return;m.del=true;m.u=now;m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;if(pinIs(x,m))x.pin=null;n++});
+  selMode=false;SEL.clear();if(me)x.unreadS=true;else x.unreadM=true;persist();renderChat();refresh();toast(`Удалено ${n} ${plural(n,"сообщение","сообщения","сообщений")} у обоих`)};
+ ["selDel","selDel2"].forEach(id=>{const b=$(id);if(b)b.onclick=()=>del(b)});
+}
 function renderChat(){
  const u=chatU,x=chatS,r=chatRole,me=r==="master";
  const tbOld=$("thread"),atBottom=!tbOld||tbOld.scrollHeight-tbOld.scrollTop-tbOld.clientHeight<90,prevTop=tbOld?tbOld.scrollTop:0;
@@ -3075,7 +3154,7 @@ function renderChat(){
  const otherUnread=me?!!x.unreadS:!!x.unreadM;
  let lastOther=-1;x.thread.forEach((m,i)=>{if(m.from!=="system"&&!mine(m))lastOther=i});
  const ticks=(i,out)=>out?`<i class="tk ${otherUnread&&i>lastOther?"":"rd"}">${otherUnread&&i>lastOther?TK1:TK2}</i>`:"";
- const meta=(at,ed,i,out)=>`<span class="meta">${ed?"изм. ":""}${hm(at)}${ticks(i,out)}</span>`;
+ const meta=(at,ed,i,out)=>`<span class="meta">${ed?"изменено ":""}${hm(at)}${ticks(i,out)}</span>`;
  /* исходник: расклад или вопрос — первое сообщение ученицы */
  const oOut=!me,oAt=x.sentAt||x.at;
  const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${x.img}" alt="Фото расклада" tabindex="0" data-mk="o">`:""}
@@ -3095,8 +3174,8 @@ function renderChat(){
   const open=!x.mDeletedAt&&!(me&&x.deletedAt)&&editMsg==null,canEd=open&&out&&!!m.t,pinned=pinIs(x,m);
   const myR=(m.r||{})[me?"m":"s"];
   const only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
-  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${rxHTML(m)}${meta(m.at,m.edited,i,out)}</div>
-   <div class="bmenu" hidden>${open?`<div class="rxbar">${RX.map(e=>`<button type="button" class="${myR===e?"on":""}" data-rx="${i}" data-e2="${e}" aria-label="Реакция ${e}">${e}</button>`).join("")}</div>`:""}${m.t?`<button type="button" data-copy="${i}">Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">Изменить</button>`:""}${open?`<button type="button" data-pin="${i}">${pinned?"Открепить":"Закрепить"}</button>`:""}${open&&out?`<button type="button" class="danger" data-del="${i}">Удалить</button>`:""}</div></div>`;
+  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}${SEL.has(i)?" picked":""}" data-i="${i}">${selMode?`<span class="selc" aria-hidden="true"></span>`:""}<div class="bub${only?" media":""}">${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${rxHTML(m)}${meta(m.at,m.edited,i,out)}</div>
+   <div class="bmenu" hidden>${open?`<div class="rxbar">${RX.map(e=>`<button type="button" class="${myR===e?"on":""}" data-rx="${i}" data-e2="${e}" aria-label="Реакция ${e}">${e}</button>`).join("")}</div>`:""}<div class="bm-card">${m.t?`<button type="button" data-copy="${i}">${IC.copy}Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">${IC.edit}Изменить</button>`:""}${open?`<button type="button" data-pin="${i}">${IC.pin}${pinned?"Открепить":"Закрепить"}</button>`:""}${open?`<button type="button" data-sel="${i}">${IC.sel}Выбрать</button>`:""}${open&&out?`<button type="button" class="danger" data-del="${i}">${IC.del}Удалить</button>`:""}</div></div></div>`;
  });
  if(!x.thread.length&&x.status==="wait")html+=`<div class="msg sys"><span>${me?(x.kind==="question"?"Ученица ждёт ответа":"Ученица ждёт разбора"):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление"}</span></div>`;
  if(!x.thread.length&&x.status==="journal"&&!me)html+=`<div class="msg sys"><span>Расклад пока только в твоём журнале. Отправь его Лене кнопкой внизу</span></div>`;
@@ -3144,36 +3223,40 @@ function renderChat(){
  if(own&&x.kind!=="question"&&!x.mDeletedAt)mi.push(locked?`<p class="lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</p>`:`<button type="button" id="vEdit">Изменить расклад</button>`);
  if(own)mi.push(`<button type="button" class="danger" id="vDel">Удалить ${x.kind==="question"?"вопрос":"расклад"}</button>`);
  if(me)mi.push(`<button type="button" class="danger" id="mDel">Удалить навсегда</button>`);
+ if(!x.mDeletedAt&&!(me&&x.deletedAt)&&x.thread.some(m=>!m.del&&m.from!=="system"))mi.push(`<button type="button" id="tgSelect">Выбрать сообщения</button>`);
  mi.push(`<button type="button" id="vClose2">Закрыть чат</button>`);
  const other=me?u.name:MASTER.name;
  $("vBox").className="dbox tgbox";
  $("vBox").innerHTML=`<div class="tg">
-  <header class="tg-h"><button type="button" class="tg-back" id="vClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  ${selMode?`<div class="tg-selh"><button type="button" class="tg-back" id="selX" aria-label="Отменить выбор"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button><b>${SEL.size}</b><button type="button" class="tg-txtbtn" id="selAll">${SEL.size&&SEL.size===x.thread.filter(m=>!m.del&&m.from!=="system").length?"Снять все":"Выбрать все"}</button><button type="button" class="tg-ic" id="selCopy" aria-label="Копировать выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button><button type="button" class="tg-ic danger" id="selDel" aria-label="Удалить выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button></div>`:""}
+  <header class="tg-h"${selMode?" hidden":""}><button type="button" class="tg-back" id="vClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <span class="tg-ava" style="--h:${hueOf(other)}">${esc((other||"?").trim().charAt(0).toUpperCase())}</span>
    <div class="tg-ti"><b>${esc(other)}</b><small><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span> · ${esc(kindName(x))}</small></div>
    <button type="button" class="tg-ic" id="tgMenuBtn" aria-label="Меню" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg></button>
    <div class="tg-menu" id="tgMenu" hidden>${mi.join("")}</div></header>
   ${pinBar(x)}${pin}
-  <div class="tg-body" id="thread">${html}</div>
-  ${foot}</div>`;
+  <div class="tg-body${selMode?" selmode":""}" id="thread">${html}</div>
+  ${selMode?(SEL.size?`<div class="tg-bar selfoot"><button type="button" class="tg-join danger" id="selDel2">Удалить ${SEL.size} ${plural(SEL.size,"сообщение","сообщения","сообщений")}</button></div>`:`<div class="tg-bar selfoot"><span>Нажимай на сообщения, чтобы выбрать</span></div>`):foot}</div>`;
  const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;tgStick=atBottom;stickChat();
  /* меню */
  const mb=$("tgMenuBtn"),mn=$("tgMenu");
  mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
- $("vBox").onclick=e=>{const mbt=e.target.closest("#tgMenu > button");if(!mn.hidden&&e.target.isConnected&&(!e.target.closest("#tgMenu")||(mbt&&mbt.id!=="vDel"&&mbt.id!=="mDel"))){mn.hidden=true;mb.setAttribute("aria-expanded","false")}
-  const b=e.target.closest(".msg .bub");document.querySelectorAll("#vBox .bmenu").forEach(m=>{if(!b||m.parentNode!==b.parentNode)m.hidden=true});
-  if(b&&!e.target.closest("button,audio,img,a,.vmsg")){const m=b.parentNode.querySelector(".bmenu");if(m&&m.children.length)m.hidden=!m.hidden}};
- $("vBox").oncontextmenu=e=>{const b=e.target.closest(".tg-body .msg .bub");if(!b)return;const m=b.parentNode.querySelector(".bmenu");if(!m||!m.children.length)return;e.preventDefault();document.querySelectorAll("#vBox .bmenu").forEach(o=>{if(o!==m)o.hidden=true});m.hidden=false};
- $("vBox").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=x.thread[+b.dataset.copy].t;try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}b.parentNode.hidden=true});
+ $("vBox").onclick=e=>{
+  if(selMode){const mm=e.target.closest(".tg-body .msg[data-i]");if(mm){e.preventDefault();e.stopPropagation();const i=+mm.dataset.i;SEL.has(i)?SEL.delete(i):SEL.add(i);renderChat()}return}
+  const mbt=e.target.closest("#tgMenu > button");if(!mn.hidden&&e.target.isConnected&&(!e.target.closest("#tgMenu")||(mbt&&mbt.id!=="vDel"&&mbt.id!=="mDel"))){mn.hidden=true;mb.setAttribute("aria-expanded","false")}
+  const b=e.target.closest(".tg-body .msg .bub");
+  if(b&&!e.target.closest("button,audio,img,video,a,.vmsg")){openCtx(b.parentNode)}};
+ $("vBox").oncontextmenu=e=>{if(selMode)return;const b=e.target.closest(".tg-body .msg .bub");if(!b)return;e.preventDefault();openCtx(b.parentNode)};
+ $("vBox").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=x.thread[+b.dataset.copy].t;try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}closeCtx()});
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
  mountChatRec(x);
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
    $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
- {const all=chatMedia(x);$("vBox").querySelectorAll(".tg-body .msg-img,.tg-body .msg-vid").forEach(el=>{const k=el.dataset.mk;if(el.tagName==="IMG"){const z=()=>openGallery(all,Math.max(0,all.findIndex(a=>a.k===k)));el.onclick=z;el.onkeydown=e=>{if(e.key==="Enter")z()}}})}
+ {const all=chatMedia(x);$("vBox").querySelectorAll(".tg-body .msg-img,.tg-body .msg-vid").forEach(el=>{const k=el.dataset.mk;if(el.tagName==="IMG"){const z=()=>selMode||openGallery(all,Math.max(0,all.findIndex(a=>a.k===k)));el.onclick=z;el.onkeydown=e=>{if(e.key==="Enter")z()}}})}
  {const b=$("tgMedia");if(b)b.onclick=()=>openMediaGrid(x)}
- bindMsgActions(x,u,me);
+ bindMsgActions(x,u,me);bindSelect(x,u,me);
  {const pb=$("finBox");if(pb&&pb.classList.contains("tg-pin")&&fin)pb.onclick=e=>{if(e.target.closest("button,audio,.vmsg"))return;pinOpen=!pinOpen;renderChat()}}
  {const fo=$("finOpen");if(fo)fo.onclick=e=>{e.stopPropagation();finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
  if(finEdit&&$("finT")){dRestore(["finT"]);
