@@ -3226,7 +3226,7 @@ function renderChat(){
   ${x.cards?`<div class="o-sec"><small>Карты</small><p>${esc(x.cards)}</p></div>`:""}
   ${x.score?`<div class="o-sec"><small>Тест</small><p>${esc(x.score)}</p></div>`:""}
   ${x.desc?`<div class="o-sec"><small>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</small><p>${esc(x.desc)}</p></div>`:""}
-  ${x.voice&&x.voice.src?voiceMsg({voice:x.voice}):""}${meta(oAt,false,-1,oOut&&!!x.sentAt)}</div></div>`;
+  ${x.voice&&x.voice.src?voiceMsg({voice:x.voice}):""}${meta(oAt,false,-0.5,oOut&&!!x.sentAt)}</div></div>`;
  let html="",day=dayOf(oAt);html+=`<div class="tg-day"><span>${dLong(oAt)}</span></div>`+origin;
  const live=x.thread.map((m,i)=>[m,i]).filter(([m])=>!m.del);
  live.forEach(([m,i],li)=>{
