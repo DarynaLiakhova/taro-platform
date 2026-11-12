@@ -2658,7 +2658,7 @@ $("dClose").onclick=()=>closeDlg("dlg");
 // ===== мои расклады =====
 let spFilter="all";
 function fakeImg(cards,q){const a=(cards||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,3);const b=a.length?a:[(q||"?").replace(/^Квест:\s*/,"")];return `<div class="ph-fake">${b.map(x=>`<i>${esc(x[0]||"?")}</i>`).join("")}</div>`}
-const imgOf=x=>x.kind==="question"&&!x.img?`<div class="ph-fake qq"><i>?</i></div>`:x.img?`<img class="ph-img" src="${x.img}" alt="Фото расклада">`:fakeImg(x.cards,x.q);
+const imgOf=x=>x.kind==="question"&&!x.img?`<div class="ph-fake qq"><i>?</i></div>`:x.img?`<img class="ph-img" src="${mURL(x.img)}" alt="Фото расклада" loading="lazy">`:fakeImg(x.cards,x.q);
 
 
 
@@ -2706,9 +2706,9 @@ function xTxt(p){
 function xHtml(p){
  const u=xU,e=esc;
  const card=x=>`<article><div class="d">${e(fullDate(x.at))}</div><h3>${e(x.q)}</h3><div class="m"><span class="t">${e(catOf(u,x))}</span><span>${e(kindName(x))}</span><span>${e(stLabel[x.status]||"")}</span></div>
-  ${x.bg?`<h4>Предыстория</h4><p class="tx">${e(x.bg)}</p>`:""}${x.cards?`<p class="c"><b>Карты:</b> ${e(x.cards)}</p>`:""}${x.img?`<img src="${x.img}" alt="Фото расклада">`:""}
-  ${x.desc?`<h4>Моя трактовка</h4><p class="tx">${e(x.desc)}</p>`:""}${x.voice?`<h4>Голосовое · ${fmtT(x.voice.dur||0)}</h4><audio controls src="${x.voice.src}"></audio>`:""}
-  ${x.thread.filter(m=>m.t||m.img).length?`<h4>Переписка</h4>${x.thread.filter(m=>m.t||m.img).map(m=>`<div class="msg ${m.from}"><b>${e(who(m))}</b> <small>${e(fullDT(m.at))}</small>${m.img?`<img src="${m.img}" alt="">`:""}<p>${e(m.t)}</p></div>`).join("")}`:""}${x.final?`<h4>Итоговый расклад · ${e(fullDT(x.final.at))}</h4>${x.final.voice&&x.final.voice.src?`<audio controls src="${x.final.voice.src}"></audio>`:""}<p class="tx">${e(x.final.t||"")}</p>`:""}</article>`;
+  ${x.bg?`<h4>Предыстория</h4><p class="tx">${e(x.bg)}</p>`:""}${x.cards?`<p class="c"><b>Карты:</b> ${e(x.cards)}</p>`:""}${x.img?`<img src="${mURL(x.img)}" alt="Фото расклада">`:""}
+  ${x.desc?`<h4>Моя трактовка</h4><p class="tx">${e(x.desc)}</p>`:""}${x.voice?`<h4>Голосовое · ${fmtT(x.voice.dur||0)}</h4><audio controls src="${mURL(x.voice.src)}"></audio>`:""}
+  ${x.thread.filter(m=>m.t||m.img).length?`<h4>Переписка</h4>${x.thread.filter(m=>m.t||m.img).map(m=>`<div class="msg ${m.from}"><b>${e(who(m))}</b> <small>${e(fullDT(m.at))}</small>${m.img?`<img src="${mURL(m.img)}" alt="">`:""}<p>${e(m.t)}</p></div>`).join("")}`:""}${x.final?`<h4>Итоговый расклад · ${e(fullDT(x.final.at))}</h4>${x.final.voice&&x.final.voice.src?`<audio controls src="${mURL(x.final.voice.src)}"></audio>`:""}<p class="tx">${e(x.final.t||"")}</p>`:""}</article>`;
  const toc=p.sc==="all"?`<nav><b>Темы</b>${p.groups.map(([c,l],i)=>`<a href="#g${i}">${e(c)} <small>${l.length}</small></a>`).join("")}</nav>`:"";
  return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(p.title)} · ${e(u.name)}</title><style>
 body{margin:0;background:#f7efe4;color:#2e1520;font:16px/1.55 Georgia,"Times New Roman",serif}
@@ -2816,7 +2816,7 @@ function makeRec(o){
  /* o: {ta, mic, micTxt, rec, time, interim, stop, clip, audio, del, label, done, onChange} */
  const R={voice:null,mr:null,g:null,t0:0,timer:null,chunks:[],stream:null};
  R.active=()=>!!(R.mr&&R.mr.state==="recording");
- R.set=v=>{R.voice=v;o.clip.hidden=!v;if(v)o.audio.src=v.src;else o.audio.removeAttribute("src");o.micTxt.textContent=v?"Перезаписать":(o.label||"Надиктовать");if(o.onChange)o.onChange(v)};
+ R.set=v=>{R.voice=v;o.clip.hidden=!v;if(v)o.audio.src=mURL(v.src);else o.audio.removeAttribute("src");o.micTxt.textContent=v?"Перезаписать":(o.label||"Надиктовать");if(o.onChange)o.onChange(v)};
  R.start=async()=>{
   if(RACTIVE&&RACTIVE!==R)RACTIVE.stop();
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast("Этот браузер не умеет записывать звук. Попробуй Chrome или Safari");return}
@@ -2961,7 +2961,7 @@ function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charC
  for(let i=0;i<30;i++){h=(h*1103515245+12345)>>>0;const v=4+((h>>>16)%15);s+=`<i style="height:${v}px"></i>`}return s}
 /* аудио не вставляем в разметку целиком (это сотни КБ текста на каждое голосовое) — подставляем при нажатии */
 const VSRC=new Map();
-const vKey=v=>{const k=v.vid||("v"+v.src.length+"_"+v.src.slice(-24));VSRC.set(k,v.src);return k};
+const vKey=v=>{const k=v.vid||("v"+v.src.length+"_"+v.src.slice(-24));VSRC.set(k,mURL(v.src));return k};
 const TR_OPEN=new Set();
 const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg" data-vk="${vKey(m.voice)}"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div><button type="button" class="tr-btn${TR_OPEN.has(vKey(m.voice))&&m.voice.tr?" on":""}" aria-expanded="${TR_OPEN.has(vKey(m.voice))&&!!m.voice.tr}" aria-label="Расшифровка" title="Расшифровка">Aa</button><audio preload="none" data-vk="${vKey(m.voice)}" data-dur="${m.voice.dur||0}"></audio><div class="tr-txt${m.voice.tr?"":" none"}${TR_FRESH.has(vKey(m.voice))?" fresh":""}"${TR_OPEN.has(vKey(m.voice))&&m.voice.tr?"":" hidden"}>${m.voice.tr?esc(m.voice.tr):CLOUD?"":"Расшифровка на сервере работает только на настоящем сайте, не в демо."}</div></div>`:"";
 document.addEventListener("click",e=>{
@@ -2986,7 +2986,7 @@ const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢"
 const MAX_IMGS=5,MAX_VID=50*1024*1024;
 function albumHTML(m){
  const ims=[m.img,...(m.more||[])].filter(Boolean),vs=m.vids||[],n=ims.length+vs.length;if(!n)return "";
- const cells=ims.map((d,j)=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0" data-mk="${m.at}|i${j}">`).concat(vs.map((v,j)=>`<span class="msg-vid vthumb" role="button" tabindex="0" aria-label="Открыть видео" data-mk="${m.at}|v${j}"><video muted playsinline preload="metadata" ${v.local?`src="${v.src}#t=0.1"`:`data-path="${esc(v.path)}"`}></video><i aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l11-6.5z" fill="#fff"/></svg></i></span>`));
+ const cells=ims.map((d,j)=>`<img class="msg-img" src="${mURL(d)}" alt="Фото" loading="lazy" tabindex="0" data-mk="${m.at}|i${j}">`).concat(vs.map((v,j)=>`<span class="msg-vid vthumb" role="button" tabindex="0" aria-label="Открыть видео" data-mk="${m.at}|v${j}"><video muted playsinline preload="metadata" ${v.local?`src="${v.src}#t=0.1"`:`data-path="${esc(v.path)}"`}></video><i aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l11-6.5z" fill="#fff"/></svg></i></span>`));
  return n===1?cells[0]:`<div class="album n${Math.min(n,4)}">${cells.join("")}</div>`;
 }
 /* видео лежит в хранилище Supabase; ссылка на просмотр — временная, кешируем на 50 минут */
@@ -3006,10 +3006,13 @@ function xhrReq(method,url,headers,body,onProg,timeout){return new Promise((res,
 async function uploadVid(f,onProg){
  if(!CLOUD)return {local:true,src:URL.createObjectURL(f),type:f.type,size:f.size};
  const ext=(f.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4",path=`${chatU.id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.${ext}`;
- const type=f.type||(ext==="mov"?"video/quicktime":"video/mp4"),b64=v=>btoa(unescape(encodeURIComponent(v)));
+ const type=f.type||(ext==="mov"?"video/quicktime":"video/mp4");
+ await tusUpload("media",path,f,type,onProg);return {path,type,size:f.size}}
+async function tusUpload(bucket,path,f,type,onProg){
+ const b64=v=>btoa(unescape(encodeURIComponent(v)));
  const base=async()=>({apikey:SB_KEY,Authorization:"Bearer "+await sbToken(),"Tus-Resumable":"1.0.0"});
  const cr=await xhrReq("POST",`${SB_URL}/storage/v1/upload/resumable`,Object.assign(await base(),{"Upload-Length":String(f.size),"x-upsert":"false",
-  "Upload-Metadata":`bucketName ${b64("media")},objectName ${b64(path)},contentType ${b64(type)},cacheControl ${b64("3600")}`}),null,null,30000);
+  "Upload-Metadata":`bucketName ${b64(bucket)},objectName ${b64(path)},contentType ${b64(type)},cacheControl ${b64("3600")}`}),null,null,30000);
  let loc=cr.getResponseHeader("Location");if(!loc)throw{status:500,message:"no location"};if(!/^https?:/.test(loc))loc=SB_URL+(loc.startsWith("/")?"":"/")+loc;
  let off=0;
  while(off<f.size){const end=Math.min(off+TUS_CHUNK,f.size),chunk=f.slice(off,end);let tries=0;
@@ -3020,7 +3023,7 @@ async function uploadVid(f,onProg){
     try{const h=await xhrReq("HEAD",loc,await base(),null,null,20000);off=+(h.getResponseHeader("Upload-Offset")||off)}catch(_){}
     await new Promise(r=>setTimeout(r,1500*tries))}}
   if(onProg)onProg(off/f.size)}
- return {path,type,size:f.size}}
+ return path}
 let vidBusy=false;
 function withVids(fn){
  const vs=cDraft.vids||[];if(!vs.length||cDraft.upl)return fn();
@@ -3125,7 +3128,7 @@ function openGallery(list,i){
   g.innerHTML='<div class="gal-top"><span class="gal-n"></span><span class="gal-d"></span><button type="button" class="gal-x" aria-label="Закрыть">×</button></div><div class="gal-st"></div><button type="button" class="gal-p" aria-label="Предыдущее">‹</button><button type="button" class="gal-nx" aria-label="Следующее">›</button>';
   document.body.appendChild(g)}
  let cur=i;const st=g.querySelector(".gal-st");
- const show=()=>{const it=list[cur];st.innerHTML=it.type==="img"?`<img src="${it.src}" alt="Фото">`:`<video controls playsinline autoplay ${it.v.local?`src="${it.v.src}"`:`data-path="${esc(it.v.path)}"`}></video>`;
+ const show=()=>{const it=list[cur];st.innerHTML=it.type==="img"?`<img src="${mURL(it.src)}" alt="Фото">`:`<video controls playsinline autoplay ${it.v.local?`src="${it.v.src}"`:`data-path="${esc(it.v.path)}"`}></video>`;
   if(it.type==="vid")hydrateVids(st);
   g.querySelector(".gal-n").textContent=list.length>1?`${cur+1} из ${list.length}`:"";
   g.querySelector(".gal-d").textContent=`${it.from==="master"?MASTER.name:chatU?chatU.name:""} · ${fullDT(it.at)}`;
@@ -3142,7 +3145,7 @@ function openMediaGrid(x){
  const list=chatMedia(x);const tg=$("vBox").querySelector(".tg");let sh=$("mediaSheet");if(sh)sh.remove();
  sh=document.createElement("div");sh.id="mediaSheet";sh.className="tg-media";
  sh.innerHTML=`<div class="tg-h"><button type="button" class="tg-back" id="mediaBack" aria-label="Назад"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tg-ti"><b>Фото и видео</b><small>${list.length} ${plural(list.length,"файл","файла","файлов")}</small></div></div>
-  <div class="mgrid">${list.map((it,i)=>`<button type="button" class="mcell" data-gi="${i}" aria-label="${it.type==="img"?"Фото":"Видео"} ${i+1}">${it.type==="img"?`<img src="${it.src}" alt="">`:`<span class="mvid">▶</span>`}</button>`).join("")}</div>`;
+  <div class="mgrid">${list.map((it,i)=>`<button type="button" class="mcell" data-gi="${i}" aria-label="${it.type==="img"?"Фото":"Видео"} ${i+1}">${it.type==="img"?`<img src="${mURL(it.src)}" alt="" loading="lazy">`:`<span class="mvid">▶</span>`}</button>`).join("")}</div>`;
  tg.appendChild(sh);
  sh.querySelectorAll("[data-gi]").forEach(b=>b.onclick=()=>openGallery(list,+b.dataset.gi));
  $("mediaBack").onclick=()=>sh.remove();
@@ -3219,7 +3222,7 @@ function renderChat(){
  const meta=(at,ed,i,out)=>`<span class="meta">${ed?"изменено ":""}${hm(at)}${ticks(i,out)}</span>`;
  /* исходник: расклад или вопрос — первое сообщение ученицы */
  const oOut=!me,oAt=x.sentAt||x.at;
- const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${x.img}" alt="Фото расклада" tabindex="0" data-mk="o">`:""}
+ const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${mURL(x.img)}" alt="Фото расклада" tabindex="0" data-mk="o">`:""}
   <div class="o-kind">${esc(kindName(x))}${x.cat?` · <span class="ctag">${esc(x.cat)}</span>`:""}</div>
   <b class="o-title" id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</b>
   ${x.bg?`<div class="o-sec"><small>Предыстория</small><p>${esc(x.bg)}</p></div>`:""}
@@ -3778,13 +3781,13 @@ function rSerialize(db){
   (u.spreads||[]).forEach(x=>{
    const b=JSON.parse(JSON.stringify(x)),k=rkey(u.id)+"~"+x.id;b.uid=u.id;
    const put=(f,str)=>{const n=Math.ceil(str.length/RCH);for(let i=0;i<n;i++)o[`m/${k}~${f}~${i}`]={d:str.slice(i*RCH,(i+1)*RCH)};return n};
-   if(b.img){b.imgN=put("img",b.img);b.img=null}
-   if(b.voice&&b.voice.src){b.voiceN=put("voice",b.voice.src);b.voice.src=""}
-   if(b.final&&b.final.voice&&b.final.voice.src){const fv=b.final.voice;fv.vid=rkey(fv.vid||"fin");fv.n=put("tv"+fv.vid,fv.src);fv.src=""}
-   (b.thread||[]).forEach(m=>{if(m.img){const iid=rkey(m.iid||m.at);m.iid=iid;m.imgN=put("ti"+iid,m.img);m.img=null}
-    if(m.more&&m.more.length){const iid=m.iid||(m.iid=rkey(m.at));m.moreN=m.more.map((d,j)=>put("ti"+iid+"m"+j,d));delete m.more}
+   if(b.img&&!isSB(b.img)){b.imgN=put("img",b.img);b.img=null}
+   if(b.voice&&b.voice.src&&!isSB(b.voice.src)){b.voiceN=put("voice",b.voice.src);b.voice.src=""}
+   if(b.final&&b.final.voice&&b.final.voice.src&&!isSB(b.final.voice.src)){const fv=b.final.voice;fv.vid=rkey(fv.vid||"fin");fv.n=put("tv"+fv.vid,fv.src);fv.src=""}
+   (b.thread||[]).forEach(m=>{if(m.img&&!isSB(m.img)){const iid=rkey(m.iid||m.at);m.iid=iid;m.imgN=put("ti"+iid,m.img);m.img=null}
+    if(m.more&&m.more.length&&!m.more.some(isSB)){const iid=m.iid||(m.iid=rkey(m.at));m.moreN=m.more.map((d,j)=>put("ti"+iid+"m"+j,d));delete m.more}
     if(m.vids)m.vids=m.vids.filter(v=>!v.local)});
-   (b.thread||[]).forEach(m=>{if(m.voice&&m.voice.src){const vid=rkey(m.voice.vid||m.at);m.voice.vid=vid;m.voice.n=put("tv"+vid,m.voice.src);m.voice.src=""}});
+   (b.thread||[]).forEach(m=>{if(m.voice&&m.voice.src&&!isSB(m.voice.src)){const vid=rkey(m.voice.vid||m.at);m.voice.vid=vid;m.voice.n=put("tv"+vid,m.voice.src);m.voice.src=""}});
    o["s/"+k]=b});
  });
  db.payments.forEach(p=>o["pay/"+rkey(p.id)]=p);
@@ -3815,8 +3818,34 @@ function rDeserialize(m){
  return db;
 }
 const mayWrite=p=>IS_M||!p.startsWith("p/");
+
+/* ---- медиа в хранилище Supabase (бакет chat, публичные ссылки со случайным именем) ---- */
+const isSB=v=>typeof v==="string"&&v.startsWith("sb:");
+const mURL=v=>isSB(v)?`${SB_URL}/storage/v1/object/public/chat/${v.slice(3).split("/").map(encodeURIComponent).join("/")}`:v;
+let offBusy=false,offAgain=false,offOff=false;
+function pendingMedia(){const L=[];if(!CLOUD||!ME)return L;const meM=role==="master",side=meM?"master":"student";
+ Object.values(DB.users).forEach(u=>(u.spreads||[]).forEach(x=>{
+  const own=!meM&&S&&u.id===S.id;if(!own&&!meM)return;
+  const add=(get,set)=>{const v=get();if(typeof v==="string"&&v.startsWith("data:")&&v.length>1500&&!v.endsWith("#"))L.push({u,get,set})};
+  if(own){add(()=>x.img,v=>x.img=v);if(x.voice)add(()=>x.voice.src,v=>x.voice.src=v);if(x.final&&x.final.voice)add(()=>x.final.voice.src,v=>x.final.voice.src=v)}
+  (x.thread||[]).forEach(m=>{if(m.from!==side||m.del)return;add(()=>m.img,v=>m.img=v);(m.more||[]).forEach((d,j)=>add(()=>m.more[j],v=>m.more[j]=v));if(m.voice)add(()=>m.voice.src,v=>m.voice.src=v)})}));
+ return L}
+async function offloadMedia(){
+ for(const it of pendingMedia()){const d=it.get();let blob;
+  try{blob=await (await fetch(d)).blob()}catch(_){it.set(d+"#");continue} /* битый файл — оставляем как есть, не зависаем */
+  const ty=(blob.type||"").split(";")[0]||"application/octet-stream";
+  const ext=/jpe?g/.test(ty)?"jpg":/png/.test(ty)?"png":/webp/.test(ty)?"webp":/gif/.test(ty)?"gif":/webm/.test(ty)?"webm":/ogg/.test(ty)?"ogg":/mp4|m4a|aac/.test(ty)?"m4a":/mpeg|mp3/.test(ty)?"mp3":/wav/.test(ty)?"wav":"bin";
+  const path=`${it.u.id}/${Date.now().toString(36)}${crypto.getRandomValues(new Uint32Array(3)).join("").slice(0,18)}.${ext}`;
+  await tusUpload("chat",path,blob,ty,null);
+  if(it.get()===d){it.set("sb:"+path);/* то же значение для мгновенного проигрывания у себя */}}
+}
 function rPush(){
  if(!ME)return;
+ /* голос и фото сначала уходят в хранилище файлов, в базу пишем только ссылку — так база не пухнет, а вход у Лены остаётся мгновенным */
+ if(!offOff&&pendingMedia().length){if(offBusy){offAgain=true;return}offBusy=true;offAgain=false;
+  offloadMedia().then(()=>{offBusy=false;rPush()},e=>{offBusy=false;
+   if(e&&e.status>=400&&e.status<500){offOff=true;rPush()}  /* хранилище не настроено — по-старому, в базу */
+   else{toast("Голосовое или фото ещё не ушло — нет связи. Отправлю, как только интернет появится");setTimeout(rPush,15000)}});return}
  const m=rSerialize(DB),seen=new Set();
  for(const p in m){if(!mayWrite(p))continue;seen.add(p);const j=stable(m[p]);if(rState[p]!==j){rState[p]=j;rWrite(p,m[p],j)}}
  for(const p of Object.keys(rState))if(mayWrite(p)&&!seen.has(p)){delete rState[p];rWrite(p,null,null)}
@@ -3877,7 +3906,10 @@ async function rLoadAll(){
  rRemote={};rVer={};rows.forEach(r=>{rRemote[r.path]=r.data;rVer[r.path]=r.updated_at});
 }
 async function rPoll(){
- if(pollBusy||!ME)return;pollBusy=true;
+ if(pollBusy||!ME)return;
+ /* пока голос/фото грузятся в хранилище, свежие данные с сервера не накатываем — иначе они затрут ещё не отправленное сообщение */
+ if(offBusy||(!offOff&&pendingMedia().length))return;
+ pollBusy=true;
  try{
   const list=await sb.list("path,updated_at"),now={};let ch=false;const need=[];
   list.forEach(r=>{now[r.path]=r.updated_at;if(rVer[r.path]!==r.updated_at&&!rPend[r.path])need.push(r.path)});
@@ -3957,7 +3989,7 @@ async function transcribeVoice(box,tb,t){
  const vk=box.dataset.vk,v=voiceByKey(vk);if(!v){toast("Не нашла это голосовое");return}
  tb.classList.add("busy");t.hidden=false;t.classList.add("wait");t.textContent="Расшифровываю…";
  try{
-  const blob=await (await fetch(v.src)).blob(),ty=blob.type||"audio/webm",ext=/mp4|m4a|aac/.test(ty)?"m4a":/ogg/.test(ty)?"ogg":/wav/.test(ty)?"wav":/mpeg|mp3/.test(ty)?"mp3":"webm";
+  const blob=await (await fetch(mURL(v.src))).blob(),ty=blob.type||"audio/webm",ext=/mp4|m4a|aac/.test(ty)?"m4a":/ogg/.test(ty)?"ogg":/wav/.test(ty)?"wav":/mpeg|mp3/.test(ty)?"mp3":"webm";
   const fd=new FormData();fd.append("file",new File([blob],"voice."+ext,{type:ty}));
   const tok=await sbToken(),r=await fetch(`${SB_URL}/functions/v1/transcribe`,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+tok},body:fd});
   const j=await r.json().catch(()=>({}));
