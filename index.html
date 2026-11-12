@@ -2921,7 +2921,7 @@ const TK1='<svg viewBox="0 0 18 12" width="16" height="11" aria-label="Дост�
 const TK2='<svg viewBox="0 0 18 12" width="16" height="11" aria-label="Прочитано"><path d="M1.5 6.5l3.5 3.5 7-8M7.5 9.5l.6.5 7-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PIN_SVG='<svg class="pin-ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2h-4v6l-1 1-1-1v-6H7v-2l3-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const hueOf=s=>{let h=0;for(const c of String(s||""))h=(h*31+c.charCodeAt(0))%360;return h};
-const FINE=()=>{try{return matchMedia("(pointer:fine)").matches}catch(e){return false}};
+const FINE=()=>{try{return matchMedia("(pointer:fine)").matches||matchMedia("(any-pointer:fine)").matches}catch(e){return false}};
 const autoH=t=>{t.style.height="auto";t.style.height=Math.min(t.scrollHeight,160)+"px"};
 let pinOpen=false;
 function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charCodeAt(0))>>>0;let s="";
@@ -2988,8 +2988,8 @@ function mountChatRec(x){
  $("cPhoto").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cPhotoIn").click()}};
  $("cPhotoIn").onchange=e=>{const fs=[...e.target.files];e.target.value="";let skip=0,pend=0;
   fs.forEach(f=>{
-   if(f.type.startsWith("video/")){if(cDraft.vids.length){toast("Можно одно видео в сообщении");return}if(f.size>MAX_VID){toast("Видео больше 50 МБ, такое не отправить");return}cDraft.vids.push({file:f,url:URL.createObjectURL(f),name:f.name});drawAtt();return}
-   if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt()})}
+   if(f.type.startsWith("video/")){if(cDraft.vids.length){toast("Можно одно видео в сообщении");return}if(f.size>MAX_VID){toast("Видео больше 50 МБ, такое не отправить");return}cDraft.vids.push({file:f,url:URL.createObjectURL(f),name:f.name});drawAtt();if(FINE())ta.focus();return}
+   if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt();if(FINE())ta.focus()})}
   });
   if(skip)toast(`Можно до ${MAX_IMGS} фото в одном сообщении`)};
 
@@ -3877,6 +3877,12 @@ document.addEventListener("focusin",e=>{const t=e.target;if(!t.matches||!t.match
 (function(){const R=document.documentElement,ds=[...document.querySelectorAll(".dlg")];
  const f=()=>{R.classList.toggle("dlg-on",ds.some(d=>!d.hidden));const v=document.getElementById("vdlg");R.classList.toggle("vdlg-on",!!v&&!v.hidden)};
  const mo=new MutationObserver(f);ds.forEach(d=>mo.observe(d,{attributes:true,attributeFilter:["hidden"]}));f()})();
+
+/* Enter в открытом чате отправляет, даже если курсор не в поле (например, сразу после выбора фото) */
+document.addEventListener("keydown",e=>{
+ if(e.key!=="Enter"||e.shiftKey||e.isComposing||!FINE())return;const v=$("vdlg");if(!v||v.hidden||document.getElementById("ctxLayer")||document.getElementById("galOv")&&!$("galOv").hidden)return;
+ const a=document.activeElement;if(a&&a.matches&&a.matches("input,textarea,select,button,a,[contenteditable],label"))return;
+ const b=$("cSend")||$("cSendRev");if(b&&!b.hidden){e.preventDefault();b.click()}});
 </script>
 
 </html>
