@@ -1294,7 +1294,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 .tg .msg.out.tail .bub{border-bottom-right-radius:4px}
 .tg .bub p{margin:0;white-space:pre-wrap;font-size:15px;line-height:1.38;color:#000;display:inline}
 .tg .bub p+.meta{margin-left:12px}
-.tg .meta{letter-spacing:0!important;font-family:inherit;font-variant-numeric:normal;float:right;position:relative;top:6px;margin:0 -2px 0 10px;font-size:12px;color:var(--tg-meta-in);display:inline-flex;align-items:center;gap:3px;line-height:1;white-space:nowrap;user-select:none}
+.tg .meta{text-transform:none!important;letter-spacing:0!important;font-family:inherit;font-variant-numeric:normal;float:right;position:relative;top:6px;margin:0 -2px 0 10px;font-size:12px;color:var(--tg-meta-in);display:inline-flex;align-items:center;gap:3px;line-height:1;white-space:nowrap;user-select:none}
 .tg .msg.out .meta{color:var(--tg-meta-out)}
 .tg .tk{display:inline-flex;font-style:normal}
 .tg .bub::after{content:"";display:block;clear:both}
@@ -1388,7 +1388,7 @@ html.kb .abox{padding-top:20px!important;gap:10px}
 html.dlg-on .top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
 html.dlg-on body *{animation-play-state:paused!important}
 html.dlg-on .dlg *{animation-play-state:running!important}
-@media (max-width:760px){html.vdlg-on body>:not(.dlg):not(.toast){visibility:hidden}}
+@media (max-width:760px){html.vdlg-on body>:not(.dlg):not(.toast):not(.galov):not(.zoomov):not(#toast){visibility:hidden}}
 .tg-body{transform:translateZ(0)}
 .vh-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
 
@@ -1415,6 +1415,37 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .tg .album.n3>:first-child{height:190px}
 .tg .msg-vid{display:block;max-width:100%;max-height:340px;border-radius:11px;margin:-2px -5px 6px -7px;width:calc(100% + 12px);background:#000}
 .tg .vid-miss{display:block;padding:20px;text-align:center;color:var(--tg-sub);font-size:13px}
+
+/* реакции, закреп, просмотр медиа */
+.tg .rxbar{display:flex;gap:2px;padding:4px 6px 6px;border-bottom:1px solid #eee;margin-bottom:2px}
+.tg .rxbar button{all:unset;cursor:pointer;font-size:22px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;transition:transform .12s}
+.tg .rxbar button:hover{transform:scale(1.18);background:#f1f1f1}
+.tg .rxbar button.on{background:#e3effd}
+.tg .rxs{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 0;clear:both}
+.tg .rx{display:inline-flex;align-items:center;gap:3px;font-size:15px;line-height:1;padding:3px 8px;border-radius:12px;background:rgba(51,144,236,.13)}
+.tg .msg.out .rx{background:rgba(79,174,78,.2)}
+.tg .rx b{font-size:12px;font-weight:600;color:var(--tg-acc)}
+.tg .bmenu button.danger{color:#e53935}
+.tg .msg.flash .bub{animation:tgflash 1.4s}
+@keyframes tgflash{0%,60%{box-shadow:0 0 0 3px var(--tg-acc)}100%{box-shadow:0 1px 1px rgba(0,0,0,.13)}}
+.tg-pinmsg{align-items:center}
+.tg-pinmsg .tg-x{margin-left:auto}
+.tg-media{position:absolute;inset:0;z-index:6;background:#fff;display:flex;flex-direction:column}
+.tg-media .mgrid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;align-content:start}
+.tg-media .mcell{all:unset;cursor:pointer;aspect-ratio:1;background:#222;display:grid;place-items:center;overflow:hidden}
+.tg-media .mcell img{width:100%;height:100%;object-fit:cover;display:block}
+.tg-media .mvid{color:#fff;font-size:28px}
+.galov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.94);display:flex;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.galov[hidden]{display:none}
+.gal-top{display:flex;align-items:center;gap:12px;padding:10px 12px calc(10px);padding-top:calc(10px + env(safe-area-inset-top,0px));color:#fff}
+.gal-n{font-weight:600;font-size:15px}.gal-d{font-size:13px;opacity:.7;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gal-x{width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.gal-st{flex:1;min-height:0;display:grid;place-items:center;padding:0 0 calc(12px + env(safe-area-inset-bottom,0px));touch-action:pan-y}
+.gal-st img,.gal-st video{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.gal-p,.gal-nx{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:30px;line-height:1;cursor:pointer}
+.gal-p{left:10px}.gal-nx{right:10px}
+.gal-p[hidden],.gal-nx[hidden]{display:none}
+@media (max-width:760px){.gal-p,.gal-nx{display:none}}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2883,7 +2914,7 @@ const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢"
 const MAX_IMGS=5,MAX_VID=50*1024*1024;
 function albumHTML(m){
  const ims=[m.img,...(m.more||[])].filter(Boolean),vs=m.vids||[],n=ims.length+vs.length;if(!n)return "";
- const cells=ims.map(d=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0">`).concat(vs.map(v=>v.local?`<video class="msg-vid" src="${v.src}" controls playsinline preload="metadata"></video>`:`<video class="msg-vid" data-path="${esc(v.path)}" controls playsinline preload="metadata"></video>`));
+ const cells=ims.map((d,j)=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0" data-mk="${m.at}|i${j}">`).concat(vs.map(v=>v.local?`<video class="msg-vid" src="${v.src}" controls playsinline preload="metadata"></video>`:`<video class="msg-vid" data-path="${esc(v.path)}" controls playsinline preload="metadata"></video>`));
  return n===1?cells[0]:`<div class="album n${Math.min(n,4)}">${cells.join("")}</div>`;
 }
 /* видео лежит в хранилище Supabase; ссылка на просмотр — временная, кешируем на 50 минут */
@@ -2980,6 +3011,62 @@ function openChat(uid,sid,r){
  const t=$("cTxt");(t&&FINE()?t:$("vClose")).focus();
  const th=$("thread");if(th)th.scrollTop=th.scrollHeight;
 }
+/* ---- действия с сообщением: реакции, закреп, удаление; фото и видео чата ---- */
+const RX=["👍","❤️","🙏","🔥","😂","😢"];
+function rxHTML(m){const r=m.r||{},a=[r.s,r.m].filter(Boolean);if(!a.length)return "";
+ const c={};a.forEach(e=>c[e]=(c[e]||0)+1);return `<span class="rxs">${Object.entries(c).map(([e,n])=>`<span class="rx">${e}${n>1?` <b>${n}</b>`:""}</span>`).join("")}</span>`}
+const pinIs=(x,m)=>!!x.pin&&x.pin.at===m.at&&x.pin.from===m.from;
+function pinBar(x){if(!x.pin)return "";const m=x.thread.find(mm=>pinIs(x,mm)&&!mm.del);if(!m)return "";
+ const what=m.t?esc(m.t):m.vids&&m.vids.length?"Видео":m.img?"Фото":m.voice?"Голосовое":"Сообщение";
+ return `<div class="tg-pin tg-pinmsg" id="pinMsg" role="button" tabindex="0"><span class="pin-l"></span><div class="pin-c"><b>Закреплённое сообщение</b><p class="fin-t">${what}</p></div><button type="button" class="tg-x" id="pinOff" aria-label="Открепить">×</button></div>`}
+function chatMedia(x){const L=[];
+ if(x.img)L.push({k:"o",type:"img",src:x.img,at:x.sentAt||x.at,from:"student"});
+ x.thread.forEach(m=>{if(m.del)return;[m.img,...(m.more||[])].filter(Boolean).forEach((d,j)=>L.push({k:`${m.at}|i${j}`,type:"img",src:d,at:m.at,from:m.from}));
+  (m.vids||[]).forEach((v,j)=>L.push({k:`${m.at}|v${j}`,type:"vid",v,at:m.at,from:m.from}))});
+ return L}
+function openGallery(list,i){
+ let g=$("galOv");if(!g){g=document.createElement("div");g.id="galOv";g.className="galov";g.setAttribute("role","dialog");g.setAttribute("aria-label","Просмотр фото и видео");
+  g.innerHTML='<div class="gal-top"><span class="gal-n"></span><span class="gal-d"></span><button type="button" class="gal-x" aria-label="Закрыть">×</button></div><div class="gal-st"></div><button type="button" class="gal-p" aria-label="Предыдущее">‹</button><button type="button" class="gal-nx" aria-label="Следующее">›</button>';
+  document.body.appendChild(g)}
+ let cur=i;const st=g.querySelector(".gal-st");
+ const show=()=>{const it=list[cur];st.innerHTML=it.type==="img"?`<img src="${it.src}" alt="Фото">`:`<video controls playsinline autoplay ${it.v.local?`src="${it.v.src}"`:`data-path="${esc(it.v.path)}"`}></video>`;
+  if(it.type==="vid")hydrateVids(st);
+  g.querySelector(".gal-n").textContent=list.length>1?`${cur+1} из ${list.length}`:"";
+  g.querySelector(".gal-d").textContent=`${it.from==="master"?MASTER.name:chatU?chatU.name:""} · ${fullDT(it.at)}`;
+  g.querySelector(".gal-p").hidden=cur<=0;g.querySelector(".gal-nx").hidden=cur>=list.length-1};
+ const go=d=>{const n=cur+d;if(n<0||n>=list.length)return;cur=n;show()};
+ const close=()=>{g.hidden=true;st.innerHTML="";document.removeEventListener("keydown",key,true)};
+ const key=e=>{if(g.hidden)return;if(e.key==="Escape"){close();e.stopImmediatePropagation()}else if(e.key==="ArrowLeft")go(-1);else if(e.key==="ArrowRight")go(1)};
+ g.querySelector(".gal-x").onclick=close;g.querySelector(".gal-p").onclick=()=>go(-1);g.querySelector(".gal-nx").onclick=()=>go(1);
+ st.onclick=e=>{if(e.target===st)close()};
+ let sx=null;st.ontouchstart=e=>{sx=e.touches[0].clientX};st.ontouchend=e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>50)go(dx<0?1:-1)};
+ document.addEventListener("keydown",key,true);g.hidden=false;show();g.querySelector(".gal-x").focus();
+}
+function openMediaGrid(x){
+ const list=chatMedia(x);const tg=$("vBox").querySelector(".tg");let sh=$("mediaSheet");if(sh)sh.remove();
+ sh=document.createElement("div");sh.id="mediaSheet";sh.className="tg-media";
+ sh.innerHTML=`<div class="tg-h"><button type="button" class="tg-back" id="mediaBack" aria-label="Назад"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="tg-ti"><b>Фото и видео</b><small>${list.length} ${plural(list.length,"файл","файла","файлов")}</small></div></div>
+  <div class="mgrid">${list.map((it,i)=>`<button type="button" class="mcell" data-gi="${i}" aria-label="${it.type==="img"?"Фото":"Видео"} ${i+1}">${it.type==="img"?`<img src="${it.src}" alt="">`:`<span class="mvid">▶</span>`}</button>`).join("")}</div>`;
+ tg.appendChild(sh);
+ sh.querySelectorAll("[data-gi]").forEach(b=>b.onclick=()=>openGallery(list,+b.dataset.gi));
+ $("mediaBack").onclick=()=>sh.remove();
+}
+function bindMsgActions(x,u,me){
+ const V=$("vBox"),touch=()=>{if(me){x.unreadS=true}else{x.unreadM=true}};
+ V.querySelectorAll("[data-rx]").forEach(b=>b.onclick=e=>{e.stopPropagation();const m=x.thread[+b.dataset.rx],side=me?"m":"s",em=b.dataset.e2;
+  m.r=Object.assign({},m.r);if(m.r[side]===em)delete m.r[side];else{m.r[side]=em;if(m.from!==(me?"master":"student")){touch();if(me)notify(u.id,`Лена отреагировала ${em} на твоё сообщение в «${x.q}»`,{type:"spread",u:u.id,sid:x.id})}}
+  m.u=nowISO();persist();renderChat()});
+ V.querySelectorAll("[data-pin]").forEach(b=>b.onclick=e=>{e.stopPropagation();const m=x.thread[+b.dataset.pin];
+  if(pinIs(x,m)){x.pin=null;toast("Сообщение откреплено")}else{x.pin={at:m.at,from:m.from};toast("Сообщение закреплено вверху чата")}
+  touch();persist();renderChat()});
+ V.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{e.stopPropagation();
+  if(b.dataset.c!=="1"){b.dataset.c="1";b.textContent="Точно удалить? Нажми ещё раз";return}
+  const m=x.thread[+b.dataset.del];m.del=true;m.u=nowISO();m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;if(pinIs(x,m))x.pin=null;
+  persist();renderChat();refresh();toast("Сообщение удалено у обоих")});
+ const pm=$("pinMsg");if(pm){const go=()=>{const m=x.thread.find(mm=>pinIs(x,mm));const i=x.thread.indexOf(m);const el=V.querySelector(`.msg[data-i="${i}"]`);if(el){el.scrollIntoView({block:"center",behavior:"smooth"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1400)}};
+  pm.onclick=e=>{if(e.target.closest("#pinOff"))return;go()};pm.onkeydown=e=>{if(e.key==="Enter")go()};
+  $("pinOff").onclick=e=>{e.stopPropagation();x.pin=null;touch();persist();renderChat();toast("Сообщение откреплено")}}
+}
 function renderChat(){
  const u=chatU,x=chatS,r=chatRole,me=r==="master";
  const tbOld=$("thread"),atBottom=!tbOld||tbOld.scrollHeight-tbOld.scrollTop-tbOld.clientHeight<90,prevTop=tbOld?tbOld.scrollTop:0;
@@ -2991,7 +3078,7 @@ function renderChat(){
  const meta=(at,ed,i,out)=>`<span class="meta">${ed?"изм. ":""}${hm(at)}${ticks(i,out)}</span>`;
  /* исходник: расклад или вопрос — первое сообщение ученицы */
  const oOut=!me,oAt=x.sentAt||x.at;
- const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${x.img}" alt="Фото расклада" tabindex="0">`:""}
+ const origin=`<div class="msg s ${oOut?"out":"in"} orig tail"><div class="bub">${x.img?`<img class="msg-img" src="${x.img}" alt="Фото расклада" tabindex="0" data-mk="o">`:""}
   <div class="o-kind">${esc(kindName(x))}${x.cat?` · <span class="ctag">${esc(x.cat)}</span>`:""}</div>
   <b class="o-title" id="vTitle">${x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q)}</b>
   ${x.bg?`<div class="o-sec"><small>Предыстория</small><p>${esc(x.bg)}</p></div>`:""}
@@ -3000,14 +3087,16 @@ function renderChat(){
   ${x.desc?`<div class="o-sec"><small>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</small><p>${esc(x.desc)}</p></div>`:""}
   ${x.voice&&x.voice.src?voiceMsg({voice:x.voice}):""}${meta(oAt,false,-1,oOut&&!!x.sentAt)}</div></div>`;
  let html="",day=dayOf(oAt);html+=`<div class="tg-day"><span>${dLong(oAt)}</span></div>`+origin;
- x.thread.forEach((m,i)=>{
+ const live=x.thread.map((m,i)=>[m,i]).filter(([m])=>!m.del);
+ live.forEach(([m,i],li)=>{
   const d=dayOf(m.at);if(d!==day){day=d;html+=`<div class="tg-day"><span>${dLong(m.at)}</span></div>`}
   if(m.from==="system"){html+=`<div class="msg sys"><span>${esc(m.t)}</span></div>`;return}
-  const out=mine(m),nx=x.thread[i+1],tail=!nx||nx.from!==m.from||dayOf(nx.at)!==d;
-  const canEd=me&&m.from==="master"&&editMsg==null&&!x.mDeletedAt;
+  const out=mine(m),nx=(live[li+1]||[])[0],tail=!nx||nx.from!==m.from||dayOf(nx.at)!==d;
+  const open=!x.mDeletedAt&&!(me&&x.deletedAt)&&editMsg==null,canEd=open&&out&&!!m.t,pinned=pinIs(x,m);
+  const myR=(m.r||{})[me?"m":"s"];
   const only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
-  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${meta(m.at,m.edited,i,out)}</div>
-   <div class="bmenu" hidden>${m.t?`<button type="button" data-copy="${i}">Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">Изменить</button>`:""}</div></div>`;
+  html+=`<div class="msg ${m.from==="master"?"m":"s"} ${out?"out":"in"}${tail?" tail":""}${editMsg===i?" editing":""}" data-i="${i}"><div class="bub${only?" media":""}">${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}${rxHTML(m)}${meta(m.at,m.edited,i,out)}</div>
+   <div class="bmenu" hidden>${open?`<div class="rxbar">${RX.map(e=>`<button type="button" class="${myR===e?"on":""}" data-rx="${i}" data-e2="${e}" aria-label="Реакция ${e}">${e}</button>`).join("")}</div>`:""}${m.t?`<button type="button" data-copy="${i}">Копировать</button>`:""}${canEd?`<button type="button" data-e="${i}">Изменить</button>`:""}${open?`<button type="button" data-pin="${i}">${pinned?"Открепить":"Закрепить"}</button>`:""}${open&&out?`<button type="button" class="danger" data-del="${i}">Удалить</button>`:""}</div></div>`;
  });
  if(!x.thread.length&&x.status==="wait")html+=`<div class="msg sys"><span>${me?(x.kind==="question"?"Ученица ждёт ответа":"Ученица ждёт разбора"):(x.kind==="question"?"Вопрос":"Расклад")+" у Лены. Когда она ответит, придёт уведомление"}</span></div>`;
  if(!x.thread.length&&x.status==="journal"&&!me)html+=`<div class="msg sys"><span>Расклад пока только в твоём журнале. Отправь его Лене кнопкой внизу</span></div>`;
@@ -3027,7 +3116,7 @@ function renderChat(){
  let foot="";
  if(x.mDeletedAt&&!me)foot=`<div class="tg-bar gone-note"><b>Лена удалила ${x.kind==="question"?"этот вопрос":"этот расклад"} ${fullDT(x.mDeletedAt)}.</b> Писать сюда больше нельзя. Сохранить переписку можно через меню ⋮ → «Экспорт».</div>`;
  else if(x.deletedAt&&me)foot=`<div class="tg-bar gone-note"><b>${esc(u.name)} удалила этот расклад ${fullDT(x.deletedAt)}.</b> Ученица его больше не видит, ответить нельзя.<button type="button" class="tg-join" id="cDismiss">${x.mDismissed?"Уже убран из очереди":"Убрать из очереди"}</button></div>`;
- else if(me&&editMsg!=null&&x.thread[editMsg]){const m=x.thread[editMsg];
+ else if(editMsg!=null&&x.thread[editMsg]){const m=x.thread[editMsg];
   foot=`<div class="comp tg-comp"><div class="tg-edit"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><div><b>Редактирование</b><small>${esc(m.t)}</small></div><button type="button" class="tg-x" id="edCancel" aria-label="Отменить">×</button></div>
    <div class="tg-row"><textarea id="edT" rows="1" aria-label="Текст сообщения">${esc(m.t)}</textarea><button type="button" class="tg-send on" id="edSave" aria-label="Сохранить"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`}
  else if(me){
@@ -3050,6 +3139,7 @@ function renderChat(){
  const mi=[];
  if(own&&!x.mDeletedAt)mi.push(`<div class="tg-mcats"><small>Тема</small><div class="cats sm" id="vCats"></div></div>`);
  if(me)mi.push(`<button type="button" id="cWho">Карточка ученицы</button>`);
+ {const n=chatMedia(x).length;if(n)mi.push(`<button type="button" id="tgMedia">Фото и видео · ${n}</button>`)}
  mi.push(`<button type="button" class="cexp" data-exp="${x.id}">Экспорт</button>`);
  if(own&&x.kind!=="question"&&!x.mDeletedAt)mi.push(locked?`<p class="lockhint">Исходный расклад уже обсуждается с Леной, менять его нельзя. Выводы запиши в «Итоговый расклад».</p>`:`<button type="button" id="vEdit">Изменить расклад</button>`);
  if(own)mi.push(`<button type="button" class="danger" id="vDel">Удалить ${x.kind==="question"?"вопрос":"расклад"}</button>`);
@@ -3063,7 +3153,7 @@ function renderChat(){
    <div class="tg-ti"><b>${esc(other)}</b><small><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span> · ${esc(kindName(x))}</small></div>
    <button type="button" class="tg-ic" id="tgMenuBtn" aria-label="Меню" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg></button>
    <div class="tg-menu" id="tgMenu" hidden>${mi.join("")}</div></header>
-  ${pin}
+  ${pinBar(x)}${pin}
   <div class="tg-body" id="thread">${html}</div>
   ${foot}</div>`;
  const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;tgStick=atBottom;stickChat();
@@ -3073,6 +3163,7 @@ function renderChat(){
  $("vBox").onclick=e=>{const mbt=e.target.closest("#tgMenu > button");if(!mn.hidden&&e.target.isConnected&&(!e.target.closest("#tgMenu")||(mbt&&mbt.id!=="vDel"&&mbt.id!=="mDel"))){mn.hidden=true;mb.setAttribute("aria-expanded","false")}
   const b=e.target.closest(".msg .bub");document.querySelectorAll("#vBox .bmenu").forEach(m=>{if(!b||m.parentNode!==b.parentNode)m.hidden=true});
   if(b&&!e.target.closest("button,audio,img,a,.vmsg")){const m=b.parentNode.querySelector(".bmenu");if(m&&m.children.length)m.hidden=!m.hidden}};
+ $("vBox").oncontextmenu=e=>{const b=e.target.closest(".tg-body .msg .bub");if(!b)return;const m=b.parentNode.querySelector(".bmenu");if(!m||!m.children.length)return;e.preventDefault();document.querySelectorAll("#vBox .bmenu").forEach(o=>{if(o!==m)o.hidden=true});m.hidden=false};
  $("vBox").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=x.thread[+b.dataset.copy].t;try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}b.parentNode.hidden=true});
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
  {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
@@ -3080,7 +3171,9 @@ function renderChat(){
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
    $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
- $("vBox").querySelectorAll(".msg-img").forEach(im=>{const z=()=>openZoom(im.src);im.onclick=z;im.onkeydown=e=>{if(e.key==="Enter")z()}});
+ {const all=chatMedia(x);$("vBox").querySelectorAll(".tg-body .msg-img,.tg-body .msg-vid").forEach(el=>{const k=el.dataset.mk;if(el.tagName==="IMG"){const z=()=>openGallery(all,Math.max(0,all.findIndex(a=>a.k===k)));el.onclick=z;el.onkeydown=e=>{if(e.key==="Enter")z()}}})}
+ {const b=$("tgMedia");if(b)b.onclick=()=>openMediaGrid(x)}
+ bindMsgActions(x,u,me);
  {const pb=$("finBox");if(pb&&pb.classList.contains("tg-pin")&&fin)pb.onclick=e=>{if(e.target.closest("button,audio,.vmsg"))return;pinOpen=!pinOpen;renderChat()}}
  {const fo=$("finOpen");if(fo)fo.onclick=e=>{e.stopPropagation();finEdit=true;renderChat();const t=$("finT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}}
  if(finEdit&&$("finT")){dRestore(["finT"]);
@@ -3097,7 +3190,9 @@ function renderChat(){
  $("vBox").querySelectorAll("[data-e]").forEach(b=>b.onclick=e=>{e.stopPropagation();editMsg=+b.dataset.e;renderChat();const t=$("edT");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}});
  if($("edT")){const t=$("edT");dRestore(["edT"]);autoH(t);t.addEventListener("input",()=>autoH(t));
   t.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&FINE()){e.preventDefault();$("edSave").click()}else if(e.key==="Escape"){e.stopPropagation();$("edCancel").click()}})}
- const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];if(m.t===t){editMsg=null;renderChat();return}m.t=t;m.edited=true;editMsg=null;x.unreadS=true;notify(u.id,`Лена изменила ответ к «${x.q}»`,{type:"spread",u:u.id,sid:x.id});persist();renderChat();refresh();toast("Ответ изменён, ученица получит уведомление")};
+ const es=$("edSave");if(es)es.onclick=()=>{const t=$("edT").value.trim();if(!t){toast("Сообщение не может быть пустым");return}dClear(["edT"]);const m=x.thread[editMsg];if(m.t===t){editMsg=null;renderChat();return}m.t=t;m.edited=true;m.u=nowISO();editMsg=null;
+  if(me){x.unreadS=true;notify(u.id,`Лена изменила сообщение в «${x.q}»`,{type:"spread",u:u.id,sid:x.id})}else{x.unreadM=true;notify("master",`${u.name} изменила сообщение в «${x.q}»`,{type:"spread",u:u.id,sid:x.id})}
+  persist();renderChat();refresh();toast("Сообщение изменено")};
  const ec=$("edCancel");if(ec)ec.onclick=()=>{dClear(["edT"]);editMsg=null;renderChat()};
  const txt=()=>($("cTxt")?$("cTxt").value.trim():"");
  const hasV=()=>!!(RC&&RC.voice)||!!(cDraft.imgs&&cDraft.imgs.length)||!!(cDraft.vids&&cDraft.vids.length);
@@ -3581,8 +3676,9 @@ function rPush(){
 }
 /* два человека пишут в одну переписку: склеиваем сообщения, а не затираем */
 function mergeSpread(server,mine){
- const key=m=>m.from+"|"+m.at+"|"+m.t,seen=new Set(),th=[];
- [...(server.thread||[]),...(mine.thread||[])].forEach(m=>{const k=key(m);if(!seen.has(k)){seen.add(k);th.push(m)}});
+ const key=m=>m.from+"|"+m.at,idx=new Map(),th=[];
+ /* одно сообщение = автор+время; если обе стороны его меняли (правка, реакция, удаление), берём более свежую версию */
+ [...(server.thread||[]),...(mine.thread||[])].forEach(m=>{const k=key(m),j=idx.get(k);if(j==null){idx.set(k,th.length);th.push(m)}else if((m.u||"")>(th[j].u||""))th[j]=m});
  th.sort((a,b)=>(a.at||"").localeCompare(b.at||""));
  const r=Object.assign({},server,mine,{thread:th});
  if(server.status==="done"&&mine.status==="wait"&&!(mine.thread||[]).some(m=>m.from==="student"&&!(server.thread||[]).some(s=>key(s)===key(m))))r.status="done";
