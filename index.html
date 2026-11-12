@@ -1481,6 +1481,23 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .tg-body.selmode .msg.picked{background:rgba(51,144,236,.12);border-radius:8px}
 .selfoot .tg-join.danger,.selfoot .tg-join.sure{color:#e53935}
 .selfoot span{color:var(--tg-sub)}
+
+.tg .vthumb{position:relative;display:block;cursor:pointer;overflow:hidden;background:#000}
+.tg .vthumb video{display:block;width:100%;height:100%;max-height:340px;object-fit:cover;pointer-events:none}
+.tg .album .vthumb video{height:150px}
+.tg .vthumb i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center;padding-left:3px}
+.gal-st video{width:100%;height:100%;background:#000}
+.tr-txt.none{color:var(--tg-sub,#888)!important;font-size:13px!important}
+
+.tg-att.uploading{flex-wrap:wrap}
+.tg-att.uploading>small,.tg-att.uploading .att-x{display:none}
+.tg-att .upl{flex:1;min-width:160px;display:grid;gap:6px;padding:0 6px}
+.tg-att .upl-t{font-size:14px;color:var(--tg-acc)}
+.tg-att .upl-b{height:4px;border-radius:2px;background:#e3effd;overflow:hidden}
+.tg-att .upl-b i{display:block;height:100%;width:0;background:var(--tg-acc);transition:width .2s}
+.tg-row .tg-send.busy{opacity:1;background:var(--tg-acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23fff' stroke-width='2.4' stroke-dasharray='42 60' stroke-linecap='round'/%3E%3C/svg%3E") center/26px no-repeat;animation:tgspin 1s linear infinite}
+.tg-row .tg-send.busy svg{visibility:hidden}
+@keyframes tgspin{to{transform:rotate(360deg)}}
 </style>
 
 <header class="top"><div class="wrap">
@@ -2795,7 +2812,7 @@ function makeRec(o){
   mr.ondataavailable=e=>{if(e.data&&e.data.size)R.chunks.push(e.data)};
   mr.onstop=()=>{stream.getTracks().forEach(t=>t.stop());if(R.stream===stream)R.stream=null;if(mr._discard||!R.chunks.length)return;
    const dur=Math.max(1,Math.round((Date.now()-R.t0)/1000)),b=new Blob(R.chunks,{type:mr.mimeType||"audio/webm"}),fr=new FileReader();
-   fr.onload=()=>{const v={src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)};if(o.sink)v.tr=(R.tr||"").trim();R.set(v);if(o.onDone)o.onDone(v);else toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))};fr.readAsDataURL(b)};
+   fr.onload=()=>(R._gDone||Promise.resolve()).then(()=>{R._gDone=null;const v={src:fr.result,dur,at:nowISO(),vid:Date.now().toString(36)+Math.random().toString(36).slice(2,6)};if(o.sink)v.tr=(R.tr||"").trim();R.set(v);if(o.onDone)o.onDone(v);else toast(o.done||(SR?"Голосовое прикреплено, текст расшифрован":"Голосовое прикреплено"))});fr.readAsDataURL(b)};
   mr.start(1000);R.t0=Date.now();
   o.rec.hidden=false;o.mic.hidden=true;o.time.textContent="0:00";
   R.tr="";o.interim.textContent=o.sink?"Идёт запись…":SR?"Идёт запись, текст появляется в поле выше":"Расшифровка работает в Chrome и Safari. Голосовое всё равно прикрепится.";
@@ -2822,11 +2839,13 @@ function makeRec(o){
     ta.value=full;ta.scrollTop=ta.scrollHeight;
     ta.dispatchEvent(new Event("input",{bubbles:true}))};
    g.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="network"){R.g=null;o.interim.textContent="Расшифровка здесь недоступна, но голосовое запишется."}};
-   g.onend=()=>{base=join(base,fin);fin="";if(o.sink)R.tr=base;else ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
+   g.onend=()=>{base=join(base,fin);fin="";if(o.sink)R.tr=base||R.tr;else ta.value=base;if(R.g===g&&R.active()){try{g.start()}catch(_){}}};
    try{g.start()}catch(_){}}
  };
  R.stop=discard=>{
-  clearInterval(R.timer);R.timer=null;const g=R.g;R.g=null;if(g)try{g.stop()}catch(_){}
+  clearInterval(R.timer);R.timer=null;const g=R.g;R.g=null;
+  /* распознавание отдаёт последнюю фразу чуть позже остановки — ждём её (до 1,5 с), иначе у коротких голосовых пропадает расшифровка */
+  if(g){R._gDone=new Promise(res=>{const t=setTimeout(res,1500);g.addEventListener("end",()=>{clearTimeout(t);setTimeout(res,50)})});try{g.stop()}catch(_){}}
   if(R.active()){R.mr._discard=!!discard;R.mr.stop()}else if(R.stream){R.stream.getTracks().forEach(t=>t.stop());R.stream=null}
   R.mr=null;if(RACTIVE===R)RACTIVE=null;o.rec.hidden=true;o.mic.hidden=false;
  };
@@ -2929,7 +2948,7 @@ function waveBars(seed){let h=0;for(const c of String(seed||"v"))h=(h*33+c.charC
 /* аудио не вставляем в разметку целиком (это сотни КБ текста на каждое голосовое) — подставляем при нажатии */
 const VSRC=new Map();
 const vKey=v=>{const k=v.vid||("v"+v.src.length+"_"+v.src.slice(-24));VSRC.set(k,v.src);return k};
-const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div>${m.voice.tr?`<button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button>`:""}<audio preload="none" data-vk="${vKey(m.voice)}"></audio>${m.voice.tr?`<div class="tr-txt" hidden>${esc(m.voice.tr)}</div>`:""}</div>`:"";
+const voiceMsg=m=>m.voice&&m.voice.src?`<div class="vmsg"><button type="button" class="vplay" aria-label="Слушать голосовое"><svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor"/></svg></button><div class="vw"><div class="vwave" style="--p:0">${waveBars(m.voice.vid||m.voice.src.length)}</div><span class="vdur">${fmtT(m.voice.dur||0)}</span></div><button type="button" class="tr-btn" aria-expanded="false" aria-label="Расшифровка" title="Расшифровка">Aa</button><audio preload="none" data-vk="${vKey(m.voice)}"></audio><div class="tr-txt${m.voice.tr?"":" none"}" hidden>${m.voice.tr?esc(m.voice.tr):"Браузер не смог расшифровать эту запись. Расшифровка работает в Chrome, а на компьютере ещё и в Safari, если включена «Диктовка»."}</div></div>`:"";
 document.addEventListener("click",e=>{
  const tb=e.target.closest(".tr-btn");
  if(tb){const t=tb.closest(".vmsg").querySelector(".tr-txt");if(t){const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o)}return}
@@ -2949,7 +2968,7 @@ const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢"
 const MAX_IMGS=5,MAX_VID=50*1024*1024;
 function albumHTML(m){
  const ims=[m.img,...(m.more||[])].filter(Boolean),vs=m.vids||[],n=ims.length+vs.length;if(!n)return "";
- const cells=ims.map((d,j)=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0" data-mk="${m.at}|i${j}">`).concat(vs.map(v=>v.local?`<video class="msg-vid" src="${v.src}" controls playsinline preload="metadata"></video>`:`<video class="msg-vid" data-path="${esc(v.path)}" controls playsinline preload="metadata"></video>`));
+ const cells=ims.map((d,j)=>`<img class="msg-img" src="${d}" alt="Фото" tabindex="0" data-mk="${m.at}|i${j}">`).concat(vs.map((v,j)=>`<span class="msg-vid vthumb" role="button" tabindex="0" aria-label="Открыть видео" data-mk="${m.at}|v${j}"><video muted playsinline preload="metadata" ${v.local?`src="${v.src}#t=0.1"`:`data-path="${esc(v.path)}"`}></video><i aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l11-6.5z" fill="#fff"/></svg></i></span>`));
  return n===1?cells[0]:`<div class="album n${Math.min(n,4)}">${cells.join("")}</div>`;
 }
 /* видео лежит в хранилище Supabase; ссылка на просмотр — временная, кешируем на 50 минут */
@@ -2957,18 +2976,25 @@ const VURL={};
 async function vidURL(path){const c=VURL[path];if(c&&c.exp>Date.now())return c.url;
  const j=await sbRaw(`/storage/v1/object/sign/media/${path.split("/").map(enc).join("/")}`,{method:"POST",body:JSON.stringify({expiresIn:3600})});
  const url=SB_URL+"/storage/v1"+(j.signedURL||j.signedUrl);VURL[path]={url,exp:Date.now()+50*60000};return url}
-function hydrateVids(root){(root||document).querySelectorAll("video[data-path]:not([src])").forEach(v=>{vidURL(v.dataset.path).then(u=>{v.src=u},()=>{v.replaceWith(Object.assign(document.createElement("span"),{className:"vid-miss",textContent:"Видео недоступно"}))})})}
-async function uploadVid(f){
+function hydrateVids(root){(root||document).querySelectorAll("video[data-path]:not([src])").forEach(v=>{vidURL(v.dataset.path).then(u=>{v.src=v.closest(".vthumb")?u+"#t=0.1":u},()=>{v.replaceWith(Object.assign(document.createElement("span"),{className:"vid-miss",textContent:"Видео недоступно"}))})})}
+async function uploadVid(f,onProg){
  if(!CLOUD)return {local:true,src:URL.createObjectURL(f),type:f.type,size:f.size};
  const ext=(f.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"")||"mp4",path=`${chatU.id}/${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}.${ext}`;
- const t=await sbToken(),r=await fetch(`${SB_URL}/storage/v1/object/media/${path}`,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+t,"Content-Type":f.type||"video/mp4","x-upsert":"false"},body:f});
- if(!r.ok){const tx=await r.text().catch(()=>"");throw{status:r.status,message:tx}}
+ const t=await sbToken();
+ /* XHR, а не fetch — чтобы показывать проценты загрузки */
+ await new Promise((res,rej)=>{const x=new XMLHttpRequest();x.open("POST",`${SB_URL}/storage/v1/object/media/${path}`);
+  x.setRequestHeader("apikey",SB_KEY);x.setRequestHeader("Authorization","Bearer "+t);x.setRequestHeader("Content-Type",f.type||"video/mp4");x.setRequestHeader("x-upsert","false");
+  x.upload.onprogress=e=>{if(e.lengthComputable&&onProg)onProg(e.loaded/e.total)};
+  x.onload=()=>x.status>=200&&x.status<300?res():rej({status:x.status,message:x.responseText});x.onerror=()=>rej({status:0});x.send(f)});
  return {path,type:f.type,size:f.size}}
 let vidBusy=false;
 function withVids(fn){
  const vs=cDraft.vids||[];if(!vs.length||cDraft.upl)return fn();
- if(vidBusy)return;vidBusy=true;const b=$("cSend")||$("cSendRev2");if(b)b.classList.add("busy");if(CLOUD)toast("Загружаю видео…");
- Promise.all(vs.map(v=>uploadVid(v.file))).then(list=>{vidBusy=false;cDraft.upl=list;fn()},e=>{vidBusy=false;if(b)b.classList.remove("busy");
+ if(vidBusy){toast("Видео ещё загружается, подожди");return}vidBusy=true;const b=$("cSend")||$("cSendRev2");if(b)b.classList.add("busy");
+ const prog=p=>{const box=$("cImgBox");if(!box)return;let el=box.querySelector(".upl");if(!el){el=document.createElement("div");el.className="upl";el.innerHTML='<span class="upl-t"></span><span class="upl-b"><i></i></span>';box.appendChild(el);box.classList.add("uploading")}
+  const pc=Math.round(p*100);el.querySelector(".upl-t").textContent=pc<100?`Видео загружается… ${pc}%`:"Почти готово…";el.querySelector("i").style.width=pc+"%"};
+ if(CLOUD)prog(0);
+ Promise.all(vs.map(v=>uploadVid(v.file,prog))).then(list=>{vidBusy=false;cDraft.upl=list;fn()},e=>{vidBusy=false;if(b)b.classList.remove("busy");const box=$("cImgBox");if(box){box.classList.remove("uploading");const el=box.querySelector(".upl");if(el)el.remove()}
   toast(e&&(e.status===400||e.status===404)?"Хранилище для видео ещё не настроено. Нужно один раз запустить storage.sql в Supabase":e&&e.status===413?"Видео слишком большое, максимум 50 МБ":"Не получилось загрузить видео. Проверь интернет")});
 }
 function mountChatRec(x){
@@ -3254,7 +3280,7 @@ function renderChat(){
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
    vc.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{x.cat=b.dataset.c||null;persist();draw();refresh();toast(x.cat?`Тема: ${x.cat}`:"Без темы")});
    $("vCatAdd").onclick=()=>{$("vCatAdd").replaceWith(catInput(n=>{if(n){x.cat=n;persist();refresh();toast(`Тема: ${n}`)}draw()}))}};draw()}}
- {const all=chatMedia(x);$("vBox").querySelectorAll(".tg-body .msg-img,.tg-body .msg-vid").forEach(el=>{const k=el.dataset.mk;if(el.tagName==="IMG"){const z=()=>selMode||openGallery(all,Math.max(0,all.findIndex(a=>a.k===k)));el.onclick=z;el.onkeydown=e=>{if(e.key==="Enter")z()}}})}
+ {const all=chatMedia(x);$("vBox").querySelectorAll(".tg-body .msg-img,.tg-body .vthumb").forEach(el=>{const k=el.dataset.mk;{const z=()=>selMode||openGallery(all,Math.max(0,all.findIndex(a=>a.k===k)));el.onclick=z;el.onkeydown=e=>{if(e.key==="Enter")z()}}})}
  {const b=$("tgMedia");if(b)b.onclick=()=>openMediaGrid(x)}
  bindMsgActions(x,u,me);bindSelect(x,u,me);
  {const pb=$("finBox");if(pb&&pb.classList.contains("tg-pin")&&fin)pb.onclick=e=>{if(e.target.closest("button,audio,.vmsg"))return;pinOpen=!pinOpen;renderChat()}}
