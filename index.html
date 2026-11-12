@@ -1473,14 +1473,17 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .tg-selh .tg-ic.danger{color:#e53935}
 .tg-selh .tg-ic:disabled{opacity:.35;cursor:default}
 .tg-h[hidden]{display:none}
-.tg-body.selmode .msg:not(.sys){cursor:pointer;padding-left:34px;max-width:100%;align-self:stretch}
+.tg-body.selmode .msg:not(.sys){cursor:pointer;max-width:100%;align-self:stretch}
 .tg-body.selmode .msg.out{align-items:flex-end}
-.tg-body.selmode .msg .bub{max-width:min(82%,460px)}
+.tg-body.selmode .msg.in{padding-left:34px}
+.tg-body.selmode .msg .bub{max-width:min(82%,460px);width:fit-content}
 .selc{position:absolute;left:4px;bottom:6px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .msg.picked .selc{background:var(--tg-acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m7 12.5 3.2 3.2L17 9' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
 .tg-body.selmode .msg.picked{background:rgba(51,144,236,.12);border-radius:8px}
 .selfoot .tg-join.danger,.selfoot .tg-join.sure{color:#e53935}
 .selfoot span{color:var(--tg-sub)}
+.tg-bar.selfoot{height:62px;box-sizing:border-box;padding-top:0;padding-bottom:0;display:flex;align-items:center;justify-content:center;flex:none}
+.selfoot .tg-join{padding:6px 10px}
 
 .tg .vthumb{position:relative;display:block;cursor:pointer;overflow:hidden;background:#000}
 .tg .vthumb video{display:block;width:100%;height:100%;max-height:340px;object-fit:cover;pointer-events:none}
@@ -3190,6 +3193,8 @@ function openCtx(msg){
  const k=e=>{if(e.key==="Escape"){e.stopImmediatePropagation();closeCtx();document.removeEventListener("keydown",k,true)}};document.addEventListener("keydown",k,true);
  const f=card.querySelector("button");if(f)f.focus({preventScroll:true});
 }
+const selHead=x=>`<div class="tg-selh"><button type="button" class="tg-back" id="selX" aria-label="Отменить выбор"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button><b>${SEL.size}</b><button type="button" class="tg-txtbtn" id="selAll">${SEL.size&&SEL.size===x.thread.filter(m=>!m.del&&m.from!=="system").length?"Снять все":"Выбрать все"}</button><button type="button" class="tg-ic" id="selCopy" aria-label="Копировать выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button><button type="button" class="tg-ic danger" id="selDel" aria-label="Удалить выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button></div>`;
+const selFoot=()=>SEL.size?`<div class="tg-bar selfoot"><button type="button" class="tg-join danger" id="selDel2">Удалить ${SEL.size} ${plural(SEL.size,"сообщение","сообщения","сообщений")}</button></div>`:`<div class="tg-bar selfoot"><span>Нажимай на сообщения, чтобы выбрать</span></div>`;
 function bindSelect(x,u,me){
  const V=$("vBox"),liveIdx=()=>x.thread.map((m,i)=>[m,i]).filter(([m])=>!m.del&&m.from!=="system").map(([,i])=>i);
  V.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{e.stopPropagation();closeCtx();selMode=true;SEL.clear();SEL.add(+b.dataset.sel);renderChat()});
@@ -3284,7 +3289,7 @@ function renderChat(){
  const other=me?u.name:MASTER.name;
  $("vBox").className="dbox tgbox";
  $("vBox").innerHTML=`<div class="tg">
-  ${selMode?`<div class="tg-selh"><button type="button" class="tg-back" id="selX" aria-label="Отменить выбор"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button><b>${SEL.size}</b><button type="button" class="tg-txtbtn" id="selAll">${SEL.size&&SEL.size===x.thread.filter(m=>!m.del&&m.from!=="system").length?"Снять все":"Выбрать все"}</button><button type="button" class="tg-ic" id="selCopy" aria-label="Копировать выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button><button type="button" class="tg-ic danger" id="selDel" aria-label="Удалить выбранное"${SEL.size?"":" disabled"}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button></div>`:""}
+  ${selMode?selHead(x):""}
   <header class="tg-h"${selMode?" hidden":""}><button type="button" class="tg-back" id="vClose" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <span class="tg-ava" style="--h:${hueOf(other)}">${esc((other||"?").trim().charAt(0).toUpperCase())}</span>
    <div class="tg-ti"><b>${esc(other)}</b><small><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span> · ${esc(kindName(x))}</small></div>
@@ -3292,13 +3297,16 @@ function renderChat(){
    <div class="tg-menu" id="tgMenu" hidden>${mi.join("")}</div></header>
   ${pinBar(x)}${pin}
   <div class="tg-body${selMode?" selmode":""}" id="thread">${html}</div>
-  ${selMode?(SEL.size?`<div class="tg-bar selfoot"><button type="button" class="tg-join danger" id="selDel2">Удалить ${SEL.size} ${plural(SEL.size,"сообщение","сообщения","сообщений")}</button></div>`:`<div class="tg-bar selfoot"><span>Нажимай на сообщения, чтобы выбрать</span></div>`):foot}</div>`;
+  ${selMode?selFoot():foot}</div>`;
  const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;tgStick=atBottom;stickChat();
  /* меню */
  const mb=$("tgMenuBtn"),mn=$("tgMenu");
  mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
  $("vBox").onclick=e=>{
-  if(selMode){const mm=e.target.closest(".tg-body .msg[data-i]");if(mm){e.preventDefault();e.stopPropagation();const i=+mm.dataset.i;SEL.has(i)?SEL.delete(i):SEL.add(i);renderChat()}return}
+  if(selMode){const mm=e.target.closest(".tg-body .msg[data-i]");if(mm){e.preventDefault();e.stopPropagation();const i=+mm.dataset.i;SEL.has(i)?SEL.delete(i):SEL.add(i);
+   /* без перерисовки всего чата — иначе лента прыгает */
+   mm.classList.toggle("picked",SEL.has(i));const hd=$("vBox").querySelector(".tg-selh"),ft=$("vBox").querySelector(".selfoot");
+   if(hd)hd.outerHTML=selHead(x);if(ft)ft.outerHTML=selFoot();bindSelect(x,u,me)}return}
   const mbt=e.target.closest("#tgMenu > button");if(!mn.hidden&&e.target.isConnected&&(!e.target.closest("#tgMenu")||(mbt&&mbt.id!=="vDel"&&mbt.id!=="mDel"))){mn.hidden=true;mb.setAttribute("aria-expanded","false")}
   const b=e.target.closest(".tg-body .msg .bub");
   if(b&&!e.target.closest("button,audio,img,video,a,.vmsg")){openCtx(b.parentNode)}};
