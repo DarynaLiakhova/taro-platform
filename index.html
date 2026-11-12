@@ -2736,13 +2736,18 @@ function makeRec(o){
   R.timer=setInterval(()=>{o.time.textContent=fmtT(Math.round((Date.now()-R.t0)/1000))},300);
   if(SR){const ta=o.ta;let base=o.sink?"":ta.value.replace(/\s+$/,""),fin="";
    const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+   const ANDR=/Android/i.test(navigator.userAgent);
    const join=(a,b)=>!a?b:!b?a:a+(/[.!?…]$/.test(a)?" ":". ")+b;
-   const g=new SR();R.g=g;g.lang="ru-RU";g.continuous=true;g.interimResults=true;
+   const g=new SR();R.g=g;g.lang="ru-RU";/* на Android непрерывный режим присылает одни и те же фразы по нескольку раз в разных вариантах — там слушаем по одной фразе и сразу перезапускаемся */g.continuous=!ANDR;g.interimResults=true;
    g.onresult=e=>{
     /* собираем всю сессию заново: так текст не дублируется (Chrome на Android присылает накопленные куски) */
     const parts=[];let tmp="";
     for(let i=0;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
-     if(e.results[i].isFinal){const last=parts[parts.length-1];if(last&&t.toLowerCase().startsWith(last.toLowerCase()))parts[parts.length-1]=t;else if(!last||!last.toLowerCase().endsWith(t.toLowerCase()))parts.push(t)}
+     if(e.results[i].isFinal){const last=parts[parts.length-1];
+      /* склеиваем только накопленные куски Chrome на Android («да» → «да да»); повторы, которые человек сказал сам, оставляем */
+      if(ANDR&&last&&t.length>last.length&&t.toLowerCase().startsWith(last.toLowerCase()))parts[parts.length-1]=t;
+      else if(ANDR&&last&&t.toLowerCase()===last.toLowerCase()&&i===e.results.length-1&&e.resultIndex<i)continue;
+      else parts.push(t)}
      else tmp=tmp?tmp+" "+t:t}
     fin=parts.map(cap).reduce(join,"");
     const live=tmp&&!(fin.toLowerCase().endsWith(tmp.toLowerCase()))?(fin?tmp:cap(tmp)):"";
