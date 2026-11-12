@@ -2917,7 +2917,7 @@ function mountChatRec(x){
  $("cPhoto").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cPhotoIn").click()}};
  $("cPhotoIn").onchange=e=>{const fs=[...e.target.files];e.target.value="";let skip=0,pend=0;
   fs.forEach(f=>{
-   if(f.type.startsWith("video/")){toast("Видео пока отправить нельзя, только фото");return}
+   if(f.type.startsWith("video/")){if(cDraft.vids.length){toast("Можно одно видео в сообщении");return}if(f.size>MAX_VID){toast("Видео больше 50 МБ, такое не отправить");return}cDraft.vids.push({file:f,url:URL.createObjectURL(f),name:f.name});drawAtt();return}
    if(f.type.startsWith("image/")){if(cDraft.imgs.length+pend>=MAX_IMGS){skip++;return}pend++;readPhoto(f,d=>{pend--;if(cDraft.imgs.length<MAX_IMGS)cDraft.imgs.push(d);saveImgs();drawAtt()})}
   });
   if(skip)toast(`Можно до ${MAX_IMGS} фото в одном сообщении`)};
@@ -3014,7 +3014,7 @@ function renderChat(){
   ${keys?`<div class="tg-keys">${keys}</div>`:""}
   <div class="tg-row">
    <textarea id="cTxt" rows="1" placeholder="Сообщение" aria-label="Сообщение"></textarea>
-   <label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото (до 5)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*" multiple class="vh-file">
+   <label class="tg-ic" id="cPhoto" for="cPhotoIn" role="button" tabindex="0" aria-label="Прикрепить фото (до 5) или видео"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.7-5.7l-8.1 8.1a6 6 0 0 0 8.5 8.5l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></label><input type="file" id="cPhotoIn" accept="image/*,video/*" multiple class="vh-file">
    <button type="button" class="tg-ic tg-mic" id="cMic" aria-label="Записать голосовое"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="cMicTxt" hidden></span></button>
    ${send?`<button type="button" class="tg-send on" id="${send}" aria-label="Отправить" hidden>${SEND_SVG}</button>`:""}</div>
   <div class="tg-rec" id="cRec" hidden><span class="rdot" aria-hidden="true"></span><span class="rt" id="cRecT">0:00</span><span class="interim" id="cInterim" aria-live="polite"></span><button type="button" class="tg-cancel" id="cCancel">Отмена</button><button type="button" class="tg-send on" id="cStop" aria-label="Отправить голосовое">${SEND_SVG}</button></div>
