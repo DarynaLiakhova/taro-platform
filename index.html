@@ -1555,10 +1555,12 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 
 /* ===== ПРЕВЬЮ: новая палитра по картинке Лены (включается window.__PAL2) ===== */
 .scene-wrap{display:none}
-html.pal2 #v-home{padding:0!important;margin:0!important;max-width:none!important}
+html.pal2 #v-home{padding:0!important;margin:0 calc(50% - 50vw)!important;width:100vw;max-width:none!important}
 html.pal2 body:has(#v-home:not([hidden])){background:#1b0b10}
 html.pal2 body:has(#v-home:not([hidden])) footer{display:none}
-html.pal2 .scene-wrap{display:block;position:relative;aspect-ratio:1280/661;width:min(100vw,calc((100dvh - 68px) * 1280 / 661));left:50%;transform:translateX(-50%);margin:0;overflow:hidden}
+html.pal2 #v-home{position:relative;overflow:hidden;height:calc(100dvh - var(--toph,68px))}
+html.pal2 #v-home::before{content:"";position:absolute;inset:-40px;background:url("assets/scene.jpg") center/cover no-repeat;filter:blur(28px) brightness(.55) saturate(1.1);transform:scale(1.08)}
+html.pal2 .scene-wrap{display:block;position:relative;aspect-ratio:1280/661;width:min(100vw,calc((100dvh - var(--toph,68px)) * 1280 / 661));margin:0 auto;overflow:hidden;box-shadow:0 0 60px 30px rgba(20,8,12,.45)}
 html.pal2 .scene{position:absolute;inset:0;background:url("assets/scene.jpg") center/cover no-repeat}
 html.pal2 .scene-go{position:absolute;left:39.45%;top:50.98%;width:19.92%;height:8.62%;border:0;background:transparent;cursor:pointer;border-radius:12px}
 html.pal2 .scene-go:hover,html.pal2 .stile:hover{box-shadow:0 0 0 3px rgba(240,207,160,.7),0 0 24px rgba(240,207,160,.55)}
@@ -1567,16 +1569,19 @@ html.pal2 .scene-tiles{position:absolute;inset:0;pointer-events:none}
 html.pal2 .stile{position:absolute;top:70.8%;width:18.9%;height:25.1%;left:calc(8.75% + var(--i) * 21.1%);border:0;background:transparent;cursor:pointer;border-radius:22px;pointer-events:auto;transition:transform .15s}
 html.pal2 .stile:hover{transform:translateY(-3px)}
 html.pal2 #v-path>.hero.me{margin-top:0}
-@media (max-width:700px){
- html.pal2 .scene-wrap{aspect-ratio:auto;width:100vw;min-height:calc(100dvh - 68px - 64px - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;background:linear-gradient(180deg,#2a0f17,#1b0b10)}
+@media (max-width:700px),(max-aspect-ratio:1/1){
+ html.pal2 #v-home{height:auto;overflow:visible}html.pal2 #v-home::before{display:none}
+ html.pal2 .scene-wrap{box-shadow:none;aspect-ratio:auto;width:100vw;min-height:calc(100dvh - 68px - 64px - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;background:linear-gradient(180deg,#2a0f17,#1b0b10)}
  html.pal2 .scene{position:relative;inset:auto;flex:none;aspect-ratio:600/442;background-size:213.33% auto;background-position:50% 0}
  html.pal2 .scene-go{left:27.5%;top:76.2%;width:42.5%;height:12.9%}
  html.pal2 .scene-tiles{position:static;flex:1;display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:12px;padding:14px 14px 18px;pointer-events:auto;
   background:linear-gradient(180deg,rgba(27,11,16,.95),rgba(27,11,16,.78) 35%,rgba(27,11,16,.92)),repeating-conic-gradient(#d9c2a6 0 25%,#3b2a2a 0 50%) 0 0/48px 48px}
- html.pal2 .tabs button{padding:12px 4px!important;font-size:13px!important;flex:1 1 0!important;min-width:0}
+ html.pal2 .scene-tiles{max-width:720px;margin:0 auto;width:100%;box-sizing:border-box}
  html.pal2 .stile{position:static;width:auto;height:auto;aspect-ratio:242/166;background:url("assets/scene.jpg") no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.5%;border-radius:18px}
  html.pal2 .stile[style*="--i:0"]{--x:112}html.pal2 .stile[style*="--i:1"]{--x:385}html.pal2 .stile[style*="--i:2"]{--x:655}html.pal2 .stile[style*="--i:3"]{--x:925}
 }
+@media (max-width:700px){html.pal2 .tabs button{padding:12px 4px!important;font-size:13px!important;flex:1 1 0!important;min-width:0}}
+@media (min-width:701px) and (max-width:1180px){html.pal2 .tabs button{padding:6px 11px;font-size:15px}}
 /* палитра */
 html.pal2{--bg:#1d3f3a;--bg2:#24504a;--surf:#163631;--gold:#d6a866;--gold2:#f2cfa0;--pink:#f1c4cf;--wine:#8e3346}
 html.pal2 .top{background:linear-gradient(180deg,#7b2f3c,#5b1f2d);border-bottom-color:#d6a866}
@@ -4095,6 +4100,10 @@ if(window.__PAL2)document.documentElement.classList.add("pal2");
  g.onclick=()=>{const b=document.getElementById("stGo");if(b)b.click()};
  document.querySelectorAll(".stile").forEach(b=>b.onclick=()=>{const v=b.dataset.sv;
   showView(v==="learn"?"path":v)})})();
+
+/* высота шапки — чтобы главный экран влезал целиком без прокрутки */
+(function(){const f=()=>{const t=document.querySelector(".top");if(t)document.documentElement.style.setProperty("--toph",t.getBoundingClientRect().height+"px")};
+ addEventListener("resize",f);f();setTimeout(f,300)})();
 </script>
 
 </html>
