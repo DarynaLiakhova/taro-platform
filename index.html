@@ -1587,6 +1587,12 @@ html.pal2 .hero.me{background:#3b1527 url("assets/scene.jpg") no-repeat;backgrou
 html.pal2 .hero.me .hero-txt{width:min(580px,92vw);padding:18px 30px 20px;background:linear-gradient(180deg,#fdf3e6,#f6dfc4);border:1.5px solid #c9a050;border-radius:22px;box-shadow:inset 0 0 0 4px #fdf3e6,inset 0 0 0 5px rgba(201,160,80,.55),0 10px 30px rgba(30,8,14,.45)}
 html.pal2 .hero.me .h-title{color:#3a1428}
 html.pal2 .hero.me .h-sub{color:#6c2d2f}
+html.pal2 .stg{aspect-ratio:271/370;background-size:100% 100%}
+html.pal2 .stg .nm{display:none}
+html.pal2 .stg.lock,html.pal2 .stg.lock.sel{filter:drop-shadow(0 12px 18px rgba(0,0,0,.42))}
+html.pal2 .stg.lock.sel{filter:drop-shadow(0 0 2px #f0d49a) drop-shadow(0 0 14px rgba(240,212,154,.5))}
+@media (max-width:760px){html.pal2 .stages{padding-top:32px}}
+html.pal2 .stg.now::after,html.pal2 .stg.pay::after{inset:0;border:0;border-radius:12px;box-shadow:0 0 18px 3px rgba(240,212,154,.55)}
 @media (max-width:760px){html.pal2 .hero.me{height:auto;background-size:210% auto;background-position:center 0;padding:26px 14px}html.pal2 .hero.me .hero-txt{padding:16px 16px 18px}}
 /* палитра */
 html.pal2{--bg:#1d3f3a;--bg2:#24504a;--surf:#163631;--gold:#d6a866;--gold2:#f2cfa0;--pink:#f1c4cf;--wine:#8e3346}
@@ -2379,6 +2385,7 @@ $("payClose").onclick=()=>closeDlg("paydlg");
 // ===== навигация =====
 const curView=()=>{const v=[...document.querySelectorAll(".view")].find(x=>!x.hidden);return v?v.id.slice(2):""};
 const PAL2=!!window.__PAL2;const HOMEV=()=>PAL2?"home":"path";
+const stImg=n=>PAL2?`assets/stg${n}p.webp`:`assets/st${STIMG[n]}.jpg`;
 function showView(v){if(v==="login"&&typeof renderLanding==="function")setTimeout(renderLanding,0);if(v!=="login"&&$("authDlg"))$("authDlg").hidden=true;
  document.querySelectorAll(".view").forEach(x=>x.hidden=!(x.id==="v-"+v||(v==="mech"&&x.id==="v-market")));
  window.scrollTo({top:0});document.body.classList.toggle("stage-on",v==="path"||v==="login");
@@ -2530,7 +2537,7 @@ function renderPath(sel){
  $("stages").innerHTML=DB.program.map(s=>{const st=stateOf(s.n),n=L(s.n),own=owns(S,s.n);
   const sub=st==="done"?"пройдена":st==="now"?(cur.lesson>n?(s.n===7?"сертификат":"Посвящение"):`лекция ${cur.lesson} из ${n}`):st==="pay"?`открыть · ${rub(s.price)}`:FREE?"":s.n===7?"подарок":own?"оплачена":rub(s.price);
   const hot=st==="now"||st==="pay";
-  return `<button class="stg ${st}${s.n===sel?" sel":""}" data-s="${s.n}" aria-pressed="${s.n===sel}" aria-label="${s.n} ступень, ${esc(s.title)}: ${sub}" style="background-image:url(assets/st${STIMG[s.n]}.jpg)">
+  return `<button class="stg ${st}${s.n===sel?" sel":""}" data-s="${s.n}" aria-pressed="${s.n===sel}" aria-label="${s.n} ступень, ${esc(s.title)}: ${sub}" style="background-image:url(${stImg(s.n)})">
    ${st==="done"?'<span class="bdg ok" aria-hidden="true">✓</span>':st==="lock"?`<span class="bdg lk" aria-hidden="true">${LOCK}</span>`:""}
    ${hot?`<span class="pill">${sub}</span>`:""}
    <span class="nm"><span class="t">${esc(tshort(s))}</span>${st==="done"||st==="now"?"":`<em>${sub}</em>`}</span></button>`}).join("");
@@ -3024,7 +3031,7 @@ document.addEventListener("keydown",e=>{const z=$("zoomOv");if(e.key==="Escape"&
   <div class="lb-card"><small>Для учениц курса</small><b>Обратная связь с Леной</b><span>Разборы твоих раскладов и вопросов, переписка с фото и голосом. Месяц. Подключается после оплаты первой ступени или курса.</span><button class="btn lbo" data-buy="fb">Подключить ${rub(FB_PRICE)}</button></div>`}
  const box=$("lProg");if(!box||!DB.program)return;
  box.innerHTML=DB.program.map(s=>{const q=s.lessons.filter(l=>l.kind==="quest").length,lec=s.lessons.length-q;
-  return `<details class="lp"><summary><span class="lp-img" style="background-image:url(assets/st${STIMG[s.n]}.jpg)"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i>${s.n===1?`<span class="lp-buy"><button type="button" class="btn sm" data-buy="1">Оплатить · ${rub(s.price)}</button></span>`:""}</summary>
+  return `<details class="lp"><summary><span class="lp-img" style="background-image:url(${stImg(s.n)})"></span><span class="lp-t"><small>${ROM[s.n-1]} ступень</small><b>${esc(short(s))}</b><span>${esc(s.about||"")}</span><em>${lec} ${plural(lec,"лекция","лекции","лекций")}${q?` · ${q} ${plural(q,"квест","квеста","квестов")}`:""} · ${s.n===7?"в подарок":rub(s.price)}</em></span><i class="lp-ch" aria-hidden="true">⌄</i>${s.n===1?`<span class="lp-buy"><button type="button" class="btn sm" data-buy="1">Оплатить · ${rub(s.price)}</button></span>`:""}</summary>
   <ol>${s.lessons.map(l=>`<li>${esc(l.title)}${l.kind==="quest"?' <small>квест</small>':""}</li>`).join("")}<li class="ex">✦ ${esc(s.exam||"Посвящение")}</li></ol></details>`}).join("");
 }
 /* ---- Лена удаляет расклад или вопрос ---- */
