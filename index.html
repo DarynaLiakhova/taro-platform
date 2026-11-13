@@ -1512,6 +1512,46 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 .galov{background:#0b0b0d}
 .gal-st{position:relative;display:block;margin:0 0 calc(10px + env(safe-area-inset-bottom,0px));padding:0}
 .gal-st img,.gal-st video{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;background:transparent}
+/* ===== чат в цветах сайта (выбран вариант 3) ===== */
+#vdlg.th-site{--tg-acc:#8a2742;--tg-in:#fffaf2;--tg-out:#f6e4cd;--tg-meta-in:#a08a7a;--tg-meta-out:#9a6f22;--tg-sub:#e8cf98;--tg-txt:#3a1428}
+.th-site .tg-h{background:linear-gradient(180deg,#5c2542,#461a30)!important;border-bottom:1px solid #c9a050!important;box-shadow:0 2px 0 rgba(201,160,80,.22)}
+.th-site .tg-ti b{color:#fbecdb;font-family:var(--serif);font-weight:500;font-size:19px}
+.th-site .tg-ti small,.th-site .tg-ti small .st{color:#e8cf98!important}
+.th-site .tg-back,.th-site .tg-h .tg-ic{color:#e8cf98}
+.th-site .tg-ava{background:radial-gradient(circle at 35% 30%,#7a2e52,#3b1527)!important;color:#f0d49a;border:1.5px solid #c9a050;font-family:var(--serif)}
+.th-site .tg-pin{background:#3b1527!important;border-bottom:1px solid rgba(201,160,80,.5)!important}
+.th-site .tg-pin .pin-l{background:#d4ad5a}.th-site .tg-pin .pin-c b{color:#f0d49a}.th-site .tg-pin .link,.th-site .tg-pin .fin-t{color:#fbecdb}.th-site .tg-pin .pin-ic{color:#c9a050}
+.th-site .tg-day span,.th-site .tg .msg.sys span{background:#3b1527;color:#f0d49a;border:1px solid rgba(201,160,80,.55)}
+.th-site .tg .bub{border:1px solid rgba(201,160,80,.55);box-shadow:0 0 0 3px rgba(251,236,219,.06),0 4px 14px rgba(0,0,0,.28)}
+.th-site .tg .bub p{color:#3a1428}
+.th-site .tg .o-title{font-family:var(--serif);font-weight:500;font-size:18px;color:#3a1428}
+.th-site .tg .o-kind{color:#8a2742!important;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+.th-site .tg .o-sec small{color:#9a6f22}
+.th-site .vplay{background:#8a2742!important;box-shadow:inset 0 0 0 2px rgba(240,212,154,.6)}
+.th-site .tg .vwave{--c:#e2c9a0!important;--a:#8a2742!important}
+.th-site .tr-btn{color:#8a2742!important;background:rgba(138,39,66,.1)!important}
+.th-site .tg .rx{background:rgba(138,39,66,.1)}
+.th-site .tg-comp{background:#fbecdb!important;border-top:1px solid #c9a050!important}
+.th-site .tg-comp .tg-ic{color:#8a2742}
+.th-site .tg-row .tg-mic,.th-site .tg-row .tg-send{background:linear-gradient(180deg,#9e2a4c,#7a1f3c)!important;box-shadow:inset 0 0 0 2px rgba(240,212,154,.55),0 0 0 1px #c9a050}
+.th-site .tg-row .tg-mic,.th-site .tg-row .tg-send{color:#f6e2c4!important}
+.th-site .tg-row .tg-mic,.th-site .tg-row .tg-send{color:#f6e2c4!important}
+.th-site .tg-bar{color:#f6e6d6;background:linear-gradient(180deg,#461a30,#3b1527)!important;border-top:1px solid #c9a050!important}.th-site .tg-bar b{color:#f0d49a}.th-site .tg-join{color:#f0d49a}.th-site .tg-join:hover{background:rgba(240,212,154,.1)}
+.th-site .tg-key{background:#fbecdb;color:#8a2742;border:1px solid rgba(201,160,80,.6)}.th-site .tg-key:hover{background:#f6e2c4}
+.th-site .tg-selh{background:linear-gradient(180deg,#5c2542,#461a30);border-bottom:1px solid #c9a050;color:#fbecdb}
+.th-site .tg-selh .tg-back,.th-site .tg-selh .tg-ic{color:#e8cf98}.th-site .tg-selh .tg-txtbtn{color:#f0d49a}.th-site .tg-selh .tg-ic.danger{color:#ff9aa8}
+.th-site .selfoot .tg-join.danger,.th-site .selfoot .tg-join.sure{color:#ff9aa8}.th-site .selfoot span{color:#e8cf98}
+.th-site .tg-body.selmode .msg.picked{background:rgba(240,212,154,.14)}
+.th-site .tg-media,.th-site .tg-media .tg-h{background:#13302c}.th-site .tg-media .tg-h{background:linear-gradient(180deg,#5c2542,#461a30)}
+.th-site .tg-edit{color:#8a2742}.th-site .tg-edit small{color:#3a1428}
+.th-site .tg-sheet{background:#fbecdb}
+.th-site .tg-menu{background:#fffaf2;border:1px solid rgba(201,160,80,.5)}
+.th-site .ctx-layer .bm-card,.th-site .ctx-layer .rxbar{background:#fffaf2;border:1px solid rgba(201,160,80,.5)}
+.th-site .ctx-layer .bm-card button svg{color:#9a6f22}
+.th-site .tg-att small{color:#9a6f22}
+.th-site .tg .msg.flash .bub{animation:tgflash2 1.4s}
+@keyframes tgflash2{0%,60%{box-shadow:0 0 0 3px #d4ad5a}100%{box-shadow:0 4px 14px rgba(0,0,0,.28)}}
+.th-site .tg .tk{color:#9a6f22}
 </style>
 
 <header class="top"><div class="wrap">
@@ -1911,7 +1951,7 @@ html.dlg-on .dlg *{animation-play-state:running!important}
     <div class="drow"><button class="btn" id="fSend">Отправить на проверку</button><button class="btn ghost" id="fSave">Сохранить в журнал</button><small id="fHint">Мастер отвечает пн–пт с 10 до 18 мск</small></div>
   </div>
 </div>
-<div class="dlg" id="vdlg" hidden role="dialog" aria-modal="true" aria-labelledby="vTitle">
+<div class="dlg th-site" id="vdlg" hidden role="dialog" aria-modal="true" aria-labelledby="vTitle">
   <div class="dbox vbox" id="vBox"></div>
 </div>
 <div class="dlg" id="rdlg" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
@@ -3301,7 +3341,9 @@ function renderChat(){
   ${pinBar(x)}${pin}
   <div class="tg-body${selMode?" selmode":""}" id="thread">${html}</div>
   ${selMode?selFoot():foot}</div>`;
- const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;tgStick=atBottom;stickChat();
+ const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;
+ /* фон ленты — тот же узор, что у сайта */
+ try{const bi=getComputedStyle(document.body).backgroundImage;if(bi&&bi!=="none"){tb.style.backgroundImage=bi;tb.style.backgroundColor="#13302c";tb.style.backgroundSize="auto"}}catch(_){}tgStick=atBottom;stickChat();
  /* меню */
  const mb=$("tgMenuBtn"),mn=$("tgMenu");
  mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
