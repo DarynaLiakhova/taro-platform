@@ -1590,6 +1590,24 @@ html.pal2 :is(.rank,.panel,.pcard,.box,.mi,.sp,.lcard,.tbl,.tile,.pg-st,.cert,.e
 html.pal2 .cat.on{background:#f2cfa0;border-color:#f2cfa0;color:#3a1428}
 html.pal2 .ctag{background:#f6d3dc!important;color:#7b2f3c!important;border-color:rgba(123,47,60,.3)!important}
 html.pal2 .h-title em,html.pal2 .sech h2 em{color:#f2cfa0}
+html.pal2 .btn,html.pal2 .hbtn{background:linear-gradient(180deg,#93384a,#6c2d2f)!important;border-color:#d6a866!important;box-shadow:inset 0 0 0 2px #6c2d2f,inset 0 0 0 3px rgba(242,207,160,.45),0 6px 14px rgba(40,8,20,.25)!important}
+html.pal2 .btn.ghost,html.pal2 .btn.lbo{background:transparent!important;box-shadow:none!important}
+html.pal2 :is(.rank,.panel,.pcard,.box,.mi,.sp,.lcard,.tbl,.tile,.pg-st,.cert,.exstat,.buy,.steps3>div,.dbox,.newsbar,.tar>div,.jitem,.npanel) .st.done{background:#2f6a5c;border-color:#2f6a5c}
+html.pal2 :is(.rank,.panel,.pcard,.box,.mi,.sp,.lcard,.tbl,.tile,.pg-st,.cert,.exstat,.buy,.steps3>div,.dbox,.newsbar,.tar>div,.jitem,.npanel) .st.wait{border-color:rgba(108,45,47,.55);color:#6c2d2f}
+html.pal2 .sp .ph-fake,html.pal2 .mi .ph-fake{background:radial-gradient(circle at 50% 38%,#8e3a4b,#4f1c29 75%)!important}
+html.pal2 .ph-fake i{background:linear-gradient(160deg,#fbe3c8,#f0cba4)!important;border-color:#d6a866!important;color:#6c2d2f}
+html.pal2 .newtag{background:#f1c4cf;color:#6c2d2f}
+html.pal2 .badge{background:#f1c4cf;color:#6c2d2f}
+html.pal2 .lab,html.pal2 .h-eye{color:#e2b98a}
+html.pal2 .lab i{background:#e2b98a}
+/* чат в новой палитре */
+html.pal2 .th-site .tg-h,html.pal2 .th-site .tg-selh,html.pal2 .th-site .tg-media .tg-h{background:linear-gradient(180deg,#7b2f3c,#5b1f2d)!important}
+html.pal2 .th-site .tg-pin,html.pal2 .th-site .tg-bar{background:#4a1a26!important}
+html.pal2 .th-site .tg-day span,html.pal2 .th-site .tg .msg.sys span{background:#4a1a26}
+html.pal2 .th-site .tg .msg.in .bub{background:#fff6ec}
+html.pal2 .th-site .tg .msg.out .bub{background:linear-gradient(180deg,#fbe3c8,#f4d0ac)}
+html.pal2 .th-site .tg-comp{background:#fdf0e1!important}
+html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site .tg-row .tg-send{background:linear-gradient(180deg,#93384a,#6c2d2f)!important}
 </style>
 
 <header class="top"><div class="wrap">
@@ -3393,7 +3411,7 @@ function renderChat(){
   ${selMode?selFoot():foot}</div>`;
  const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;
  /* фон ленты — тот же узор, что у сайта */
- try{const bi=getComputedStyle(document.body).backgroundImage;if(bi&&bi!=="none"){tb.style.backgroundImage=bi;tb.style.backgroundColor="#13302c";tb.style.backgroundSize="auto"}}catch(_){}tgStick=atBottom;stickChat();
+ try{const bi=getComputedStyle(document.body).backgroundImage;if(bi&&bi!=="none"){tb.style.backgroundImage=bi;tb.style.backgroundColor=document.documentElement.classList.contains("pal2")?"#21493f":"#13302c";tb.style.backgroundSize="auto"}}catch(_){}tgStick=atBottom;stickChat();
  /* меню */
  const mb=$("tgMenuBtn"),mn=$("tgMenu");
  mb.onclick=e=>{e.stopPropagation();mn.hidden=!mn.hidden;mb.setAttribute("aria-expanded",!mn.hidden)};
