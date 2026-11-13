@@ -1555,7 +1555,10 @@ html.dlg-on .dlg *{animation-play-state:running!important}
 
 /* ===== ПРЕВЬЮ: новая палитра по картинке Лены (включается window.__PAL2) ===== */
 .scene-wrap{display:none}
-html.pal2 .scene-wrap{display:block;position:relative;max-width:1280px;margin:0 auto 26px;aspect-ratio:1280/661;border-radius:0 0 18px 18px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+html.pal2 #v-home{padding:0!important;margin:0!important;max-width:none!important}
+html.pal2 body:has(#v-home:not([hidden])){background:#1b0b10}
+html.pal2 body:has(#v-home:not([hidden])) footer{display:none}
+html.pal2 .scene-wrap{display:block;position:relative;aspect-ratio:1280/661;width:min(100vw,calc((100dvh - 68px) * 1280 / 661));left:50%;transform:translateX(-50%);margin:0;overflow:hidden}
 html.pal2 .scene{position:absolute;inset:0;background:url("assets/scene.jpg") center/cover no-repeat}
 html.pal2 .scene-go{position:absolute;left:39.45%;top:50.98%;width:19.92%;height:8.62%;border:0;background:transparent;cursor:pointer;border-radius:12px}
 html.pal2 .scene-go:hover,html.pal2 .stile:hover{box-shadow:0 0 0 3px rgba(240,207,160,.7),0 0 24px rgba(240,207,160,.55)}
@@ -1565,10 +1568,12 @@ html.pal2 .stile{position:absolute;top:70.8%;width:18.9%;height:25.1%;left:calc(
 html.pal2 .stile:hover{transform:translateY(-3px)}
 html.pal2 #v-path>.hero.me{margin-top:0}
 @media (max-width:700px){
- html.pal2 .scene-wrap{aspect-ratio:auto;border-radius:0;margin:-8px -16px 18px;box-shadow:none;overflow:visible}
- html.pal2 .scene{position:relative;inset:auto;aspect-ratio:600/442;background-size:213.33% auto;background-position:50% 0}
+ html.pal2 .scene-wrap{aspect-ratio:auto;width:100vw;min-height:calc(100dvh - 68px - 64px - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;background:linear-gradient(180deg,#2a0f17,#1b0b10)}
+ html.pal2 .scene{position:relative;inset:auto;flex:none;aspect-ratio:600/442;background-size:213.33% auto;background-position:50% 0}
  html.pal2 .scene-go{left:27.5%;top:76.2%;width:42.5%;height:12.9%}
- html.pal2 .scene-tiles{position:static;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px 0;pointer-events:auto;background:linear-gradient(180deg,#3a1520,transparent)}
+ html.pal2 .scene-tiles{position:static;flex:1;display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:12px;padding:14px 14px 18px;pointer-events:auto;
+  background:linear-gradient(180deg,rgba(27,11,16,.95),rgba(27,11,16,.78) 35%,rgba(27,11,16,.92)),repeating-conic-gradient(#d9c2a6 0 25%,#3b2a2a 0 50%) 0 0/48px 48px}
+ html.pal2 .tabs button{padding:12px 4px!important;font-size:13px!important;flex:1 1 0!important;min-width:0}
  html.pal2 .stile{position:static;width:auto;height:auto;aspect-ratio:242/166;background:url("assets/scene.jpg") no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.5%;border-radius:18px}
  html.pal2 .stile[style*="--i:0"]{--x:112}html.pal2 .stile[style*="--i:1"]{--x:385}html.pal2 .stile[style*="--i:2"]{--x:655}html.pal2 .stile[style*="--i:3"]{--x:925}
 }
@@ -1755,7 +1760,7 @@ html.pal2 .h-title em,html.pal2 .sech h2 em{color:#f2cfa0}
 
 
 <!-- ========== МОЙ ПУТЬ ========== -->
-<section class="view" id="v-path" hidden>
+<section class="view" id="v-home" hidden>
 <div class="scene-wrap" id="scene" aria-label="Главный экран">
  <div class="scene" role="img" aria-label="Зал с открытыми дверями, солнцем и луной"><button type="button" class="scene-go" id="sceneGo" aria-label="Начать путь"></button></div>
  <div class="scene-tiles">
@@ -1765,6 +1770,8 @@ html.pal2 .h-title em,html.pal2 .sech h2 em{color:#f2cfa0}
   <button type="button" class="stile" data-sv="journal" style="--i:3" aria-label="Журнал"></button>
  </div>
 </div>
+</section>
+<section class="view" id="v-path" hidden>
 <div class="hero me"><div class="hero-txt"><div class="h-eye" id="hEye"></div><h1 class="h-title" id="hHi"></h1><p class="h-sub" id="hSub"></p><div class="h-prog"><div class="h-bar"><i id="hBarMe"></i></div><span id="hProgTxt"></span></div><button class="hbtn" id="stGo" type="button"></button></div></div>
 <div class="steps-bar"><div class="sb-h"><b>Ступени</b><span>Нажми на ступень, чтобы открыть её лекции</span></div><div class="stages" id="stages"></div></div>
   <div class="cab">
@@ -2342,6 +2349,7 @@ $("payClose").onclick=()=>closeDlg("paydlg");
 
 // ===== навигация =====
 const curView=()=>{const v=[...document.querySelectorAll(".view")].find(x=>!x.hidden);return v?v.id.slice(2):""};
+const PAL2=!!window.__PAL2;const HOMEV=()=>PAL2?"home":"path";
 function showView(v){if(v==="login"&&typeof renderLanding==="function")setTimeout(renderLanding,0);if(v!=="login"&&$("authDlg"))$("authDlg").hidden=true;
  document.querySelectorAll(".view").forEach(x=>x.hidden=!(x.id==="v-"+v||(v==="mech"&&x.id==="v-market")));
  window.scrollTo({top:0});document.body.classList.toggle("stage-on",v==="path"||v==="login");
@@ -2363,7 +2371,7 @@ function renderTabs(){
  const top=document.querySelector(".top");top.classList.toggle("out",!role);
  const tabs=role==="master"
   ?[["mqueue",`Проверка${waitingAll().length?`<span class="badge">${waitingAll().length}</span>`:""}`],["mstudents","Ученицы"],...(FREE?[]:[["mpay",`Оплаты${reqs().filter(r=>r.st==="wait").length?`<span class="badge">${reqs().filter(r=>r.st==="wait").length}</span>`:""}`]]),["mprog","Программа"],["mstats","Статистика"],["mech","Концепт"]]
-  :[["path","Мой путь"],["deck","Колода"],["spreads",`Расклады${S&&S.spreads.some(x=>x.unreadS)?'<span class="badge">•</span>':""}`],["journal","Журнал"]];
+  :[...(PAL2?[["home","Мой путь"],["path","Обучение"]]:[["path","Мой путь"]]),["deck",PAL2?"Практика":"Колода"],["spreads",`Расклады${S&&S.spreads.some(x=>x.unreadS)?'<span class="badge">•</span>':""}`],["journal","Журнал"]];
  const map={lesson:"path",exam:"path",welcome:"path",market:"mech",profile:""};
  const cv=map[curView()]||curView();
  $("tabs").innerHTML=role?tabs.map(([v,l])=>`<button role="tab" data-v="${v}" aria-selected="${v===cv}">${l}</button>`).join(""):"";
@@ -2431,7 +2439,7 @@ $("fIn").onsubmit=async e=>{
  const u=Object.values(DB.users).find(x=>x.email===em);
  if(!u){err.textContent="Аккаунт с такой почтой не найден. Проверь адрес или зарегистрируйся.";err.hidden=false;return}
  if(u.pass&&u.pass!==pw){err.textContent="Неверный пароль.";err.hidden=false;return}
- err.hidden=true;loginStudent(u);showView("path");
+ err.hidden=true;loginStudent(u);showView(HOMEV());
  const un=myNotifs().filter(n=>!n.read).length;toast(un?`С возвращением, ${u.name}. Новых уведомлений: ${un}`:`С возвращением, ${u.name}`);
  if(u.reward)setTimeout(showPendingReward,500);
 };
@@ -4015,7 +4023,7 @@ async function afterAuth(user,opts){
    notify("master",`Новая регистрация: ${nm}`,{type:"student",u:ME});rPush()}
   startPoll();ov(false);
   if(opts&&opts.fresh){loginStudent(u);$("wTitle").innerHTML=`Добро пожаловать, <em>${esc(u.name)}</em>`;if(FREE){showView("path")}else showView("welcome")}
-  else{loginStudent(u);showView("path");const un=myNotifs().filter(n=>!n.read).length;toast(un?`С возвращением, ${u.name}. Новых уведомлений: ${un}`:`С возвращением, ${u.name}`);if(u.reward)setTimeout(showPendingReward,500)}
+  else{loginStudent(u);showView(HOMEV());const un=myNotifs().filter(n=>!n.read).length;toast(un?`С возвращением, ${u.name}. Новых уведомлений: ${un}`:`С возвращением, ${u.name}`);if(u.reward)setTimeout(showPendingReward,500)}
   if(opts&&opts.recovery){showView("profile");toast("Придумай новый пароль в разделе «Пароль»")}
  }catch(e){ov(false);rErr(e);if(e&&e.status===401){sbSave(null);ME=null}}
 }
@@ -4038,7 +4046,7 @@ renderTabs();showView("login");
 if(!CLOUD){try{const k=localStorage.getItem(LOCAL_SESS);
  if(k&&staleSession())localStorage.removeItem(LOCAL_SESS);
  else if(k==="master")loginMaster();
- else if(k&&DB.users[k]){loginStudent(DB.users[k]);showView("path")}}catch(e){}}
+ else if(k&&DB.users[k]){loginStudent(DB.users[k]);showView(HOMEV())}}catch(e){}}
 
 /* ---- телефонная клавиатура ---- */
 (function(){const vv=window.visualViewport,R=document.documentElement;if(!vv)return;
@@ -4086,7 +4094,7 @@ if(window.__PAL2)document.documentElement.classList.add("pal2");
 (function(){const g=document.getElementById("sceneGo");if(!g)return;
  g.onclick=()=>{const b=document.getElementById("stGo");if(b)b.click()};
  document.querySelectorAll(".stile").forEach(b=>b.onclick=()=>{const v=b.dataset.sv;
-  if(v==="learn"){const st=document.querySelector(".steps-bar");if(st)st.scrollIntoView({behavior:"smooth",block:"start"})}else showView(v)})})();
+  showView(v==="learn"?"path":v)})})();
 </script>
 
 </html>
