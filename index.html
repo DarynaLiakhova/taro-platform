@@ -1582,6 +1582,12 @@ html.pal2 #v-path>.hero.me{margin-top:0}
 }
 @media (max-width:700px){html.pal2 .tabs button{padding:12px 4px!important;font-size:13px!important;flex:1 1 0!important;min-width:0}}
 @media (min-width:701px) and (max-width:1180px){html.pal2 .tabs button{padding:6px 11px;font-size:15px}}
+/* баннер обучения: картинка Лены по бокам, текст на пергаментной табличке по центру (закрывает надпись на картинке) */
+html.pal2 .hero.me{background:#3b1527 url("assets/scene.jpg") no-repeat;background-size:max(100%,1900px) auto;background-position:center calc(100% + max(min(100vw,1920px),1900px) * 161 / 1280);height:270px;box-shadow:inset 0 46px 34px -26px rgba(43,14,24,.85)}
+html.pal2 .hero.me .hero-txt{width:min(580px,92vw);padding:18px 30px 20px;background:linear-gradient(180deg,#fdf3e6,#f6dfc4);border:1.5px solid #c9a050;border-radius:22px;box-shadow:inset 0 0 0 4px #fdf3e6,inset 0 0 0 5px rgba(201,160,80,.55),0 10px 30px rgba(30,8,14,.45)}
+html.pal2 .hero.me .h-title{color:#3a1428}
+html.pal2 .hero.me .h-sub{color:#6c2d2f}
+@media (max-width:760px){html.pal2 .hero.me{height:auto;background-size:210% auto;background-position:center 0;padding:26px 14px}html.pal2 .hero.me .hero-txt{padding:16px 16px 18px}}
 /* палитра */
 html.pal2{--bg:#1d3f3a;--bg2:#24504a;--surf:#163631;--gold:#d6a866;--gold2:#f2cfa0;--pink:#f1c4cf;--wine:#8e3346}
 html.pal2 .top{background:linear-gradient(180deg,#7b2f3c,#5b1f2d);border-bottom-color:#d6a866}
