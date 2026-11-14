@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Путь Таролога</title>
+<meta name="description" content="Онлайн-обучение Таро с Леной · Ellene Del Sol’: семь ступеней, лекции, квесты и личные разборы.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+ --wine:#6c2d2f;--wine2:#93384a;--plum:#3a1428;--bar1:#7b2f3c;--bar2:#5b1f2d;
+ --em:#173a30;--em2:#112c25;--em3:#1f4339;
+ --parch:#fdf3e6;--parch2:#f6dfc4;--peach:#f4d0ac;--gold:#d6a866;--gold2:#c9a050;--lily:#f1c4cf;
+ --ink:#3a1428;--ink2:#6b4a46;
+ --serif:"Playfair Display",Georgia,serif;--sans:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;font-family:var(--sans);color:#f6e7d4;line-height:1.5;
+ background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23d6a866' stroke-opacity='.07'%3E%3Cpath d='M60 18l5 37 37 5-37 5-5 37-5-37-37-5 37-5z'/%3E%3Ccircle cx='0' cy='0' r='9'/%3E%3Ccircle cx='120' cy='0' r='9'/%3E%3Ccircle cx='0' cy='120' r='9'/%3E%3Ccircle cx='120' cy='120' r='9'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(180deg,var(--em3) 0,var(--em) 900px,var(--em2) 100%);
+ background-color:var(--em2)}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{width:min(1180px,100% - 32px);margin:0 auto}
+
+/* шапка */
+.top{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bar1),var(--bar2));border-bottom:1px solid var(--gold);box-shadow:0 4px 18px rgba(20,4,10,.35)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:64px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;font-family:var(--serif);letter-spacing:.14em;font-size:19px;color:#fbecd8;white-space:nowrap}
+.logo svg{flex:none}
+.nav{display:flex;margin:0 auto}
+.nav a{font-family:var(--serif);font-size:16px;color:#f3dcc4;text-decoration:none;padding:6px 20px;border-left:1px solid rgba(214,168,102,.35)}
+.nav a:first-child{border-left:0}
+.nav a:hover{color:#fff}
+.enter{font-family:var(--serif);font-size:15px;color:#fbecd8;text-decoration:none;border:1px solid var(--gold);border-radius:12px;padding:7px 18px;white-space:nowrap}
+.enter:hover{background:rgba(214,168,102,.15)}
+
+/* кнопки */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-family:var(--serif);font-size:18px;color:#fff3e6;text-decoration:none;cursor:pointer;
+ background:linear-gradient(180deg,var(--wine2),var(--wine));border:1.5px solid var(--gold);border-radius:12px;padding:12px 30px;
+ box-shadow:inset 0 0 0 2px var(--wine),inset 0 0 0 3px rgba(242,207,160,.45),0 8px 18px rgba(40,8,20,.3);transition:transform .2s,filter .2s}
+.btn i{font-style:normal;color:#f0d49a;font-size:12px}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--wine);box-shadow:none;border-color:var(--gold2)}
+.btn.ghost.light{color:#fbecd8}
+
+/* пергамент */
+.parch{background:linear-gradient(180deg,var(--parch),var(--parch2));color:var(--ink);border:1.5px solid var(--gold2);border-radius:20px;
+ box-shadow:inset 0 0 0 4px var(--parch),inset 0 0 0 5px rgba(201,160,80,.55),0 14px 34px rgba(10,4,6,.4)}
+.eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#b07a3e}
+
+/* первый экран */
+.scene{--iw:max(100vw,1350px);position:relative;min-height:calc(var(--iw)*.345);padding:calc(var(--iw)*.072) 16px 36px;background:#3b1527 url(assets/scene.jpg) no-repeat center top;background-size:var(--iw) auto;overflow:hidden}
+.scene>.parch{position:relative;z-index:1;margin:0 auto;width:max(400px,calc(var(--iw)*.34));max-width:100%;min-height:calc(var(--iw)*.262);display:flex;flex-direction:column;justify-content:center;text-align:center}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:70px;background:linear-gradient(180deg,transparent,rgba(31,67,57,.9));pointer-events:none}
+.hero-card{padding:28px 32px 26px}
+.hero-card h1{font-family:var(--serif);font-weight:500;font-size:clamp(36px,3.6vw,54px);line-height:1.08;margin:12px 0 10px}
+.hero-card h1 em{color:var(--wine2)}
+.hero-card p{font-family:var(--serif);font-style:italic;font-size:clamp(16px,1.3vw,19px);color:var(--wine);margin:0 0 22px}
+.hero-card .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.star{display:block;margin:0 auto;color:var(--gold2)}
+
+/* секции */
+section{padding:72px 0 0}
+.sh{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+.sh h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3vw,40px);margin:0;color:#fbecd8}
+.sh h2 em{color:var(--peach)}
+.sh p{margin:0;color:#d8c3aa;font-size:15px}
+
+/* ступени */
+.stages{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;padding-top:16px}
+.stg{position:relative;aspect-ratio:271/370;border:0;padding:0;cursor:pointer;background:center/100% 100% no-repeat;border-radius:12px;
+ filter:drop-shadow(0 12px 18px rgba(0,0,0,.42));transition:transform .25s}
+.stg:hover{transform:translateY(-4px)}
+.stg.sel{transform:translateY(-8px)}
+.stg.sel::after{content:"";position:absolute;inset:0;border-radius:12px;box-shadow:0 0 22px 4px rgba(240,212,154,.6);pointer-events:none}
+.stg .num{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-style:italic;font-size:13px;color:#fbecd8;background:linear-gradient(180deg,var(--wine2),var(--wine));border:1px solid var(--gold);border-radius:999px;padding:1px 12px;white-space:nowrap}
+.stg .gift{background:linear-gradient(180deg,#2f6a5c,#1f4a40)}
+.stg:focus-visible{outline:2px solid var(--peach);outline-offset:4px}
+
+.sdet{margin-top:30px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:0;overflow:hidden}
+.sdet .l{padding:30px 34px}
+.sdet .r{padding:30px 30px;border-left:1px solid rgba(201,160,80,.45);background:rgba(244,208,172,.25)}
+.sdet h3{font-family:var(--serif);font-weight:400;font-size:clamp(26px,2.4vw,34px);margin:8px 0 6px;line-height:1.15}
+.sdet .about{color:var(--ink2);margin:0 0 18px}
+.topics{list-style:none;margin:0;padding:0;columns:2;column-gap:26px}
+.topics li{break-inside:avoid;padding:7px 0 7px 26px;position:relative;border-bottom:1px solid rgba(201,160,80,.25);font-size:15px}
+.topics li::before{content:"✦";position:absolute;left:2px;top:7px;color:var(--gold2);font-size:12px}
+.topics li.q{color:var(--wine);font-weight:500}
+.kv{display:grid;gap:14px;margin-bottom:22px}
+.kv div span{display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#a87a4a}
+.kv div b{font-family:var(--serif);font-weight:500;font-size:19px}
+.price{font-family:var(--serif);font-size:34px;color:var(--wine);line-height:1}
+
+/* как учимся */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.how .parch{padding:26px 26px 24px;display:flex;gap:18px;align-items:flex-start}
+.how img{width:72px;height:72px;border-radius:14px;object-fit:cover;flex:none;border:1px solid var(--gold2)}
+.how h3,.who h3,.tar h3{font-family:var(--serif);font-weight:500;font-size:21px;margin:0 0 6px}
+.how p,.who p{margin:0;color:var(--ink2);font-size:15px}
+
+.who{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.who .parch{padding:26px}
+.who .n{font-family:var(--serif);font-style:italic;font-size:40px;color:var(--gold2);line-height:1}
+
+/* лена */
+.lena{display:grid;grid-template-columns:320px 1fr;gap:0;overflow:hidden}
+.lena .ph{background:linear-gradient(160deg,#4a1a26,#2a0f18);min-height:360px;display:grid;place-items:center;color:#e8c9a8;text-align:center;padding:20px;border-right:1px solid var(--gold2)}
+.lena .tx{padding:34px 38px}
+.lena h3{font-family:var(--serif);font-weight:400;font-size:34px;margin:8px 0 14px}
+.facts{display:flex;gap:28px;flex-wrap:wrap;margin-top:22px}
+.facts div{font-size:14px;color:var(--ink2)}
+.facts b{display:block;font-family:var(--serif);font-weight:500;font-size:30px;color:var(--wine)}
+.todo{border:1.5px dashed rgba(167,110,70,.6);border-radius:12px;padding:10px 14px;color:#9b6b4a;font-style:italic;background:rgba(255,255,255,.35)}
+.lena .ph .todo{border-color:rgba(232,201,168,.5);color:#e8c9a8;background:transparent}
+
+/* тарифы */
+.tar{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
+.tar .parch{padding:28px 28px 26px;display:flex;flex-direction:column}
+.tar .hl{transform:translateY(-10px);box-shadow:inset 0 0 0 4px var(--parch),inset 0 0 0 5px rgba(201,160,80,.55),0 0 0 2px var(--gold),0 18px 40px rgba(10,4,6,.5)}
+.tar .badge{align-self:flex-start;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fbecd8;background:linear-gradient(180deg,var(--wine2),var(--wine));border-radius:999px;padding:3px 12px;margin-bottom:10px}
+.tar .pr{font-family:var(--serif);font-size:32px;color:var(--wine);margin:4px 0 14px}
+.tar .pr small{font-size:16px;color:var(--ink2)}
+.tar ul{list-style:none;padding:0;margin:0 0 22px;flex:1}
+.tar li{padding:7px 0 7px 24px;position:relative;font-size:15px;border-bottom:1px solid rgba(201,160,80,.25)}
+.tar li::before{content:"✦";position:absolute;left:0;top:8px;color:var(--gold2);font-size:12px}
+.tar .btn{width:100%}
+
+/* отзывы */
+.revs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.revs .parch{padding:26px;min-height:190px;display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+.revs .q{font-family:var(--serif);font-size:56px;line-height:.5;color:var(--gold2);height:22px}
+
+/* вопросы */
+.faq{display:grid;gap:12px;max-width:900px;margin:0 auto}
+.faq details{padding:0;border-radius:16px}
+.faq summary{cursor:pointer;list-style:none;padding:18px 56px 18px 24px;font-family:var(--serif);font-size:19px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:26px;color:var(--wine2);transition:transform .2s}
+.faq details[open] summary::after{transform:translateY(-50%) rotate(45deg)}
+.faq .a{padding:0 24px 20px;color:var(--ink2)}
+
+/* финал */
+.final{margin-top:90px;border-top:1px solid var(--gold)}
+.final .parch{padding:28px 32px}
+.final h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.2vw,46px);margin:10px 0 8px}
+.final p{margin:0 0 22px;color:var(--ink2)}
+.final .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+footer{padding:30px 0 40px;color:#bfa58a;font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* адаптив */
+@media (max-width:1100px){
+ .nav{display:none}.top .wrap{justify-content:space-between}
+ .stages{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding:22px 4px 18px;margin:0 -4px;scrollbar-width:none}
+ .stages::-webkit-scrollbar{display:none}
+ .stg{flex:0 0 clamp(150px,22vw,200px);scroll-snap-align:center}
+ .how,.who,.revs{grid-template-columns:1fr}
+ .tar{grid-template-columns:1fr;max-width:560px}
+ .tar .hl{transform:none}
+}
+@media (max-width:760px){
+ .logo{font-size:16px;letter-spacing:.1em}
+ .scene{--iw:250vw;min-height:0;padding:34px 14px 44px;background:linear-gradient(180deg,transparent 0,transparent calc(var(--iw)*.26),var(--em3) calc(var(--iw)*.42)),#3b1527 url(assets/scene.jpg) no-repeat center top/var(--iw) auto}
+ .hero::after{display:none}
+ .scene>.parch{width:100%;min-height:0;padding:26px 20px 24px}
+ .eyebrow{letter-spacing:.14em;font-size:11px}
+ .stg{flex-basis:44%}
+ .sdet{grid-template-columns:1fr}
+ .sdet .l,.sdet .r{padding:24px 20px}
+ .sdet .r{border-left:0;border-top:1px solid rgba(201,160,80,.45)}
+ .topics{columns:1}
+ .lena{grid-template-columns:1fr}
+ .lena .ph{min-height:220px;border-right:0;border-bottom:1px solid var(--gold2)}
+ .lena .tx{padding:26px 22px}
+ section{padding-top:56px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+ <div class="wrap">
+  <a class="logo" href="#top" aria-label="Путь Таролога, наверх">
+   <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><g fill="#e2b866"><circle cx="12" cy="12" r="4.4"/><g stroke="#e2b866" stroke-width="1.3" stroke-linecap="round"><path d="M12 1.5v3.4M12 19.1v3.4M1.5 12h3.4M19.1 12h3.4M4.6 4.6l2.4 2.4M17 17l2.4 2.4M4.6 19.4L7 17M17 7l2.4-2.4"/></g></g></svg>
+   ПУТЬ ТАРОЛОГА
+  </a>
+  <nav class="nav" aria-label="Разделы">
+   <a href="#stages">Ступени</a><a href="#how">Как учимся</a><a href="#lena">Кто ведёт</a><a href="#price">Стоимость</a><a href="#faq">Вопросы</a>
+  </nav>
+  <a class="enter" href="index.html">Войти</a>
+ </div>
+</header>
+
+<main id="top">
+ <div class="hero scene">
+  <div class="hero-card parch">
+   <svg class="star" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l1.6 9.4L23 12l-9.4 1.6L12 23l-1.6-9.4L1 12l9.4-1.6z" fill="currentColor"/></svg>
+   <div class="eyebrow" style="margin-top:10px">Онлайн-школа Таро · Ellene Del Sol’</div>
+   <h1>Изучай Таро <em>в своём ритме</em></h1>
+   <p>Интуиция, символы и живая практика — семь ступеней от первого расклада до первых клиентов</p>
+   <div class="acts">
+    <a class="btn" href="index.html"><i>✦</i> Начать путь <i>✦</i></a>
+    <a class="btn ghost" href="#stages">Смотреть ступени</a>
+   </div>
+  </div>
+ </div>
+
+ <section id="stages">
+  <div class="wrap">
+   <div class="sh"><h2>Семь <em>ступеней</em></h2><p>Нажми на ступень, чтобы посмотреть её лекции</p></div>
+   <div class="stages" id="stg" role="tablist" aria-label="Ступени обучения"></div>
+   <div class="sdet parch" id="sdet" role="tabpanel" aria-live="polite"></div>
+  </div>
+ </section>
+
+ <section id="how">
+  <div class="wrap">
+   <div class="sh"><h2>Как <em>учимся</em></h2><p>Всё в личном кабинете, с телефона или компьютера</p></div>
+   <div class="how">
+    <div class="parch"><img src="assets/ic_book.jpg" alt=""><div><h3>Лекции и квесты</h3><p>Видео, конспект и практика. В конце каждой ступени Посвящение, после него открывается следующая.</p></div></div>
+    <div class="parch"><img src="assets/ic_sun.jpg" alt=""><div><h3>Разборы с Леной</h3><p>Присылаешь расклад или вопрос, Лена отвечает лично: текстом, голосовым, с фото.</p></div></div>
+    <div class="parch"><img src="assets/ic_progress.jpg" alt=""><div><h3>Колода и журнал</h3><p>За лекции в твою колоду приходят арканы, к каждой карте свои заметки и расклады.</p></div></div>
+   </div>
+  </div>
+ </section>
+
+ <section>
+  <div class="wrap">
+   <div class="sh"><h2>Кому <em>подойдёт</em></h2></div>
+   <div class="who">
+    <div class="parch"><div class="n">I</div><h3>Только начинаешь</h3><p>Карты пугают, «правил» слишком много. Первая ступень снимает страх и даёт опору.</p></div>
+    <div class="parch"><div class="n">II</div><h3>Знаешь значения, но не читаешь</h3><p>Каждая карта по отдельности понятна, а сюжет не складывается. Учимся читать поток.</p></div>
+    <div class="parch"><div class="n">III</div><h3>Хочешь работать с людьми</h3><p>Последняя ступень про первых клиентов, цену и формат консультации.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="lena">
+  <div class="wrap">
+   <div class="lena parch">
+    <div class="ph"><div class="todo">тут будет фото Лены<br>портрет, лучше с картами</div></div>
+    <div class="tx">
+     <div class="eyebrow">Кто ведёт</div>
+     <h3>Лена · Ellene Del Sol’</h3>
+     <div class="todo">тут будет 3–4 предложения от Лены о себе: как пришла к Таро, в чём её подход, почему учит именно так.</div>
+     <div class="facts">
+      <div><b>—</b>лет практики</div><div><b>—</b>учениц</div><div><b>—</b>раскладов и консультаций</div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section id="price">
+  <div class="wrap">
+   <div class="sh"><h2><em>Стоимость</em></h2><p>Можно идти по одной ступени или взять весь курс. Оплаченная ступень остаётся навсегда.</p></div>
+   <div class="tar">
+    <div class="parch">
+     <h3>Самостоятельно</h3>
+     <div class="pr">от 1 111 ₽</div>
+     <ul><li>ступени по отдельности, первая за 1 888 ₽</li><li>лекции, конспекты и квесты</li><li>колода и журнал практики</li><li>Посвящение с автопроверкой</li></ul>
+     <a class="btn ghost" href="index.html">Начать с первой ступени</a>
+    </div>
+    <div class="parch hl">
+     <span class="badge">с Леной</span>
+     <h3>С обратной связью</h3>
+     <div class="pr">7 777 ₽ <small>/ мес</small></div>
+     <ul><li>чат с Леной пн–пт, 10:00–18:00 мск</li><li>разбор каждого Посвящения</li><li>ответы на вопросы под лекциями</li><li>для тех, кто уже учится на 1-й ступени или взял курс</li></ul>
+     <a class="btn" href="index.html"><i>✦</i> Учиться с Леной <i>✦</i></a>
+    </div>
+    <div class="parch">
+     <h3>Личная практика</h3>
+     <div class="pr">15 555 ₽</div>
+     <ul><li>5 совместных сессий на 6-й ступени</li><li>разборы реальных раскладов</li><li>открывается, когда доходишь до 6-й ступени</li></ul>
+     <a class="btn ghost" href="#stages">Посмотреть путь</a>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section>
+  <div class="wrap">
+   <div class="sh"><h2>Отзывы <em>учениц</em></h2></div>
+   <div class="revs">
+    <div class="parch"><div class="q">“</div><div class="todo">тут будет отзыв ученицы</div><small>имя · какую ступень прошла</small></div>
+    <div class="parch"><div class="q">“</div><div class="todo">тут будет отзыв ученицы</div><small>имя · какую ступень прошла</small></div>
+    <div class="parch"><div class="q">“</div><div class="todo">тут будет отзыв ученицы</div><small>имя · какую ступень прошла</small></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="faq">
+  <div class="wrap">
+   <div class="sh" style="justify-content:center"><h2>Частые <em>вопросы</em></h2></div>
+   <div class="faq">
+    <details class="parch"><summary>Как проходит обучение?</summary><div class="a">Каждая ступень — это лекции с видео и конспектом, квесты-практики и Посвящение в конце. Ступени открываются по порядку: следующая после Посвящения предыдущей. Всё в личном кабинете, с телефона или компьютера.</div></details>
+    <details class="parch"><summary>Что даёт обратная связь?</summary><div class="a">Ты присылаешь свои расклады и вопросы, Лена разбирает их лично. Можно переписываться, отправлять фото и голосовые. Ответы пн–пт с 10 до 18 мск.</div></details>
+    <details class="parch"><summary>Доступ к ступени ограничен по времени?</summary><div class="a">Нет, оплаченная ступень остаётся у тебя навсегда, пересматривать лекции можно сколько угодно.</div></details>
+    <details class="parch"><summary>Нужна ли своя колода? Какая?</summary><div class="a"><span class="todo">тут будет ответ Лены</span></div></details>
+    <details class="parch"><summary>Сколько времени нужно в неделю?</summary><div class="a"><span class="todo">тут будет ответ Лены</span></div></details>
+    <details class="parch"><summary>Как оплатить из-за рубежа?</summary><div class="a"><span class="todo">тут будет ответ Лены: какие способы оплаты подключены</span></div></details>
+   </div>
+  </div>
+ </section>
+
+ <div class="final scene">
+  <div class="parch">
+   <svg class="star" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l1.6 9.4L23 12l-9.4 1.6L12 23l-1.6-9.4L1 12l9.4-1.6z" fill="currentColor"/></svg>
+   <h2>Готова начать путь?</h2>
+   <p>Первая ступень — «Освобождение». Дальше решишь сама.</p>
+   <div class="acts"><a class="btn" href="index.html"><i>✦</i> Начать за 1 888 ₽ <i>✦</i></a><a class="btn ghost" href="index.html">Весь курс сразу</a></div>
+  </div>
+ </div>
+</main>
+
+<footer><div class="wrap"><span>© Путь Таролога · Ellene Del Sol’</span><a href="index.html">Личный кабинет</a></div></footer>
+
+<script>
+const S=[
+ {t:"Освобождение",p:1888,a:"Снимаем страх перед картами и чужие «правила». Подготовка внутреннего пространства для чтения.",e:"расклад «Что меня держит»",r:"Шут",
+  l:["Почему карты «молчат»","Чужие страхи и запреты","Очищение колоды и себя","Тело как инструмент","Тишина перед раскладом","Квест: первый расклад на себя","Ритуал входа и выхода","Энергия вопроса","Дневник таролога"]},
+ {t:"Ясновидение · Яснознание · Потоковое чтение",p:7777,a:"Три канала восприятия и как переключаться между ними, не теряя нить расклада.",e:"потоковое чтение",r:"Маг",
+  l:["Что такое ясновидение","Образ, а не значение","Яснознание: знание без объяснения","Квест: вопрос подруги","Отличить знание от желания","Поток: как не останавливаться","Склейка образов в сюжет","Квест: чтение без книги","Каналы в одном раскладе"]},
+ {t:"Придворные арканы",p:1333,a:"Пажи, рыцари, королевы и короли как люди, роли и состояния.",e:"расклад на отношения",r:"Императрица",
+  l:["Двор как семья","Пажи","Рыцари","Королевы","Короли","Квест: портрет человека","Двор и стихии","Кто есть кто в раскладе","Двор как совет"]},
+ {t:"Числовые арканы и тузы",p:1333,a:"Ритм от туза до десятки, нумерология младших арканов.",e:"расклад на ситуацию",r:"Колесо Фортуны",
+  l:["Тузы: семя масти","Двойки и тройки","Четвёрки и пятёрки","Квест: путь числа","Шестёрки и семёрки","Восьмёрки и девятки","Десятки: итог","Четыре масти рядом","Числа в сюжете"]},
+ {t:"Старшие арканы · Алхимия Сил",p:3777,a:"Путь Шута через 22 аркана и как Силы взаимодействуют в раскладе.",e:"большой расклад",r:"Звезда",
+  l:["Путь Шута","Первая семёрка","Вторая семёрка","Третья семёрка","Квест: мой аркан года","Алхимия: соединение Сил","Конфликт арканов","Старшие среди младших","Судьба и выбор"]},
+ {t:"Таро как кинолента · Открытое потоковое чтение",p:1111,a:"Расклад как фильм: кадры, монтаж, сюжет. Объединение всех инструментов.",e:"открытая сессия с клиентом",r:"Солнце",
+  l:["Расклад как кадр","Монтаж карт","Сюжетная линия","Единство инструментов","Квест: фильм о вопросе","Открытое чтение","Чтение на живом клиенте","Квест: три клиента","Твой стиль"]},
+ {t:"Монетизация",p:0,a:"Открывается в подарок после 6-й ступени: цена, первые клиенты, формат консультации.",e:"сертификат таролога",r:"Мир",
+  l:["Сколько стоит твой расклад","Первые клиенты","Формат консультации","Соцсети таролога","Этика и границы"]}
+];
+const R=["I","II","III","IV","V","VI","VII"];
+const rub=n=>n.toLocaleString("ru-RU")+" ₽";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const box=document.getElementById("stg"),det=document.getElementById("sdet");
+box.innerHTML=S.map((s,i)=>`<button type="button" class="stg" role="tab" id="t${i}" aria-controls="sdet" aria-label="${R[i]} ступень: ${esc(s.t)}" style="background-image:url(assets/stg${i+1}p.webp)">${i===6?'<span class="num gift">подарок</span>':`<span class="num">${R[i]} ступень</span>`}</button>`).join("");
+function pick(i,scroll){
+ box.querySelectorAll(".stg").forEach((b,k)=>{b.classList.toggle("sel",k===i);b.setAttribute("aria-selected",k===i);b.tabIndex=k===i?0:-1});
+ const s=S[i];
+ det.setAttribute("aria-labelledby","t"+i);
+ det.innerHTML=`<div class="l"><div class="eyebrow">${R[i]} ступень · ${s.l.length} лекций</div><h3>${esc(s.t)}</h3><p class="about">${esc(s.a)}</p>
+  <ul class="topics">${s.l.map(x=>`<li${/^Квест/.test(x)?' class="q"':""}>${esc(x)}</li>`).join("")}</ul></div>
+  <div class="r"><div class="kv"><div><span>Стоимость</span><div class="price">${s.p?rub(s.p):"в подарок"}</div></div>
+  <div><span>Посвящение</span><b>${esc(s.e)}</b></div><div><span>Аркан в колоду</span><b>${esc(s.r)}</b></div><div><span>Доступ</span><b>навсегда</b></div></div>
+  ${i===0?'<a class="btn" href="index.html"><i>✦</i> Начать с этой ступени <i>✦</i></a>':i===6?'<p class="about" style="margin:0">Открывается сама после Посвящения на 6-й ступени.</p>':'<p class="about" style="margin:0">Открывается после Посвящения предыдущей ступени.</p>'}</div>`;
+ if(scroll)box.children[i].scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
+}
+box.addEventListener("click",e=>{const b=e.target.closest(".stg");if(b)pick([...box.children].indexOf(b))});
+box.addEventListener("keydown",e=>{const i=[...box.children].findIndex(b=>b.classList.contains("sel"));let n=i;
+ if(e.key==="ArrowRight")n=Math.min(6,i+1);else if(e.key==="ArrowLeft")n=Math.max(0,i-1);else return;
+ e.preventDefault();pick(n,true);box.children[n].focus()});
+pick(0);
+</script>
+</body>
+</html>
