@@ -63,6 +63,31 @@ img{max-width:100%;display:block}
 .hero-card .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .star{display:block;margin:0 auto;color:var(--gold2)}
 
+/* первый экран: картина Лены целиком */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fs{position:relative;height:calc(100vh - 64px);height:calc(100dvh - 64px);min-height:340px;overflow:hidden;background:#1b0b10;display:grid;place-items:center}
+.fs::before{content:"";position:absolute;inset:-40px;background:url(assets/scene.jpg) center/cover no-repeat;filter:blur(28px) brightness(.55) saturate(1.1)}
+.fs-wrap{position:relative;aspect-ratio:1280/661;width:min(100vw,calc((100dvh - 64px) * 1280 / 661));box-shadow:0 0 60px 30px rgba(20,8,12,.45)}
+.fs-pic{position:absolute;inset:0;background:url(assets/scene.jpg) center/cover no-repeat}
+.fs-go{position:absolute;left:39.45%;top:50.98%;width:19.92%;height:8.62%;border-radius:12px}
+.fs-tiles{position:absolute;inset:0;pointer-events:none}
+.fs-t{position:absolute;top:70.8%;width:18.9%;height:25.1%;left:calc(8.75% + var(--i) * 21.1%);border-radius:22px;pointer-events:auto;transition:transform .15s}
+.fs-go:hover,.fs-t:hover{box-shadow:0 0 0 3px rgba(240,207,160,.7),0 0 24px rgba(240,207,160,.55)}
+.fs-t:hover{transform:translateY(-3px)}
+.fs-go:focus-visible,.fs-t:focus-visible{outline:3px solid #f2cfa0;outline-offset:2px}
+.fs-down{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fbecd8;background:rgba(59,21,39,.65);border:1px solid var(--gold);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translate(-50%,5px)}}
+@media (min-aspect-ratio:1280/560){.fs-down{display:none}}
+@media (max-width:700px),(max-aspect-ratio:1/1){
+ .fs{height:auto;min-height:0;display:block}.fs::before{display:none}.fs-down{display:none}
+ .fs-wrap{aspect-ratio:auto;width:100%;box-shadow:none;display:flex;flex-direction:column;background:linear-gradient(180deg,#2a0f17,#1b0b10)}
+ .fs-pic{position:relative;inset:auto;aspect-ratio:600/442;background-size:213.33% auto;background-position:50% 0}
+ .fs-go{left:27.5%;top:76.2%;width:42.5%;height:12.9%}
+ .fs-tiles{position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 14px 20px;pointer-events:auto;max-width:720px;margin:0 auto;width:100%;
+  background:linear-gradient(180deg,rgba(27,11,16,.95),rgba(27,11,16,.78) 35%,rgba(27,11,16,.92)),repeating-conic-gradient(#d9c2a6 0 25%,#3b2a2a 0 50%) 0 0/48px 48px}
+ .fs-t{position:static;width:auto;height:auto;aspect-ratio:242/166;background:url(assets/scene.jpg) no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.5%;border-radius:18px}
+ .fs-t[style*="--i:0"]{--x:112}.fs-t[style*="--i:1"]{--x:385}.fs-t[style*="--i:2"]{--x:655}.fs-t[style*="--i:3"]{--x:925}
+}
 /* секции */
 section{padding:72px 0 0}
 .sh{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:26px}
@@ -197,17 +222,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 </header>
 
 <main id="top">
- <div class="hero scene">
-  <div class="hero-card parch">
-   <svg class="star" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l1.6 9.4L23 12l-9.4 1.6L12 23l-1.6-9.4L1 12l9.4-1.6z" fill="currentColor"/></svg>
-   <div class="eyebrow" style="margin-top:10px">Онлайн-школа Таро · Ellene Del Sol’</div>
-   <h1>Изучай Таро <em>в своём ритме</em></h1>
-   <p>Интуиция, символы и живая практика — семь ступеней от первого расклада до первых клиентов</p>
-   <div class="acts">
-    <a class="btn" href="index.html"><i>✦</i> Начать путь <i>✦</i></a>
-    <a class="btn ghost" href="#stages">Смотреть ступени</a>
+ <div class="fs" id="first">
+  <h1 class="sr">Путь Таролога — изучай Таро в своём ритме. Онлайн-школа Таро Ellene Del Sol’</h1>
+  <div class="fs-wrap">
+   <div class="fs-pic" role="img" aria-label="Зал с открытыми дверями, солнцем и луной: «Изучайте Таро в своём ритме»">
+    <a class="fs-go" href="index.html" aria-label="Начать путь"></a>
    </div>
+   <nav class="fs-tiles" aria-label="Разделы">
+    <a class="fs-t" style="--i:0" href="#stages" aria-label="Обучение: семь ступеней"></a>
+    <a class="fs-t" style="--i:1" href="#how" aria-label="Практика: как учимся"></a>
+    <a class="fs-t" style="--i:2" href="#who" aria-label="Расклады: кому подойдёт"></a>
+    <a class="fs-t" style="--i:3" href="#lena" aria-label="Журнал: кто ведёт"></a>
+   </nav>
   </div>
+  <a class="fs-down" href="#stages" aria-label="Листать ниже"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
  </div>
 
  <section id="stages">
@@ -231,7 +259,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
  <section>
   <div class="wrap">
-   <div class="sh"><h2>Кому <em>подойдёт</em></h2></div>
+   <div class="sh" id="who"><h2>Кому <em>подойдёт</em></h2></div>
    <div class="who">
     <div class="parch"><div class="n">I</div><h3>Только начинаешь</h3><p>Карты пугают, «правил» слишком много. Первая ступень снимает страх и даёт опору.</p></div>
     <div class="parch"><div class="n">II</div><h3>Знаешь значения, но не читаешь</h3><p>Каждая карта по отдельности понятна, а сюжет не складывается. Учимся читать поток.</p></div>
