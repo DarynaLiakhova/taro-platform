@@ -53,41 +53,55 @@ img{max-width:100%;display:block}
 .eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#b07a3e}
 
 /* первый экран */
-.scene{--iw:max(100vw,1350px);position:relative;min-height:calc(var(--iw)*.345);padding:calc(var(--iw)*.072) 16px 36px;background:#3b1527 url(assets/scene.jpg) no-repeat center top;background-size:var(--iw) auto;overflow:hidden}
-.scene>.parch{position:relative;z-index:1;margin:0 auto;width:max(400px,calc(var(--iw)*.34));max-width:100%;min-height:calc(var(--iw)*.262);display:flex;flex-direction:column;justify-content:center;text-align:center}
-.hero::after{content:"";position:absolute;inset:auto 0 0;height:70px;background:linear-gradient(180deg,transparent,rgba(31,67,57,.9));pointer-events:none}
-.hero-card{padding:28px 32px 26px}
-.hero-card h1{font-family:var(--serif);font-weight:500;font-size:clamp(36px,3.6vw,54px);line-height:1.08;margin:12px 0 10px}
-.hero-card h1 em{color:var(--wine2)}
-.hero-card p{font-family:var(--serif);font-style:italic;font-size:clamp(16px,1.3vw,19px);color:var(--wine);margin:0 0 22px}
-.hero-card .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .star{display:block;margin:0 auto;color:var(--gold2)}
 
-/* первый экран: картина Лены целиком */
+/* первый экран: картина Лены, текст живой поверх чистой таблички */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.fs{position:relative;height:calc(100vh - 64px);height:calc(100dvh - 64px);min-height:340px;overflow:hidden;background:#1b0b10;display:grid;place-items:center}
-.fs::before{content:"";position:absolute;inset:-40px;background:url(assets/scene.jpg) center/cover no-repeat;filter:blur(28px) brightness(.55) saturate(1.1)}
-.fs-wrap{position:relative;aspect-ratio:1280/661;width:min(100vw,calc((100dvh - 64px) * 1280 / 661));box-shadow:0 0 60px 30px rgba(20,8,12,.45)}
-.fs-pic{position:absolute;inset:0;background:url(assets/scene.jpg) center/cover no-repeat}
-.fs-go{position:absolute;left:39.45%;top:50.98%;width:19.92%;height:8.62%;border-radius:12px}
-.fs-tiles{position:absolute;inset:0;pointer-events:none}
-.fs-t{position:absolute;top:70.8%;width:18.9%;height:25.1%;left:calc(8.75% + var(--i) * 21.1%);border-radius:22px;pointer-events:auto;transition:transform .15s}
-.fs-go:hover,.fs-t:hover{box-shadow:0 0 0 3px rgba(240,207,160,.7),0 0 24px rgba(240,207,160,.55)}
-.fs-t:hover{transform:translateY(-3px)}
-.fs-go:focus-visible,.fs-t:focus-visible{outline:3px solid #f2cfa0;outline-offset:2px}
-.fs-down{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fbecd8;background:rgba(59,21,39,.65);border:1px solid var(--gold);animation:bob 2.4s ease-in-out infinite}
+.fs{position:relative;height:calc(100vh - 64px);height:calc(100svh - 64px);min-height:420px;overflow:hidden;background:#1b0b10;display:grid;place-items:center}
+.fs::before{content:"";position:absolute;inset:-40px;background:url(assets/scene-1600.webp) center/cover no-repeat;filter:blur(30px) brightness(.5) saturate(1.1)}
+.fs-crop{position:absolute;inset:0}
+.fs-wrap{container-type:inline-size;position:relative;width:min(100vw,calc((100svh - 64px) * 1280 / 661));aspect-ratio:1280/661;overflow:hidden;box-shadow:0 0 70px 30px rgba(20,8,12,.5)}
+.fs-pic{--L:0%;--CW:100%;position:absolute;top:0;left:var(--L);width:var(--CW);aspect-ratio:1280/661;container-type:inline-size;
+ background:url(assets/scene-1600.webp) center/100% 100% no-repeat}
+@media (min-width:1300px),(min-resolution:1.5dppx){.fs-pic{background-image:url(assets/scene-2560.webp)}}
+.plq{position:absolute;left:38.4%;width:23.2%;text-align:center;color:#3a1428}
+.plq-t{top:22.6%;font-family:var(--serif);font-style:italic;font-weight:500;font-size:3.35cqw;line-height:1.1;margin:0;letter-spacing:-.005em}
+.plq-s{top:41.4%;font-family:var(--serif);font-style:italic;font-size:1.22cqw;line-height:1.38;color:#5a2a33;margin:0}
+.plq-b{position:absolute;left:41.15%;width:17.75%;top:52.75%;height:6.15%;display:flex;align-items:center;justify-content:center;gap:.7cqw;
+ font-family:var(--serif);font-size:1.5cqw;color:#fbecd8;text-decoration:none;border-radius:.45cqw;
+ background:linear-gradient(180deg,#8d2a45,#6a1a33);box-shadow:inset 0 0 0 .08cqw rgba(240,207,160,.35);transition:filter .2s,box-shadow .2s}
+.plq-b svg{width:1.4cqw;height:1.4cqw}
+.plq-b:hover{filter:brightness(1.15);box-shadow:inset 0 0 0 .08cqw rgba(240,207,160,.6),0 0 1.6cqw rgba(240,207,160,.55)}
+.plq-b:focus-visible,.tile:focus-visible{outline:3px solid #f2cfa0;outline-offset:3px}
+.tiles{position:absolute;inset:0;pointer-events:none}
+.tile{position:absolute;top:71.2%;width:18.6%;height:24.4%;left:calc(8.9% + var(--i) * 21.1%);border-radius:1.6cqw;pointer-events:auto;text-decoration:none;
+ transition:transform .2s,box-shadow .2s}
+.tile span{position:absolute;left:0;right:0;top:56%;text-align:center;font-family:var(--serif);font-size:1.75cqw;color:#3a1428;line-height:1.2}
+.tile:hover{transform:translateY(-.4cqw);box-shadow:0 0 0 .22cqw rgba(240,207,160,.75),0 1cqw 2.4cqw rgba(20,6,10,.45)}
+.fs-down{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:2;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fbecd8;background:rgba(59,21,39,.7);border:1px solid var(--gold);animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translate(-50%,5px)}}
-@media (min-aspect-ratio:1280/560){.fs-down{display:none}}
-@media (max-width:700px),(max-aspect-ratio:1/1){
- .fs{height:auto;min-height:0;display:block}.fs::before{display:none}.fs-down{display:none}
- .fs-wrap{aspect-ratio:auto;width:100%;box-shadow:none;display:flex;flex-direction:column;background:linear-gradient(180deg,#2a0f17,#1b0b10)}
- .fs-pic{position:relative;inset:auto;aspect-ratio:600/442;background-size:213.33% auto;background-position:50% 0}
- .fs-go{left:27.5%;top:76.2%;width:42.5%;height:12.9%}
- .fs-tiles{position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 14px 20px;pointer-events:auto;max-width:720px;margin:0 auto;width:100%;
-  background:linear-gradient(180deg,rgba(27,11,16,.95),rgba(27,11,16,.78) 35%,rgba(27,11,16,.92)),repeating-conic-gradient(#d9c2a6 0 25%,#3b2a2a 0 50%) 0 0/48px 48px}
- .fs-t{position:static;width:auto;height:auto;aspect-ratio:242/166;background:url(assets/scene.jpg) no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.5%;border-radius:18px}
- .fs-t[style*="--i:0"]{--x:112}.fs-t[style*="--i:1"]{--x:385}.fs-t[style*="--i:2"]{--x:655}.fs-t[style*="--i:3"]{--x:925}
+@media (min-aspect-ratio:1280/600){.fs-down{display:none}}
+/* телефон и узкие экраны: центр картины крупно, плитки сеткой ниже */
+@media (max-width:760px),(max-aspect-ratio:1/1){
+ .fs{height:auto;min-height:0;display:block;background:#1b0b10}.fs::before,.fs-down{display:none}
+ .fs-wrap{width:100%;aspect-ratio:auto;box-shadow:none;overflow:visible}
+ .fs-wrap{container-type:normal}
+ .fs-crop{position:relative;inset:auto;width:100%;aspect-ratio:600/452;overflow:hidden}
+ .fs-pic{--CW:213.33%;--L:-56.67%;background-image:url(assets/scene-2560.webp)}
+ .tiles{position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 14px 22px;pointer-events:auto;
+  background:linear-gradient(180deg,#1b0b10,#24101a)}
+ .tile{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:242/166;border-radius:16px;
+  background:url(assets/scene-1600.webp) no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.6%;container-type:inline-size}
+ .tile span{font-size:11.5cqw;top:57%}
+ .plq{left:37.2%;width:25.6%}
+ .plq-t{font-size:3.55cqw}
+ .plq-s{font-size:1.42cqw;top:41.6%}
+ .plq-b{font-size:1.78cqw}
+ .plq-b svg{width:1.6cqw;height:1.6cqw}
+ .tile[style*="--i:0"]{--x:112}.tile[style*="--i:1"]{--x:385}.tile[style*="--i:2"]{--x:655}.tile[style*="--i:3"]{--x:925}
+ .tile:hover{transform:none}
 }
+@media (min-width:600px) and ((max-width:760px) or (max-aspect-ratio:1/1)){.tiles{grid-template-columns:repeat(4,1fr);gap:14px;padding:16px 16px 24px}}
 /* секции */
 section{padding:72px 0 0}
 .sh{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:26px}
@@ -169,8 +183,8 @@ section{padding:72px 0 0}
 .faq .a{padding:0 24px 20px;color:var(--ink2)}
 
 /* финал */
-.final{margin-top:90px;border-top:1px solid var(--gold)}
-.final .parch{padding:28px 32px}
+.final{margin-top:90px;padding:80px 16px 70px;display:grid;place-items:center;border-top:1px solid rgba(214,168,102,.35);background:radial-gradient(60% 80% at 50% 40%,rgba(147,56,74,.28),transparent 70%)}
+.final .parch{padding:36px 40px;text-align:center;width:min(620px,100%)}
 .final h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.2vw,46px);margin:10px 0 8px}
 .final p{margin:0 0 22px;color:var(--ink2)}
 .final .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
@@ -189,10 +203,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 }
 @media (max-width:760px){
  .logo{font-size:16px;letter-spacing:.1em}
- .scene{--iw:250vw;min-height:0;padding:34px 14px 44px;background:linear-gradient(180deg,transparent 0,transparent calc(var(--iw)*.26),var(--em3) calc(var(--iw)*.42)),#3b1527 url(assets/scene.jpg) no-repeat center top/var(--iw) auto}
- .hero::after{display:none}
- .scene>.parch{width:100%;min-height:0;padding:26px 20px 24px}
- .eyebrow{letter-spacing:.14em;font-size:11px}
+  .eyebrow{letter-spacing:.14em;font-size:11px}
  .stg{flex-basis:44%}
  .sdet{grid-template-columns:1fr}
  .sdet .l,.sdet .r{padding:24px 20px}
@@ -223,17 +234,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <main id="top">
  <div class="fs" id="first">
-  <h1 class="sr">Путь Таролога — изучай Таро в своём ритме. Онлайн-школа Таро Ellene Del Sol’</h1>
   <div class="fs-wrap">
-   <div class="fs-pic" role="img" aria-label="Зал с открытыми дверями, солнцем и луной: «Изучайте Таро в своём ритме»">
-    <a class="fs-go" href="index.html" aria-label="Начать путь"></a>
+   <div class="fs-crop">
+    <div class="fs-pic">
+     <h1 class="plq plq-t">Изучайте Таро<br>в своём ритме</h1>
+     <p class="plq plq-s">Интуиция, символы и практика<br>для глубокого понимания Таро</p>
+     <a class="plq-b" href="index.html">Начать путь <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
    </div>
-   <nav class="fs-tiles" aria-label="Разделы">
-    <a class="fs-t" style="--i:0" href="#stages" aria-label="Обучение: семь ступеней"></a>
-    <a class="fs-t" style="--i:1" href="#how" aria-label="Практика: как учимся"></a>
-    <a class="fs-t" style="--i:2" href="#who" aria-label="Расклады: кому подойдёт"></a>
-    <a class="fs-t" style="--i:3" href="#lena" aria-label="Журнал: кто ведёт"></a>
-   </nav>
+   <nav class="tiles" aria-label="Разделы">
+      <a class="tile" style="--i:0" href="#stages"><span>Ступени</span></a>
+      <a class="tile" style="--i:1" href="#how"><span>Как учимся</span></a>
+      <a class="tile" style="--i:2" href="#price"><span>Стоимость</span></a>
+      <a class="tile" style="--i:3" href="#faq"><span>Вопросы</span></a>
+     </nav>
   </div>
   <a class="fs-down" href="#stages" aria-label="Листать ниже"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
  </div>
@@ -336,7 +350,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
  </section>
 
- <div class="final scene">
+ <div class="final">
   <div class="parch">
    <svg class="star" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l1.6 9.4L23 12l-9.4 1.6L12 23l-1.6-9.4L1 12l9.4-1.6z" fill="currentColor"/></svg>
    <h2>Готова начать путь?</h2>
