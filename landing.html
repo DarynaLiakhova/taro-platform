@@ -240,6 +240,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
  .fc-b .acts{display:flex;gap:8px;width:100%}
  .fc-b .btn{flex:1;font-size:15px;padding:10px 8px}
  .fc-b .btn.ghost{flex:none;padding:10px 12px;font-size:14px}
+ .fc-b .acts:not(:has(a)) .btn.ghost{flex:1}
+ .fc-b .lk svg{vertical-align:-1px;margin-right:5px}
+ .fc-b .lk{margin:0 0 10px;text-wrap:balance;font-size:12.5px;color:#8a5a3c;line-height:1.3}
  .msheet{position:fixed;inset:0;z-index:40;display:block;pointer-events:none}
  .msheet::before{content:"";position:absolute;inset:0;background:rgba(10,4,6,.55);opacity:0;transition:opacity .25s}
  .msheet .sh-p{position:absolute;left:0;right:0;bottom:0;max-height:82svh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 22px calc(24px + env(safe-area-inset-bottom));
@@ -481,6 +484,7 @@ box.addEventListener("keydown",e=>{const i=[...box.children].findIndex(b=>b.clas
  e.preventDefault();pick(n,true);box.children[n].focus()});
 pick(0);
 (()=>{const mp=document.getElementById("mpath"),P="index.html";
+ const lock='<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
  const rot='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
  mp.innerHTML=S.map((s,i)=>`<li class="mp"><div class="mp-step"><span class="mp-n${i===6?" gift":""}">${i===6?"подарок":R[i]+" ступень"}</span></div>
   <div class="flip" role="button" tabindex="0" aria-pressed="false" aria-label="${R[i]} ступень, ${esc(s.t)}. Нажми, чтобы перевернуть">
@@ -488,7 +492,7 @@ pick(0);
    <div class="fc fc-b"><span class="k">${R[i]} ступень</span><h3>${esc(s.t)}</h3><p class="ab">${esc(s.a)}</p>
     <div class="meta"><div><b>${s.l.length} лекций</b> · квесты · Посвящение</div><div>Аркан в колоду: <b>${esc(s.r)}</b></div></div>
     <div class="pr">${s.p?rub(s.p):"в подарок"}</div>
-    <div class="acts">${i===6?'':`<a class="btn" href="${P}">${i===0?"Начать":"Открыть"}</a>`}<button class="btn ghost" type="button" data-l="${i}">${i===6?"Что внутри":"Лекции"}</button></div>
+    ${i?`<p class="lk">${lock}${i===6?"Отдельно не покупается":`Откроется после Посвящения ${R[i-1]}&nbsp;ступени`}</p>`:""}<div class="acts">${i===0?`<a class="btn" href="${P}">Начать</a>`:""}<button class="btn ghost" type="button" data-l="${i}">${i===6?"Что внутри":"Лекции"}</button></div>
    </div></div></div></li>`).join("");
  const flip=f=>{const o=f.classList.toggle("on");f.setAttribute("aria-pressed",o)};
  mp.addEventListener("click",e=>{const l=e.target.closest("[data-l]");if(l){e.stopPropagation();sheet(+l.dataset.l);return}
