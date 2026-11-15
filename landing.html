@@ -81,27 +81,46 @@ img{max-width:100%;display:block}
 .fs-down{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:2;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fbecd8;background:rgba(59,21,39,.7);border:1px solid var(--gold);animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translate(-50%,5px)}}
 @media (min-aspect-ratio:1280/600){.fs-down{display:none}}
-/* телефон и узкие экраны: центр картины крупно, плитки сеткой ниже */
+/* телефон и узкие экраны: картина на весь первый экран, разделы внизу */
+.mnav{display:none}
 @media (max-width:760px),(max-aspect-ratio:1/1){
- .fs{height:auto;min-height:0;display:block;background:#1b0b10}.fs::before,.fs-down{display:none}
- .fs-wrap{width:100%;aspect-ratio:auto;box-shadow:none;overflow:visible}
- .fs-wrap{container-type:normal}
- .fs-crop{position:relative;inset:auto;width:100%;aspect-ratio:600/452;overflow:hidden}
- .fs-pic{--CW:213.33%;--L:-56.67%;background-image:url(assets/scene-2560.webp)}
- .tiles{position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 14px 22px;pointer-events:auto;
-  background:linear-gradient(180deg,#1b0b10,#24101a)}
- .tile{position:relative;left:auto;top:auto;width:auto;height:auto;aspect-ratio:242/166;border-radius:16px;
-  background:url(assets/scene-1600.webp) no-repeat;background-size:528.9% auto;background-position:calc(var(--x) / 1038 * 100%) 94.6%;container-type:inline-size}
- .tile span{font-size:11.5cqw;top:57%}
- .plq{left:37.2%;width:25.6%}
- .plq-t{font-size:3.55cqw}
- .plq-s{font-size:1.42cqw;top:41.6%}
- .plq-b{font-size:1.78cqw}
- .plq-b svg{width:1.6cqw;height:1.6cqw}
- .tile[style*="--i:0"]{--x:112}.tile[style*="--i:1"]{--x:385}.tile[style*="--i:2"]{--x:655}.tile[style*="--i:3"]{--x:925}
- .tile:hover{transform:none}
+ .fs{--H:calc(100svh - 64px);--PW:min(337vw,(var(--H) - 150px) * 2.747);height:var(--H);min-height:500px;display:flex;flex-direction:column;background:#1b0b10;place-items:initial}
+ .fs::before,.fs-down,.tiles{display:none}
+ .fs-wrap{position:relative;flex:none;width:100%;height:calc(var(--PW) * .3645);aspect-ratio:auto;box-shadow:none;overflow:hidden;container-type:normal}
+ .fs-crop{position:absolute;inset:0}
+ .fs-pic{width:var(--PW);left:50%;transform:translateX(-50%);background-image:url(assets/scene-2560.webp)}
+ .fs-wrap::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;background:linear-gradient(180deg,rgba(27,11,16,0),#1b0b10);z-index:1}
+ .mnav{display:block;flex:1;min-height:0;container:mn / size;position:relative;z-index:2;
+  background:radial-gradient(90% 70% at 50% 0%,rgba(147,56,74,.22),transparent 70%),#1b0b10}
+ .mnav-in{height:100%;display:grid;grid-template-columns:repeat(4,1fr);align-content:center;gap:4px;padding:6px 10px calc(10px + env(safe-area-inset-bottom))}
+ .mnav a{display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;color:#f6e3c8;font-family:var(--serif);font-size:14px;line-height:1.1;text-align:center;padding:4px 2px;border-radius:12px}
+ .mnav i{width:52px;height:36px;border-radius:10px;border:1px solid var(--gold2);background:center/cover no-repeat;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+ .mnav a:nth-child(1) i{background-image:url(assets/tile1.webp)}.mnav a:nth-child(2) i{background-image:url(assets/tile2.webp)}
+ .mnav a:nth-child(3) i{background-image:url(assets/tile3.webp)}.mnav a:nth-child(4) i{background-image:url(assets/tile4.webp)}
+ .mnav a:active{background:rgba(240,207,160,.12)}
+ @container mn (min-height:190px){
+  .mnav-in{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;align-content:stretch;gap:8px;padding:6px 12px calc(12px + env(safe-area-inset-bottom))}
+  .mnav a{position:relative;padding:0;gap:0;display:grid;place-items:center;container-type:size}
+  .mnav a::before{content:"";grid-area:1/1;width:min(100cqw,145.8cqh);aspect-ratio:242/166;border-radius:14px;background:center/cover no-repeat;box-shadow:0 6px 14px rgba(0,0,0,.45),0 0 0 1px rgba(201,160,80,.5)}
+  .mnav a:nth-child(1)::before{background-image:url(assets/tile1.webp)}.mnav a:nth-child(2)::before{background-image:url(assets/tile2.webp)}
+  .mnav a:nth-child(3)::before{background-image:url(assets/tile3.webp)}.mnav a:nth-child(4)::before{background-image:url(assets/tile4.webp)}
+  .mnav a:active::before{filter:brightness(1.1)}
+  .mnav i{display:none}
+  .mnav a span{grid-area:1/1;align-self:center;transform:translateY(min(18cqh,12.3cqw));font-size:clamp(13px,min(13cqh,9cqw),19px);color:#3a1428;position:relative}
+ }
 }
-@media (min-width:600px) and ((max-width:760px) or (max-aspect-ratio:1/1)){.tiles{grid-template-columns:repeat(4,1fr);gap:14px;padding:16px 16px 24px}}
+/* бургер */
+.burger{display:none;width:44px;height:44px;border:1px solid var(--gold);border-radius:12px;background:transparent;cursor:pointer;padding:0;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.burger span{display:block;width:20px;height:1.5px;background:#fbecd8;border-radius:2px;transition:transform .25s,opacity .2s}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.menu{position:fixed;top:64px;left:0;right:0;z-index:19;background:linear-gradient(180deg,#5b1f2d,#3b1527);border-bottom:1px solid var(--gold);box-shadow:0 18px 30px rgba(10,4,6,.5);padding:8px 0 14px;display:flex;flex-direction:column}
+.menu[hidden]{display:none}
+.menu a{font-family:var(--serif);font-size:20px;color:#fbecd8;text-decoration:none;padding:13px 24px;border-bottom:1px solid rgba(214,168,102,.18)}
+.menu a:last-child{border-bottom:0}
+@media (max-width:1100px){.burger{display:flex}.top .wrap{gap:10px}.enter{margin-left:auto}}
+@media (min-width:1101px){.menu{display:none!important}}
 /* секции */
 section{padding:72px 0 0}
 .sh{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:26px}
@@ -229,8 +248,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    <a href="#stages">Ступени</a><a href="#how">Как учимся</a><a href="#lena">Кто ведёт</a><a href="#price">Стоимость</a><a href="#faq">Вопросы</a>
   </nav>
   <a class="enter" href="index.html">Войти</a>
+  <button class="burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
  </div>
 </header>
+<div class="menu" id="menu" hidden>
+ <a href="#stages">Ступени</a><a href="#how">Как учимся</a><a href="#lena">Кто ведёт</a><a href="#price">Стоимость</a><a href="#faq">Вопросы</a>
+</div>
 
 <main id="top">
  <div class="fs" id="first">
@@ -249,6 +272,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <a class="tile" style="--i:3" href="#faq"><span>Вопросы</span></a>
      </nav>
   </div>
+  <nav class="mnav" aria-label="Разделы"><div class="mnav-in">
+   <a href="#stages"><i></i><span>Ступени</span></a><a href="#how"><i></i><span>Как учимся</span></a><a href="#price"><i></i><span>Стоимость</span></a><a href="#faq"><i></i><span>Вопросы</span></a>
+  </div></nav>
   <a class="fs-down" href="#stages" aria-label="Листать ниже"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
  </div>
 
@@ -400,6 +426,12 @@ box.addEventListener("keydown",e=>{const i=[...box.children].findIndex(b=>b.clas
  if(e.key==="ArrowRight")n=Math.min(6,i+1);else if(e.key==="ArrowLeft")n=Math.max(0,i-1);else return;
  e.preventDefault();pick(n,true);box.children[n].focus()});
 pick(0);
+const bg=document.querySelector(".burger"),mn=document.getElementById("menu");
+const setM=o=>{mn.hidden=!o;bg.setAttribute("aria-expanded",o)};
+bg.addEventListener("click",()=>setM(mn.hidden));
+mn.addEventListener("click",e=>{if(e.target.closest("a"))setM(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")setM(false)});
+document.addEventListener("click",e=>{if(!mn.hidden&&!e.target.closest(".menu,.burger"))setM(false)});
 </script>
 </body>
 </html>
