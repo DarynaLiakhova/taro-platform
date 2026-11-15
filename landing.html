@@ -247,6 +247,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
  .msheet::before{content:"";position:absolute;inset:0;background:rgba(10,4,6,.55);opacity:0;transition:opacity .25s}
  .msheet .sh-p{position:absolute;left:0;right:0;bottom:0;max-height:82svh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 22px calc(24px + env(safe-area-inset-bottom));
   background:linear-gradient(180deg,var(--parch),var(--parch2));color:var(--ink);transform:translateY(100%);transition:transform .3s cubic-bezier(.3,.7,.2,1)}
+ .msheet{visibility:hidden;transition:visibility 0s .3s}
+ .msheet.on{visibility:visible;transition:none}
  .msheet.on{pointer-events:auto}.msheet.on::before{opacity:1}.msheet.on .sh-p{transform:none}
  .sh-p .grab{width:42px;height:4px;border-radius:2px;background:rgba(108,45,47,.3);margin:0 auto 14px}
  .sh-p h3{font-family:var(--serif);font-weight:500;font-size:24px;margin:4px 0 12px}
@@ -254,6 +256,29 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
  .sh-p .close{position:absolute;top:12px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--gold2);background:transparent;color:var(--wine);font-size:20px;line-height:1}
 }
 @media (max-width:760px) and (prefers-reduced-motion:reduce){.flip-in{transition:none}}
+/* костяк: ритм блоков */
+section.band{margin-top:80px;padding:64px 0;background:linear-gradient(180deg,#4a1a28,#3a1422);border-top:1px solid rgba(214,168,102,.45);border-bottom:1px solid rgba(214,168,102,.45)}
+section.band+section{padding-top:80px}
+.res{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.res-i{border-top:1px solid rgba(214,168,102,.5);padding-top:16px;display:grid;gap:10px}
+.res-n{font-family:var(--serif);font-style:italic;font-size:44px;line-height:1;color:var(--gold)}
+.res .todo{color:#e8c9a8;border-color:rgba(232,201,168,.45);background:transparent}
+.total{margin-top:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 28px;flex-wrap:wrap}
+.total b{display:block;margin-top:6px;font-weight:400}
+@media (max-width:1100px){.res{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){
+ body{font-size:16px}
+ .res{grid-template-columns:1fr;gap:14px}
+ .res-i{grid-template-columns:52px 1fr;align-items:start;padding-top:14px}
+ .res-n{font-size:34px}
+ section.band{margin-top:56px;padding:48px 0}
+ section.band+section{padding-top:56px}
+ .how p,.who p,.tar li,.faq .a,.sdet .about{font-size:16px}
+ .eyebrow{font-size:12px}
+ .fc-b .ab{font-size:15px}.fc-b .meta{font-size:14px}.fc-b .lk{font-size:13.5px}
+ .total{padding:20px;flex-direction:column;align-items:stretch;text-align:center}
+ .mfs-n a{background:transparent;border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;font-size:15px;color:#f3dcc4;text-decoration:underline;text-decoration-color:rgba(214,168,102,.6);text-underline-offset:5px}
+}
 /* адаптив */
 @media (max-width:1100px){
  .nav{display:none}.top .wrap{justify-content:space-between}
@@ -296,7 +321,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
  </div>
 </header>
 <div class="menu" id="menu" hidden>
- <a href="#stages">Ступени</a><a href="#how">Как учимся</a><a href="#lena">Кто ведёт</a><a href="#price">Стоимость</a><a href="#faq">Вопросы</a>
+ <a href="#for">Кому подойдёт</a><a href="#lena">Кто ведёт</a><a href="#stages">Ступени</a><a href="#how">Как учимся</a><a href="#price">Стоимость</a><a href="#reviews">Отзывы</a><a href="#faq">Вопросы</a>
 </div>
 
 <main id="top">
@@ -333,6 +358,45 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    </nav>
  </div>
 
+ <section id="for">
+  <div class="wrap">
+   <div class="sh" id="who"><h2>Кому <em>подойдёт</em></h2></div>
+   <div class="who">
+    <div class="parch"><div class="n">I</div><h3>Только начинаешь</h3><p>Карты пугают, «правил» слишком много. Первая ступень снимает страх и даёт опору.</p></div>
+    <div class="parch"><div class="n">II</div><h3>Знаешь значения, но не читаешь</h3><p>Каждая карта по отдельности понятна, а сюжет не складывается. Учимся читать поток.</p></div>
+    <div class="parch"><div class="n">III</div><h3>Хочешь работать с людьми</h3><p>Последняя ступень про первых клиентов, цену и формат консультации.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="result">
+  <div class="wrap">
+   <div class="sh"><h2>Что ты будешь <em>уметь</em></h2></div>
+   <div class="res">
+    <div class="res-i"><span class="res-n">01</span><div class="todo">результат 1: например, «читаешь расклад без книги»</div></div>
+    <div class="res-i"><span class="res-n">02</span><div class="todo">результат 2</div></div>
+    <div class="res-i"><span class="res-n">03</span><div class="todo">результат 3</div></div>
+    <div class="res-i"><span class="res-n">04</span><div class="todo">результат 4: например, «берёшь первых клиентов»</div></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="lena" class="band">
+  <div class="wrap">
+   <div class="lena parch">
+    <div class="ph"><div class="todo">тут будет фото Лены<br>портрет, лучше с картами</div></div>
+    <div class="tx">
+     <div class="eyebrow">Кто ведёт</div>
+     <h3>Лена · Ellene Del Sol’</h3>
+     <div class="todo">тут будет 3–4 предложения от Лены о себе: как пришла к Таро, в чём её подход, почему учит именно так.</div>
+     <div class="facts">
+      <div><b>—</b>лет практики</div><div><b>—</b>учениц</div><div><b>—</b>раскладов и консультаций</div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </section>
+
  <section id="stages">
   <div class="wrap">
    <div class="sh"><h2>Семь <em>ступеней</em></h2><p>Нажми на ступень, чтобы посмотреть её лекции</p><span class="mhint" hidden>Нажми на карту, чтобы перевернуть её</span></div>
@@ -349,33 +413,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="parch"><img src="assets/ic_book.jpg" alt=""><div><h3>Лекции и квесты</h3><p>Видео, конспект и практика. В конце каждой ступени Посвящение, после него открывается следующая.</p></div></div>
     <div class="parch"><img src="assets/ic_sun.jpg" alt=""><div><h3>Разборы с Леной</h3><p>Присылаешь расклад или вопрос, Лена отвечает лично: текстом, голосовым, с фото.</p></div></div>
     <div class="parch"><img src="assets/ic_progress.jpg" alt=""><div><h3>Колода и журнал</h3><p>За лекции в твою колоду приходят арканы, к каждой карте свои заметки и расклады.</p></div></div>
-   </div>
-  </div>
- </section>
-
- <section>
-  <div class="wrap">
-   <div class="sh" id="who"><h2>Кому <em>подойдёт</em></h2></div>
-   <div class="who">
-    <div class="parch"><div class="n">I</div><h3>Только начинаешь</h3><p>Карты пугают, «правил» слишком много. Первая ступень снимает страх и даёт опору.</p></div>
-    <div class="parch"><div class="n">II</div><h3>Знаешь значения, но не читаешь</h3><p>Каждая карта по отдельности понятна, а сюжет не складывается. Учимся читать поток.</p></div>
-    <div class="parch"><div class="n">III</div><h3>Хочешь работать с людьми</h3><p>Последняя ступень про первых клиентов, цену и формат консультации.</p></div>
-   </div>
-  </div>
- </section>
-
- <section id="lena">
-  <div class="wrap">
-   <div class="lena parch">
-    <div class="ph"><div class="todo">тут будет фото Лены<br>портрет, лучше с картами</div></div>
-    <div class="tx">
-     <div class="eyebrow">Кто ведёт</div>
-     <h3>Лена · Ellene Del Sol’</h3>
-     <div class="todo">тут будет 3–4 предложения от Лены о себе: как пришла к Таро, в чём её подход, почему учит именно так.</div>
-     <div class="facts">
-      <div><b>—</b>лет практики</div><div><b>—</b>учениц</div><div><b>—</b>раскладов и консультаций</div>
-     </div>
-    </div>
    </div>
   </div>
  </section>
@@ -404,10 +441,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
      <a class="btn ghost" href="#stages">Посмотреть путь</a>
     </div>
    </div>
+   <div class="total parch"><div><div class="eyebrow">Весь путь целиком</div><b class="todo">сумма за 7 ступеней и цена при оплате сразу</b></div><a class="btn" href="index.html">Взять весь курс</a></div>
   </div>
  </section>
 
- <section>
+ <section id="reviews" class="band">
   <div class="wrap">
    <div class="sh"><h2>Отзывы <em>учениц</em></h2></div>
    <div class="revs">
