@@ -2403,9 +2403,11 @@ $("payDone").onclick=()=>{
 };
 $("payWaitOk").onclick=()=>closeDlg("paydlg");
 /* подтверждённую заявку применяем к ученице ровно один раз; в облаке — только у Лены (доступы a/ пишет только мастер) */
+/* пока a/<id> на сервере нет (SQL ещё не запускали), заявки из старого u/.appliedReqs считаем применёнными — только чтобы не применить их второй раз */
+function legacyApplied(u){if(!CLOUD)return[];const ap="a/"+rkey(u.id);if(ap in rRemote||ap in rPend)return[];const lu=rRemote["u/"+rkey(u.id)];return lu&&Array.isArray(lu.appliedReqs)?lu.appliedReqs:[]}
 function syncReqs(){let ch=false;
  reqs().forEach(r=>{if(r.st!=="ok")return;const u=DB.users[r.u];if(!u)return;u.appliedReqs=u.appliedReqs||[];
-  if(!u.appliedReqs.includes(r.id)){u.appliedReqs.push(r.id);applyPurchase(u,r.item);ch=true}});
+  if(!u.appliedReqs.includes(r.id)&&!legacyApplied(u).includes(r.id)){u.appliedReqs.push(r.id);applyPurchase(u,r.item);ch=true}});
  return ch}
 function decideReq(id,ok){
  const r=reqs().find(x=>x.id===id);if(!r||r.st!=="wait")return;const u=DB.users[r.u];

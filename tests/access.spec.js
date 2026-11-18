@@ -306,6 +306,29 @@ test.describe('доступы из a/', () => {
     expect(lena.errors).toEqual([]);
   });
 
+  test('страницу выложили раньше SQL: Лена не применяет старые заявки второй раз', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const lena = await openWindow(browser, ti);
+    const R1 = 1700000000001, R2 = 1700000000002, F = '2026-12-01';
+    const [id] = await seed(lena, [{ email: 'anna@example.com', name: 'Анна', owned: [1, 2], cur: { stage: 2, lesson: 1 },
+      extra: { fbUntil: F, appliedReqs: [R1, R2] } }], { migrate: false });
+    await addReq(id, { kind: 'stage', n: 2 }, 'ok', R1);
+    await addReq(id, { kind: 'fb' }, 'ok', R2);
+    await logIn(lena, LENA.email, LENA.password);
+    await lena.waitForTimeout(10_000); // несколько циклов опроса
+    expect(await a(id)).toBeNull();
+    const u = (await sb.db.doc('u/' + id)).data;
+    expect(u.owned).toEqual([1, 2]);
+    expect(u.fbUntil).toBe(F);
+    expect(lena.writes.filter((w) => / a\//.test(w))).toEqual([]);
+    await sb.db.runFile('supabase/access-migration.sql');
+    const d = await a(id);
+    expect(d.owned).toEqual([1, 2]);
+    expect(d.fbUntil).toBe(F);
+    expect(d.appliedReqs).toEqual(expect.arrayContaining([R1, R2]));
+    expect(lena.errors).toEqual([]);
+  });
+
   test('ученицу удалили в Supabase (u/ удалена, a/ осталась): у Лены без ошибок, a/ не трогается', async ({ browser }, ti) => {
     sb = await SupabaseMock.create({ migrate: false });
     const lena = await openWindow(browser, ti);
