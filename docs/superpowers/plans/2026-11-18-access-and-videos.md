@@ -63,7 +63,7 @@
 
 ---
 
-### Задача 1: PGlite-стенд с настоящим `setup.sql`
+### Task 1 · Задача 1: PGlite-стенд с настоящим `setup.sql`
 
 **Файлы:** создать `tests/db/harness.js`, `tests/db/setup.test.js`; изменить `package.json`, `playwright.config.js`.
 
@@ -85,7 +85,7 @@
 - [ ] **Шаг 3:** `npm run test:db` → первый тест FAIL (запись прошла), второй PASS. Так проверяем, что стенд и правда исполняет RLS.
 - [ ] **Шаг 4: Коммит** `test: PGlite harness running real setup.sql`. (Падающий тест отмечаем `{ todo: 'закрывается в задаче 2' }`, чтобы в коммите набор был зелёным.)
 
-### Задача 2: Правила доступа в `access-migration.sql`
+### Task 2 · Задача 2: Правила доступа в `access-migration.sql`
 
 **Файлы:** создать `supabase/access-migration.sql` (часть 1 — функции и правила); тест `tests/db/policies.test.js`.
 
@@ -114,7 +114,7 @@
 - [ ] **Шаг 4:** `npm run test:db` → PASS; повторный `runFile` той же миграции без ошибок.
 - [ ] **Шаг 5: Коммит** `db: restrictive RLS — student path whitelist, has_stage for lesson videos`.
 
-### Задача 3: Перенос данных в `access-migration.sql`
+### Task 3 · Задача 3: Перенос данных в `access-migration.sql`
 
 **Файлы:** дописать `supabase/access-migration.sql` (часть 2); тест `tests/db/migration.test.js`.
 
@@ -137,7 +137,7 @@
 - [ ] **Шаг 4:** `npm run test:db` → PASS.
 - [ ] **Шаг 5: Коммит** `db: migrate existing access to a/<uid> and lesson videos to v/<n>`.
 
-### Задача 4: Резервная копия, откат и «сироты»
+### Task 4 · Задача 4: Резервная копия, откат и «сироты»
 
 **Файлы:** создать `supabase/access-backup.sql`, `supabase/access-rollback.sql`, `supabase/access-orphans.sql`; тест `tests/db/rollback.test.js`.
 
@@ -150,7 +150,7 @@
 - [ ] **Шаг 2:** FAIL → **Шаг 3:** написать файлы → **Шаг 4:** PASS.
 - [ ] **Шаг 5: Коммит** `db: backup and rollback scripts for access migration`.
 
-### Задача 5: Подмена Supabase в Playwright на настоящих правилах
+### Task 5 · Задача 5: Подмена Supabase в Playwright на настоящих правилах
 
 **Файлы:** изменить `tests/mocks/supabase.js`.
 
@@ -164,7 +164,7 @@
 - [ ] **Шаг 2:** `npx playwright test tests/access.spec.js` → PASS. `npm test` → `cabinet.spec.js` зелёный, как до изменений.
 - [ ] **Шаг 3: Коммит** `test: Supabase mock stores docs in PGlite with real RLS`.
 
-### Задача 6: Страница — доступы из `a/<uid>`
+### Task 6 · Задача 6: Страница — доступы из `a/<uid>`
 
 **Файлы:** изменить `index.html` (`ownerOf` ~3943, `mayWrite` ~3976, `rSerialize` ~3951, `rDeserialize` ~3958, `rPush` ~4000, `rApply` ~4044, `noPay`/`STAFF` ~2334); тест `tests/access.spec.js`.
 
@@ -193,7 +193,7 @@
 - [ ] **Шаг 4:** `npm test` → PASS (включая `cabinet.spec.js` в демо-режиме: там `CLOUD` выключен и поля доступа живут в `u`, как раньше).
 - [ ] **Шаг 5: Коммит** `Access records a/<uid>: students read, only Lena writes`.
 
-### Задача 7: Страница — видео из `v/<n>`
+### Task 7 · Задача 7: Страница — видео из `v/<n>`
 
 **Файлы:** изменить `index.html` (`rSerialize`, `rDeserialize`); тест `tests/access.spec.js`.
 
@@ -210,7 +210,7 @@
 - [ ] **Шаг 2:** FAIL → **Шаг 3:** реализовать → **Шаг 4:** `npm test` PASS.
 - [ ] **Шаг 5: Коммит** `Lesson videos in v/<n>, readable only for paid stages`.
 
-### Задача 8: Старая страница поверх новой базы + инструкция по выкату
+### Task 8 · Задача 8: Старая страница поверх новой базы + инструкция по выкату
 
 **Файлы:** создать `tests/old-page.spec.js`; инструкция — в шапке `supabase/access-migration.sql` и в итоговом сообщении Дарине.
 
@@ -229,7 +229,7 @@
 
 ---
 
-### Задача 9 (НА ПОТОМ, через 1–2 недели после выката — сейчас не выполнять): убрать зеркало доступов из `u/`
+### Task 9 · Задача 9 (НА ПОТОМ, через 1–2 недели после выката — сейчас не выполнять): убрать зеркало доступов из `u/`
 
 Когда у всех обновилась страница (Лена и ученицы хотя бы раз зашли после выката), зеркало (решение 1) больше не нужно.
 
