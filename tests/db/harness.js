@@ -34,9 +34,9 @@ class Db {
   // Выполнить SQL-файл целиком (в нём может быть несколько команд)
   async runFile(relPath) { return this.pg.exec(readSql(relPath)); }
 
-  async addUser(email) {
+  async addUser(email, id) {
     const { rows } = await this.pg.query(
-      'insert into auth.users(id, email) values (gen_random_uuid(), $1) returning id', [email]);
+      'insert into auth.users(id, email) values (coalesce($2::uuid, gen_random_uuid()), $1) returning id', [email, id ?? null]);
     return rows[0].id;
   }
 

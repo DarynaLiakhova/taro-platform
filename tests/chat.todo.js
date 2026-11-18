@@ -79,8 +79,8 @@ async function recordVoice(page, seconds = 2) {
 const bubbles = (page) => page.locator('#vBox .msg');
 
 test.beforeAll(async ({ browser }, testInfo) => {
-  sb = new SupabaseMock();
-  sb.addUser(LENA.email, LENA.password, LENA.name, true);
+  sb = await SupabaseMock.create();
+  await sb.addUser(LENA.email, LENA.password, LENA.name, true);
   student = await openWindow(browser, testInfo);
   lena = await openWindow(browser, testInfo);
   await signUpStudent(student);
@@ -88,6 +88,7 @@ test.beforeAll(async ({ browser }, testInfo) => {
 });
 
 test.afterAll(async () => {
+  await sb?.close();
   await student?.context().close();
   await lena?.context().close();
 });

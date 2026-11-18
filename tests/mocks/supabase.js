@@ -2,26 +2,32 @@
 // подписанные ссылки на видео и функция расшифровки. Всё живёт в памяти одного теста,
 // поэтому ученица и Лена в двух окнах видят одну и ту же «базу», а настоящая база не трогается.
 const crypto = require('crypto');
+const { makeDb } = require('../db/harness');
 
 const SB = 'https://gdkxyjlarmwigxfsggni.supabase.co';
 
 class SupabaseMock {
-  constructor() {
+  constructor(db) {
+    this.db = db;                // PGlite со всеми правилами доступа (docs, masters)
     this.users = new Map();      // email -> user
     this.tokens = new Map();     // token -> user id
-    this.masters = new Set();
-    this.docs = new Map();       // path -> row
     this.files = new Map();      // bucket/path -> { type, data }
     this.uploads = new Map();    // id -> TUS upload in progress
-    this.seq = 0;
     this.transcript = 'Тестовая расшифровка голосового';
     this.log = [];
   }
 
-  addUser(email, password, name = '', master = false) {
+  static async create({ migrate = true } = {}) {
+    return new SupabaseMock(await makeDb({ migrate }));
+  }
+
+  async close() { await this.db.close(); }
+
+  async addUser(email, password, name = '', master = false) {
     const id = crypto.randomUUID();
+    await this.db.addUser(email, id);
+    if (master) await this.db.makeMaster(id);
     this.users.set(email, { id, email, password, name });
-    if (master) this.masters.add(id);
     return id;
   }
 
@@ -38,8 +44,6 @@ class SupabaseMock {
     return { access_token: t, refresh_token: r, expires_in: 3600, token_type: 'bearer',
       user: { id: u.id, email: u.email, user_metadata: { name: u.name } } };
   }
-
-  stamp() { return new Date().toISOString().replace('Z', String(++this.seq).padStart(6, '0') + '+00:00'); }
 
   async handle(route) {
     const req = route.request();
@@ -59,7 +63,7 @@ class SupabaseMock {
     if (path === '/auth/v1/signup') {
       const b = body();
       if (this.users.has(b.email)) return json(422, { code: 'user_already_exists', msg: 'User already registered' });
-      this.addUser(b.email, b.password, (b.data || {}).name || '');
+      await this.addUser(b.email, b.password, (b.data || {}).name || '');
       return json(200, this.session(this.users.get(b.email)));
     }
     if (path === '/auth/v1/token') {
@@ -86,7 +90,6 @@ class SupabaseMock {
     if (path.startsWith('/storage/v1/object/sign/') && m === 'GET') return this.serve(route, decodeURIComponent(path.slice('/storage/v1/object/sign/'.length)), H);
 
     if (!uid) return json(401, { code: 'PGRST301', message: 'JWT required' });
-    const master = this.masters.has(uid);
 
     // --- хранилище: загрузка кусками (TUS)
     if (path === '/storage/v1/upload/resumable' && m === 'POST') {
@@ -94,7 +97,7 @@ class SupabaseMock {
       const meta = Object.fromEntries((h['upload-metadata'] || '').split(',').map((p) => {
         const [k, v] = p.trim().split(' '); return [k, Buffer.from(v || '', 'base64').toString()];
       }));
-      if (!master && !meta.objectName.startsWith(uid + '/')) return json(403, { error: 'Unauthorized', message: 'new row violates row-level security policy' });
+      if (!(await this.isMaster(uid)) && !meta.objectName.startsWith(uid + '/')) return json(403, { error: 'Unauthorized', message: 'new row violates row-level security policy' });
       const id = String(this.uploads.size + 1);
       this.uploads.set(id, { bucket: meta.bucketName, name: meta.objectName, type: meta.contentType, length: +h['upload-length'], data: Buffer.alloc(0) });
       return route.fulfill({ status: 201, headers: { ...H, Location: SB + '/storage/v1/upload/resumable/' + id } });
@@ -116,41 +119,72 @@ class SupabaseMock {
     // --- функция расшифровки голосовых
     if (path === '/functions/v1/transcribe') return json(200, { text: this.transcript });
 
-    // --- база: таблица docs
-    if (path === '/rest/v1/rpc/is_master') return json(200, master);
+    // --- база: таблица docs (настоящий Postgres с боевыми правилами доступа)
+    if (path === '/rest/v1/rpc/is_master') return json(200, await this.isMaster(uid));
     if (path === '/rest/v1/docs') {
-      const visible = (d) => master || d.owner === uid || d.owner === null;
-      const can = (owner) => master || owner === uid;
-      if (m === 'GET') {
-        let rows = [...this.docs.values()].filter(visible);
-        const f = q.get('path');
-        if (f && f.startsWith('eq.')) rows = rows.filter((d) => d.path === f.slice(3));
-        if (f && f.startsWith('in.(')) { const want = f.slice(4, -1).split(',').map((s) => s.replace(/^"|"$/g, '')); rows = rows.filter((d) => want.includes(d.path)); }
-        rows.sort((a, b) => a.path.localeCompare(b.path));
-        const off = +(q.get('offset') || 0), lim = +(q.get('limit') || 1e6);
-        const cols = (q.get('select') || 'path,owner,data,updated_at').split(',');
-        return json(200, rows.slice(off, off + lim).map((d) => Object.fromEntries(cols.map((c) => [c, d[c]]))));
-      }
-      if (m === 'POST') {
-        const b = body(), ex = this.docs.get(b.path);
-        if (!can(b.owner) || (ex && !can(ex.owner))) return json(403, { code: '42501', message: 'new row violates row-level security policy' });
-        const ts = this.stamp();
-        this.docs.set(b.path, { path: b.path, owner: b.owner, data: b.data, updated_at: ts });
-        return json(201, [{ updated_at: ts }]);
-      }
-      if (m === 'PATCH') {
-        const p = (q.get('path') || '').slice(3), ver = q.get('updated_at'), d = this.docs.get(p);
-        if (!d || !can(d.owner) || (ver && d.updated_at !== ver.slice(3))) return json(200, []);
-        d.data = body().data; d.updated_at = this.stamp();
-        return json(200, [{ updated_at: d.updated_at }]);
-      }
-      if (m === 'DELETE') {
-        const p = (q.get('path') || '').slice(3), d = this.docs.get(p);
-        if (d && can(d.owner)) this.docs.delete(p);
-        return json(204);
-      }
+      const r = await this.docsRequest(m, q, body(), req.headers()['prefer'] || '', uid);
+      return json(r.status, r.body);
     }
     return json(404, { message: 'mock: unknown ' + m + ' ' + path });
+  }
+
+  async isMaster(uid) {
+    const { rows } = await this.db.as(uid, 'select public.is_master() as m');
+    return !!(rows[0] && rows[0].m);
+  }
+
+  // Перевод запроса PostgREST к таблице docs в SQL от имени пользователя
+  async docsRequest(m, q, b, prefer, uid) {
+    const ver = "to_json(updated_at)#>>'{}'";
+    const COLS = ['path', 'owner', 'data', 'updated_at'];
+    const colSql = (c) => (c === 'updated_at' ? `${ver} as updated_at` : `"${c}"`);
+    const cols = (q.get('select') || COLS.join(',')).split(',').map((c) => c.trim()).filter((c) => COLS.includes(c));
+    const sel = (cols.length ? cols : COLS).map(colSql).join(', ');
+    const params = [];
+    const where = [];
+    const add = (v) => { params.push(v); return '$' + params.length; };
+    const f = q.get('path');
+    if (f && f.startsWith('eq.')) where.push(`path = ${add(f.slice(3))}`);
+    else if (f && f.startsWith('in.(')) {
+      const list = [...f.slice(4, -1).matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((x) => x[1].replace(/\\(.)/g, '$1'));
+      where.push(`path = any(${add(list)}::text[])`);
+    }
+    const u = q.get('updated_at');
+    if (u && u.startsWith('eq.')) where.push(`updated_at = ${add(u.slice(3))}::timestamptz`);
+    const w = where.length ? ' where ' + where.join(' and ') : '';
+    let r;
+    if (m === 'GET') {
+      const off = Math.max(0, parseInt(q.get('offset') || '0', 10) || 0);
+      const lim = Math.max(0, parseInt(q.get('limit') || '1000000', 10) || 0);
+      r = await this.db.as(uid, `select ${sel} from public.docs${w} order by path limit ${lim} offset ${off}`, params);
+    } else if (m === 'POST') {
+      const rows = Array.isArray(b) ? b : [b];
+      const out = [];
+      for (const x of rows) {
+        r = await this.db.as(uid,
+          `insert into public.docs(path, owner, data) values ($1, $2, $3::jsonb)
+           on conflict (path) do update set owner = excluded.owner, data = excluded.data returning ${sel}`,
+          [x.path, x.owner ?? null, JSON.stringify(x.data)]);
+        if (r.error) break;
+        out.push(...r.rows);
+      }
+      if (!r.error) r = { rows: out, error: null };
+    } else if (m === 'PATCH') {
+      const sets = [];
+      if ('data' in b) sets.push(`data = ${add(JSON.stringify(b.data))}::jsonb`);
+      if ('owner' in b) sets.push(`owner = ${add(b.owner ?? null)}`);
+      if (!sets.length) return { status: 200, body: [] };
+      r = await this.db.as(uid, `update public.docs set ${sets.join(', ')}${w} returning ${sel}`, params);
+    } else if (m === 'DELETE') {
+      r = await this.db.as(uid, `delete from public.docs${w}`, params);
+      return r.error ? this.pgError(r.error) : { status: 204 };
+    } else return { status: 405, body: { message: 'mock: method ' + m } };
+    if (r.error) return this.pgError(r.error);
+    return { status: m === 'POST' ? 201 : 200, body: r.rows };
+  }
+
+  pgError(e) {
+    return { status: e.code === '42501' ? 403 : 400, body: { code: e.code || 'XX000', message: e.message } };
   }
 
   serve(route, key, H) {
