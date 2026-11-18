@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { makeDb, assertRlsError } = require('./harness');
 
-// Стенд: ученица A (куплен этап 1), ученица B, мастер M; уроки v/1..v/7 и программа
+// Стенд: ученица A (куплена ступень 1), ученица B, мастер M; уроки v/1..v/7 и программа
 async function setup(t) {
   const db = await makeDb({ migrate: true });
   t.after(() => db.close());
