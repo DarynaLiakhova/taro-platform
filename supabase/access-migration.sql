@@ -172,6 +172,13 @@ update public.docs d set data = f.data
 from fixed f
 where d.path = f.path and d.data is distinct from f.data;
 
+-- 7а. Пустые записи v/1 … v/7 для ступеней, где ссылок ещё нет: тогда первая
+--     ссылка, которую мастер добавит в такую ступень, сразу попадёт в v/<n>,
+--     а не в общую программу. Уже существующие v/<n> не трогаем.
+insert into public.docs(path, owner, data)
+select 'v/' || n, null, '{"videos":{}}'::jsonb from generate_series(1, 7) n
+on conflict (path) do nothing;
+
 -- 8. Проверка (результат появится внизу SQL Editor): ученицы, у которых открыта
 --    ступень без подтверждённой оплаты в pay/ (оплата ступени n или всего курса —
 --    он покрывает ступени 1–6), и те, у кого в профиле стояло free: true

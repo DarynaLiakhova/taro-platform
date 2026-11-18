@@ -18,7 +18,8 @@ async function setup(t) {
     ('u/' || $1::text, $1::uuid, '{"name":"A"}'),
     ('p/program', null, '{"stages":7}')`, [A, B]);
   for (let n = 1; n <= 7; n++) {
-    await db.root(`insert into docs(path, owner, data) values ($1, null, $2)`, ['v/' + n, { url: 'https://x/' + n }]);
+    // миграция уже создала пустые v/1…v/7 — заполняем их
+    await db.root(`insert into docs(path, owner, data) values ($1, null, $2) on conflict (path) do update set data = excluded.data`, ['v/' + n, { url: 'https://x/' + n }]);
   }
   return { db, A, B, M };
 }

@@ -72,20 +72,20 @@ const POLL = { timeout: 20_000 }; // страница забирает изме�
 let wins = [];
 test.afterEach(async () => { for (const c of wins) await c.close().catch(() => {}); wins = []; });
 
-/** Окно браузера со своей сессией; page.writes — все записи в docs ("POST a/…", "DELETE u/…") */
+/** Окно браузера со своей сессией; page.writes — все записи в docs ("POST a/…", "DELETE u/…"), page.bodies — их тела */
 async function openWindow(browser, testInfo) {
   const context = await browser.newContext({ ...testInfo.project.use });
   wins.push(context);
   await sb.attach(context);
   const page = await context.newPage();
-  page.errors = []; page.writes = [];
+  page.errors = []; page.writes = []; page.bodies = [];
   page.on('pageerror', (e) => page.errors.push(e.message));
   page.on('request', (r) => {
     const u = new URL(r.url());
     if (!u.pathname.endsWith('/rest/v1/docs') || r.method() === 'GET') return;
     let p = (u.searchParams.get('path') || '').replace(/^eq\./, '');
     if (r.method() === 'POST') { try { p = JSON.parse(r.postData()).path; } catch { /* */ } }
-    page.writes.push(r.method() + ' ' + p);
+    page.writes.push(r.method() + ' ' + p); page.bodies.push(r.postData() || '');
   });
   await page.goto(APP);
   return page;
@@ -449,6 +449,23 @@ test.describe('видео из v/', () => {
     }
     expect(pvWrites(page)).toEqual([]);
     expect(page.errors).toEqual([]);
+  });
+
+  test('после SQL Лена добавляет первую ссылку в ступень без видео → ссылка только в v/<n>, ни одна запись p/program её не содержит', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const lena = await openWindow(browser, ti);
+    await seed(lena, [], { videos: { 1: VID(1) } });
+    expect(await v(2)).toEqual({ videos: {} }); // перенос создал пустые v/1…v/7
+    await logIn(lena, LENA.email, LENA.password);
+    const NEW = 'https://kinescope.io/first2';
+    await lenaEditsVideo(lena, 2, NEW);
+    await expect.poll(async () => (await v(2))?.videos, POLL).toEqual({ l2_1: NEW });
+    await lena.waitForTimeout(5_000); // ещё цикл опроса — вдруг программа пересохранится
+    const prog = lena.writes.map((w, i) => [w, lena.bodies[i]]).filter(([w]) => / p\/program$/.test(w));
+    expect(prog.filter(([, b]) => b.includes(NEW))).toEqual([]);
+    expect(prog.filter(([, b]) => b.includes(VID(1)))).toEqual([]);
+    expect(await progVideos()).toEqual([]);
+    expect(lena.errors).toEqual([]);
   });
 
   test('страницу выложили раньше SQL: Лена сохраняет программу — ссылки переезжают в v/, ни одна не теряется', async ({ browser }, ti) => {

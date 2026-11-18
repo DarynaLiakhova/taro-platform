@@ -121,7 +121,10 @@ test('видео разложены по v/1 и v/3, в p/program нет ни о
   assert.equal(v1.owner, null);
   assert.deepEqual(v1.data, { videos: { l1_9: 'https://v/old', l1_1: 'https://v/1_1' } });
   assert.deepEqual((await db.doc('v/3')).data, { videos: { l3_1: 'https://v/3_1' } });
-  assert.equal(await db.doc('v/2'), null);
+  // ступени без ссылок получают пустую v/<n> — первая ссылка сразу ляжет туда, а не в общую программу
+  assert.deepEqual((await db.doc('v/2')).data, { videos: {} });
+  const { rows: vs } = await db.root(`select path, owner from docs where path like 'v/%' order by path`);
+  assert.deepEqual(vs, [1, 2, 3, 4, 5, 6, 7].map(n => ({ path: 'v/' + n, owner: null })));
   const p = (await db.doc('p/program')).data;
   assert.equal(p.program.some(s => s.lessons.some(l => 'video' in l)), false);
   // остальное в программе не изменилось

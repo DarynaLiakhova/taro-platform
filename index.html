@@ -4052,8 +4052,7 @@ function rWrite(p,data,j){
     body=mergeSpread(cur2[0].data,body);rVer[p]=cur2[0].updated_at;merged=true}
    if(merged)merged=stable(body)!==j}
   if(!res)res=await sb.upsert({path:p,owner:ownerOf(p,body),data:body});
-  const nv=p.startsWith("v/")&&!(p in rRemote); /* v/<n> впервые на сервере — теперь можно убрать ссылки из программы */
-  rRemote[p]=body;if(res&&res[0])rVer[p]=res[0].updated_at;if(nv){clearTimeout(rVT);rVT=setTimeout(rPush,50)}
+  rRemote[p]=body;if(res&&res[0])rVer[p]=res[0].updated_at;if(p.startsWith("v/"))vFix();
   if(merged){rState[p]=stable(body);rApplySoon()}
  }).then(()=>{if(rPend[p]&&rPend[p].j===j)delete rPend[p]},e=>{if(rPend[p]&&rPend[p].j===j)delete rPend[p];rErr(e)});
 }
@@ -4061,12 +4060,14 @@ function rErr(e){const c=e&&e.code||"x";if(rWarned[c])return;rWarned[c]=1;setTim
  console.warn("supabase",e);
  toast(c==="42501"||e.status===401||e.status===403?"Не получилось сохранить: нет прав. Выйди и войди снова":e.status===413?"Файл слишком большой":"Связь с сервером пропала, изменения могут не сохраниться. Проверь интернет")}
 var rT=null,rVT=null;const rApplySoon=()=>{clearTimeout(rT);rT=setTimeout(rApply,60)};
+/* в программе на сервере ещё лежат ссылки ступени, чья v/<n> уже есть, — пересохраняем программу без них */
+const vFix=()=>{if(IS_M&&((rRemote["p/program"]||{}).program||[]).some(s=>"v/"+s.n in rRemote&&(s.lessons||[]).some(l=>"video" in l))){clearTimeout(rVT);rVT=setTimeout(rPush,50)}};
 function rApply(){
  const m=Object.assign({},rRemote);
  for(const p in rPend){if(rPend[p].data)m[p]=rPend[p].data;else delete m[p]}
  const nd=rDeserialize(m);if(!nd.program)nd.program=DB.program||defaultProgram();
  rState={};for(const p in m)rState[p]=stable(m[p]);
- DB=nd;if(IS_M&&syncReqs())setTimeout(persist,0);sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
+ DB=nd;if(IS_M&&syncReqs())setTimeout(persist,0);vFix();sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
  rRebind();
 }
 function rRebind(){
