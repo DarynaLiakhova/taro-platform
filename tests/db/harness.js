@@ -45,7 +45,9 @@ class Db {
   }
 
   // Запрос от имени пользователя (uid или null = вошедший без id): RLS действует.
-  // Ошибку не бросает, а возвращает: { rows, error }
+  // Ошибку не бросает, а возвращает: { rows, error }.
+  // Запрос идёт в своей транзакции: при успехе изменения фиксируются (commit),
+  // при ошибке — откатываются.
   async as(uid, sql, params) {
     try {
       const rows = await this.pg.transaction(async (tx) => {
@@ -58,6 +60,9 @@ class Db {
       return { rows: [], error };
     }
   }
+
+  // Закрыть базу (освободить экземпляр WASM) — вызывать в конце каждого теста
+  async close() { await this.pg.close(); }
 
   async doc(p) {
     const { rows } = await this.pg.query('select * from public.docs where path = $1', [p]);
@@ -75,4 +80,12 @@ async function makeDb({ migrate = false } = {}) {
   return db;
 }
 
-module.exports = { makeDb };
+// Ошибка именно от правил доступа (RLS, код 42501), а не любая другая
+function assertRlsError(error) {
+  const assert = require('node:assert/strict');
+  assert.notEqual(error, null, 'ожидалась ошибка RLS, а запрос прошёл');
+  assert.equal(error.code, '42501', `ожидался код 42501, получено: ${error.code} ${error.message}`);
+  assert.match(error.message, /row-level security/);
+}
+
+module.exports = { makeDb, assertRlsError };
