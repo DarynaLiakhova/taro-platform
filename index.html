@@ -3939,9 +3939,12 @@ function ownerOf(p,d){
 function rSerialize(db){
  const o={};o["p/program"]={program:db.program,links:db.links||null};
  Object.values(db.users).forEach(u=>{
-  const rest=Object.assign({},u);delete rest.spreads;delete rest.pass;delete rest.free;o["u/"+rkey(u.id)]=JSON.parse(JSON.stringify(rest));
+  const rest=Object.assign({},u),ap="a/"+rkey(u.id),hasA=ap in rRemote||ap in rPend,lu=rRemote["u/"+rkey(u.id)];delete rest.spreads;delete rest.pass;delete rest.free;
+  /* пока a/ на сервере нет (SQL ещё не запускали), зеркало в u/ хранит старые доступы как есть — из них перенос и соберёт a/ */
+  if(!hasA&&lu)ACCESS_KEYS.forEach(k=>{if(k in lu)rest[k]=lu[k]});
+  o["u/"+rkey(u.id)]=JSON.parse(JSON.stringify(rest));
   /* мастер не создаёт пустых a/ (их потом не перезапишет перенос в SQL), но обновляет уже существующие */
-  const ac=accessOf(u),ap="a/"+rkey(u.id);if(!IS_M||accessSet(ac)||ap in rRemote||ap in rPend)o[ap]=ac;
+  const ac=accessOf(u);if(!IS_M||accessSet(ac)||hasA)o[ap]=ac;
   (u.spreads||[]).forEach(x=>{
    const b=JSON.parse(JSON.stringify(x)),k=rkey(u.id)+"~"+x.id;b.uid=u.id;
    const put=(f,str)=>{const n=Math.ceil(str.length/RCH);for(let i=0;i<n;i++)o[`m/${k}~${f}~${i}`]={d:str.slice(i*RCH,(i+1)*RCH)};return n};

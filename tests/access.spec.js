@@ -278,6 +278,34 @@ test.describe('доступы из a/', () => {
     expect(old.errors).toEqual([]);
   });
 
+  test('страницу выложили раньше SQL: старые доступы в u/ не затираются и переносятся в a/', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const page = await openWindow(browser, ti);
+    const [id] = await seed(page, [{ email: 'anna@example.com', name: 'Анна', owned: [1, 2], cur: { stage: 2, lesson: 1 },
+      extra: { fbUntil: '2026-12-01', sessions: 5, appliedReqs: [7] } }], { migrate: false });
+    const legacy = { owned: [1, 2], fbUntil: '2026-12-01', sessions: 5, appliedReqs: [7] };
+    const access = async () => { const d = (await sb.db.doc('u/' + id)).data; return { owned: d.owned, fbUntil: d.fbUntil, sessions: d.sessions, appliedReqs: d.appliedReqs }; };
+    await logIn(page, 'anna@example.com');
+    await expect(stage(page, 2)).toHaveClass(/\bpay\b/); // без a/ — ничего не куплено
+    const lena = await openWindow(browser, ti);
+    await logIn(lena, LENA.email, LENA.password);
+    // обе страницы сохраняют профиль ученицы
+    await page.evaluate(() => { S.streak = 3; persist(); });
+    await expect.poll(async () => (await sb.db.doc('u/' + id)).data.streak, POLL).toBe(3);
+    await lena.evaluate((uid) => { DB.users[uid].tg = '@anna'; persist(); }, id);
+    await expect.poll(async () => (await sb.db.doc('u/' + id)).data.tg, POLL).toBe('@anna');
+    await page.waitForTimeout(5_000);
+    expect(await access()).toEqual(legacy);
+    expect(await a(id)).toBeNull();
+    await sb.db.runFile('supabase/access-migration.sql');
+    expect((await a(id)).owned).toEqual([1, 2]);
+    expect((await a(id)).fbUntil).toBe('2026-12-01');
+    expect((await a(id)).sessions).toBe(5);
+    await expect(stage(page, 2)).toHaveClass(/\bnow\b/, POLL);
+    expect(page.errors).toEqual([]);
+    expect(lena.errors).toEqual([]);
+  });
+
   test('ученицу удалили в Supabase (u/ удалена, a/ осталась): у Лены без ошибок, a/ не трогается', async ({ browser }, ti) => {
     sb = await SupabaseMock.create({ migrate: false });
     const lena = await openWindow(browser, ti);
