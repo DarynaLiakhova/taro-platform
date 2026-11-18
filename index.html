@@ -3939,7 +3939,9 @@ function ownerOf(p,d){
  return ME;
 }
 function rSerialize(db){
- const o={};o["p/program"]={program:db.program,links:db.links||null};
+ const o={},pg=JSON.parse(JSON.stringify(db.program||null));o["p/program"]={program:pg,links:db.links||null};
+ /* ссылки на видео — в v/<n> (всегда, даже пустой); из программы их убираем, только когда v/<n> уже на сервере — иначе до SQL ссылки бы потерялись */
+ (pg||[]).forEach(s=>{const vs={},vp="v/"+s.n;(s.lessons||[]).forEach(l=>{if(l.video)vs[l.id]=l.video;if(!l.video||vp in rRemote)delete l.video});o[vp]={videos:vs}});
  Object.values(db.users).forEach(u=>{
   const rest=Object.assign({},u),ap="a/"+rkey(u.id),hasA=ap in rRemote||ap in rPend,lu=rRemote["u/"+rkey(u.id)];delete rest.spreads;delete rest.pass;delete rest.free;
   /* пока a/ на сервере нет (SQL ещё не запускали), зеркало в u/ хранит старые доступы как есть — из них перенос и соберёт a/ */
@@ -3965,8 +3967,10 @@ function rSerialize(db){
  return o;
 }
 function rDeserialize(m){
- const db={program:(m["p/program"]||{}).program||null,links:(m["p/program"]||{}).links||null,users:{},payments:[],payReqs:[],notifs:[],done:0};
+ const db={program:JSON.parse(JSON.stringify((m["p/program"]||{}).program||null)),links:(m["p/program"]||{}).links||null,users:{},payments:[],payReqs:[],notifs:[],done:0};
  for(const p in m)if(p.startsWith("u/")){const d=JSON.parse(JSON.stringify(m[p]));d.spreads=[];if(!d.notes)d.notes={};db.users[d.id]=d}
+ /* видео урока — из v/<n>, если запись есть (ученице видна только за оплаченную ступень); нет v/<n> — старая ссылка из программы */
+ (db.program||[]).forEach(s=>{const v=m["v/"+s.n];(s.lessons||[]).forEach(l=>l.video=(v?(v.videos||{})[l.id]:l.video)||"")});
  /* доступы — только из a/<id> (нет записи — ничего не куплено); a/ без u/ (ученицу удалили) пропускаем */
  for(const id in db.users){const ac=accessOf(m["a/"+rkey(id)]);ACCESS_KEYS.forEach(k=>db.users[id][k]=ac[k])}
  for(const p in m){const d=m[p];
@@ -4048,14 +4052,15 @@ function rWrite(p,data,j){
     body=mergeSpread(cur2[0].data,body);rVer[p]=cur2[0].updated_at;merged=true}
    if(merged)merged=stable(body)!==j}
   if(!res)res=await sb.upsert({path:p,owner:ownerOf(p,body),data:body});
-  rRemote[p]=body;if(res&&res[0])rVer[p]=res[0].updated_at;
+  const nv=p.startsWith("v/")&&!(p in rRemote); /* v/<n> впервые на сервере — теперь можно убрать ссылки из программы */
+  rRemote[p]=body;if(res&&res[0])rVer[p]=res[0].updated_at;if(nv){clearTimeout(rVT);rVT=setTimeout(rPush,50)}
   if(merged){rState[p]=stable(body);rApplySoon()}
  }).then(()=>{if(rPend[p]&&rPend[p].j===j)delete rPend[p]},e=>{if(rPend[p]&&rPend[p].j===j)delete rPend[p];rErr(e)});
 }
 function rErr(e){const c=e&&e.code||"x";if(rWarned[c])return;rWarned[c]=1;setTimeout(()=>delete rWarned[c],20000);
  console.warn("supabase",e);
  toast(c==="42501"||e.status===401||e.status===403?"Не получилось сохранить: нет прав. Выйди и войди снова":e.status===413?"Файл слишком большой":"Связь с сервером пропала, изменения могут не сохраниться. Проверь интернет")}
-var rT=null;const rApplySoon=()=>{clearTimeout(rT);rT=setTimeout(rApply,60)};
+var rT=null,rVT=null;const rApplySoon=()=>{clearTimeout(rT);rT=setTimeout(rApply,60)};
 function rApply(){
  const m=Object.assign({},rRemote);
  for(const p in rPend){if(rPend[p].data)m[p]=rPend[p].data;else delete m[p]}

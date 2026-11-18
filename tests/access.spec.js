@@ -93,8 +93,9 @@ async function openWindow(browser, testInfo) {
 const aWrites = (page) => page.writes.filter((w) => / a\//.test(w));
 
 /** База «как в бою»: старые профили u/ без a/, потом SQL-перенос доступов */
-async function seed(page, students, { migrate = true } = {}) {
+async function seed(page, students, { migrate = true, videos = {} } = {}) {
   const program = await page.evaluate(() => defaultProgram());
+  for (const n in videos) program[n - 1].lessons[0].video = videos[n]; // старые ссылки лежат прямо в программе
   await sb.db.root('insert into public.docs(path, owner, data) values ($1, null, $2)', ['p/program', { program, links: null }]);
   await sb.addUser(LENA.email, LENA.password, LENA.name, true);
   const ids = [];
@@ -347,5 +348,129 @@ test.describe('доступы из a/', () => {
     expect(lena.writes.filter((w) => w.includes(gone))).toEqual([]);
     expect(lena.errors).toEqual([]);
     expect(stay).toBeTruthy();
+  });
+});
+
+// ── Задача 7: ссылки на видео уроков — в v/<n>, видны только за оплаченные ступени ─
+const VID = (n) => 'https://kinescope.io/s' + n;
+const ALL_VIDEOS = Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => [n, VID(n)]));
+const v = async (n) => (await sb.db.doc('v/' + n))?.data ?? null;
+/** уроки p/program, в которых ещё есть ключ video */
+const progVideos = async () => (await sb.db.doc('p/program')).data.program.flatMap((s) => s.lessons.filter((l) => 'video' in l).map((l) => l.id + '=' + l.video));
+/** запрос v/<n> от имени того, кто вошёл на странице: сколько строк отдала база */
+const seesV = (page, n) => page.evaluate((k) => sbRaw('/rest/v1/docs?select=path&path=eq.' + enc('v/' + k), { method: 'GET' }).then((r) => r.length), n);
+const pvWrites = (page) => page.writes.filter((w) => / (p|v)\//.test(w));
+const lessonVideo = (page, n) => page.evaluate((k) => ST(k).lessons[0].video, n);
+
+test.describe('видео из v/', () => {
+  test('ученица с owned [1]: видео 1-й ступени открывается, v/2…v/7 ей не видны, сама p/ и v/ не пишет', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const page = await openWindow(browser, ti);
+    await seed(page, [{ email: 'anna@example.com', name: 'Анна', owned: [1] }], { videos: ALL_VIDEOS });
+    expect(await progVideos()).toEqual([]);
+    await logIn(page, 'anna@example.com');
+    await page.evaluate(() => openLesson(1, 1));
+    const link = page.locator('#player .vlink');
+    await expect(link).toHaveText('Открыть видео ↗');
+    await expect(link).toHaveAttribute('href', VID(1));
+    expect(await seesV(page, 1)).toBe(1);
+    for (const n of [2, 3, 4, 5, 6, 7]) expect(await seesV(page, n)).toBe(0);
+    expect(await lessonVideo(page, 2)).toBe('');
+    await page.evaluate(() => { S.streak = 4; persist(); });
+    await page.waitForTimeout(5_000);
+    expect(pvWrites(page)).toEqual([]);
+    expect(page.errors).toEqual([]);
+  });
+
+  test('после покупки курса, подтверждённой Леной, видны видео 7-й ступени', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const page = await openWindow(browser, ti);
+    const [id] = await seed(page, [{ email: 'anna@example.com', name: 'Анна' }], { videos: ALL_VIDEOS });
+    await logIn(page, 'anna@example.com');
+    expect(await seesV(page, 7)).toBe(0);
+    const rid = await addReq(id, { kind: 'course' });
+    const lena = await openWindow(browser, ti);
+    await logIn(lena, LENA.email, LENA.password);
+    await lenaConfirms(lena, rid);
+    await expect.poll(async () => (await a(id)).owned, POLL).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(await seesV(page, 7)).toBe(1);
+    await expect.poll(() => lessonVideo(page, 7), POLL).toBe(VID(7));
+    expect(pvWrites(page)).toEqual([]);
+    expect(page.errors).toEqual([]);
+    expect(lena.errors).toEqual([]);
+  });
+
+  async function lenaEditsVideo(lena, n, url) {
+    await lena.click('.tabs button[data-v="mprog"]');
+    const st = lena.locator(`#pgList details[data-n="${n}"]`);
+    await st.locator('summary').click();
+    await st.locator('[data-a="edit"][data-i="0"]').click();
+    await lena.fill('#leVideo', url);
+    await lena.click('#leSave');
+    await expect(lena.locator('#ldlg')).toBeHidden();
+  }
+
+  test('Лена меняет ссылку урока в редакторе программы → меняется v/<n>, в p/program ссылки нет', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const lena = await openWindow(browser, ti);
+    await seed(lena, [], { videos: { 2: VID(2) } });
+    await logIn(lena, LENA.email, LENA.password);
+    await lenaEditsVideo(lena, 2, 'https://kinescope.io/new2');
+    await expect.poll(async () => (await v(2))?.videos, POLL).toEqual({ l2_1: 'https://kinescope.io/new2' });
+    await lenaEditsVideo(lena, 4, 'https://kinescope.io/new4');
+    await expect.poll(async () => (await v(4))?.videos, POLL).toEqual({ l4_1: 'https://kinescope.io/new4' });
+    await lena.waitForTimeout(1_000);
+    expect(await progVideos()).toEqual([]);
+    expect(lena.errors).toEqual([]);
+  });
+
+  test('Лена стирает единственную ссылку ступени → v/<n> = {videos:{}}, строка не удалена', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const lena = await openWindow(browser, ti);
+    await seed(lena, [], { videos: { 3: VID(3) } });
+    await logIn(lena, LENA.email, LENA.password);
+    await lenaEditsVideo(lena, 3, '');
+    await expect.poll(async () => await v(3), POLL).toEqual({ videos: {} });
+    await lena.waitForTimeout(5_000);
+    expect(await v(3)).toEqual({ videos: {} });
+    expect(lena.writes.filter((w) => w.startsWith('DELETE'))).toEqual([]);
+    expect(await progVideos()).toEqual([]);
+    expect(lena.errors).toEqual([]);
+  });
+
+  test('Дарина видит видео всех ступеней', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const page = await openWindow(browser, ti);
+    await seed(page, [{ email: 'darynaliakhova@gmail.com', name: 'Дарина' }], { videos: ALL_VIDEOS });
+    await logIn(page, 'darynaliakhova@gmail.com');
+    for (const n of [1, 2, 3, 4, 5, 6, 7]) {
+      expect(await seesV(page, n)).toBe(1);
+      expect(await lessonVideo(page, n)).toBe(VID(n));
+    }
+    expect(pvWrites(page)).toEqual([]);
+    expect(page.errors).toEqual([]);
+  });
+
+  test('страницу выложили раньше SQL: Лена сохраняет программу — ссылки переезжают в v/, ни одна не теряется', async ({ browser }, ti) => {
+    sb = await SupabaseMock.create({ migrate: false });
+    const lena = await openWindow(browser, ti);
+    await seed(lena, [], { videos: { 1: VID(1), 3: VID(3) }, migrate: false });
+    expect(await v(1)).toBeNull();
+    await logIn(lena, LENA.email, LENA.password);
+    expect(await lessonVideo(lena, 1)).toBe(VID(1)); // пока v/ нет — ссылки из программы
+    expect(await lessonVideo(lena, 3)).toBe(VID(3));
+    await lena.evaluate(() => { ST(5).title += ' '; persist(); });
+    await expect.poll(async () => [(await v(1))?.videos, (await v(3))?.videos], POLL).toEqual([{ l1_1: VID(1) }, { l3_1: VID(3) }]);
+    await expect.poll(progVideos, POLL).toEqual([]);
+    for (const n of [2, 4, 5, 6, 7]) expect(await v(n)).toEqual({ videos: {} });
+    await sb.db.runFile('supabase/access-migration.sql');
+    expect((await v(1)).videos).toEqual({ l1_1: VID(1) });
+    expect((await v(3)).videos).toEqual({ l3_1: VID(3) });
+    expect(await progVideos()).toEqual([]);
+    await lena.waitForTimeout(5_000);
+    expect(await lessonVideo(lena, 1)).toBe(VID(1));
+    expect(await lessonVideo(lena, 3)).toBe(VID(3));
+    expect(lena.writes.filter((w) => w.startsWith('DELETE'))).toEqual([]);
+    expect(lena.errors).toEqual([]);
   });
 });
