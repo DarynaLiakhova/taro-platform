@@ -1674,7 +1674,7 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 <section class="view" id="v-login">
 <div class="hero"><div class="hero-txt"><h1 class="h-title">Изучайте Таро через интуицию, символы и видение</h1><p class="h-sub">Системное обучение, живая практика и развитие собственного стиля таролога.</p><button class="hbtn" id="startBtn" type="button"><i>✦</i>Начать путь<i>✦</i></button></div></div>
 <div class="band lhow"><div class="qrow"><div class="qc"><img src="assets/ic_progress.jpg" alt=""><span><b>Лекции и квесты</b><small>Видео, конспект и практика. Ступени открываются по порядку</small></span></div><div class="qc"><img src="assets/ic_sun.jpg" alt=""><span><b>Разборы с Леной</b><small>Присылаешь расклад или вопрос — Лена отвечает лично</small></span></div><div class="qc"><img src="assets/ic_book.jpg" alt=""><span><b>Колода и журнал</b><small>За лекции приходят арканы, к каждой карте — свои заметки</small></span></div></div></div>
-<div class="courses"><h2 class="sec-h">Семь ступеней пути</h2><p class="sec-sub">Каждая ступень открывает следующую. За лекции в твою колоду приходят арканы.</p><div class="stages"><div class="stg" style="background-image:url(assets/st3.jpg)"><span class="nm"><span class="t">Освобождение</span><em>1 888 ₽</em></span></div><div class="stg" style="background-image:url(assets/st1.jpg)"><span class="nm"><span class="t">Ясновидение</span><em>7 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/st4.jpg)"><span class="nm"><span class="t">Придворные</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/st6.jpg)"><span class="nm"><span class="t">Числовые и тузы</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/st5.jpg)"><span class="nm"><span class="t">Старшие арканы</span><em>3 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/st7.jpg)"><span class="nm"><span class="t">Таро-кинолента</span><em>1 111 ₽</em></span></div><div class="stg" style="background-image:url(assets/st2.jpg)"><span class="nm"><span class="t">Монетизация</span><em>подарок</em></span></div></div></div>
+<div class="courses"><h2 class="sec-h">Семь ступеней пути</h2><p class="sec-sub">Каждая ступень открывает следующую. За лекции в твою колоду приходят арканы.</p><div class="stages"><div class="stg" style="background-image:url(assets/stg1p.webp)"><span class="nm"><span class="t">Освобождение</span><em>1 888 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg2p.webp)"><span class="nm"><span class="t">Ясновидение</span><em>7 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg3p.webp)"><span class="nm"><span class="t">Придворные</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg4p.webp)"><span class="nm"><span class="t">Числовые и тузы</span><em>1 333 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg5p.webp)"><span class="nm"><span class="t">Старшие арканы</span><em>3 777 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg6p.webp)"><span class="nm"><span class="t">Таро-кинолента</span><em>1 111 ₽</em></span></div><div class="stg" style="background-image:url(assets/stg7p.webp)"><span class="nm"><span class="t">Монетизация</span><em>подарок</em></span></div></div></div>
 <div class="lprog" id="lProg" aria-label="Программа обучения"></div>
 <div class="l-buy" id="lBuy"></div>
 <div class="l-cta"><span>Уже учишься? <button class="link" type="button" data-auth="in">Войти</button></span></div>
@@ -2421,7 +2421,7 @@ $("payClose").onclick=()=>closeDlg("paydlg");
 // ===== навигация =====
 const curView=()=>{const v=[...document.querySelectorAll(".view")].find(x=>!x.hidden);return v?v.id.slice(2):""};
 const PAL2=!!window.__PAL2;const HOMEV=()=>PAL2?"home":"path";
-const stImg=n=>PAL2?`assets/stg${n}p.webp`:`assets/st${STIMG[n]}.jpg`;
+const stImg=n=>`assets/stg${n}p.webp`;
 function showView(v){if(v==="login"&&typeof renderLanding==="function")setTimeout(renderLanding,0);if(v!=="login"&&$("authDlg"))$("authDlg").hidden=true;
  document.querySelectorAll(".view").forEach(x=>x.hidden=!(x.id==="v-"+v||(v==="mech"&&x.id==="v-market")));
  window.scrollTo({top:0});document.body.classList.toggle("stage-on",v==="path"||v==="login");
@@ -4162,7 +4162,8 @@ async function transcribeVoice(box,tb,t){
 }
 
 /* превью новой палитры и главного экрана */
-if(window.__PAL2){document.documentElement.classList.add("pal2");
+/* новое оформление (палитра картины, рамки-картуши) — теперь на рабочем сайте; window.__PAL2 включает ещё главный экран-картину и вкладку «Обучение» (пока превью) */
+{document.documentElement.classList.add("pal2");
  /* рамка-картуш из общей темы на карточках кабинета */
  const cart=()=>document.querySelectorAll("#v-path .panel,#v-path .qc,#v-path .newsbar").forEach(e=>{e.classList.add("tp-cart");if(!e.querySelector(":scope>.tp-star"))e.insertAdjacentHTML("afterbegin",'<span class="tp-star" aria-hidden="true">✦</span>')});
  cart();new MutationObserver(cart).observe(document.getElementById("v-path"),{childList:true,subtree:true})}
