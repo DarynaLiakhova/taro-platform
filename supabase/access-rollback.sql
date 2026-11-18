@@ -44,6 +44,12 @@ set data = u.data || jsonb_build_object(
 from public.docs a
 where a.path like 'a/%' and u.path = 'u/' || substring(a.path from 3);
 
+-- 2а. Старая страница вызывает u.owned.includes — у каждого профиля owned должен
+--     быть массивом (ученица, пришедшая после переноса, могла остаться без него)
+update public.docs
+set data = data || '{"owned":[]}'::jsonb
+where path like 'u/%' and jsonb_typeof(data->'owned') is distinct from 'array';
+
 -- 3. Удаляем a/ и v/
 delete from public.docs where path like 'a/%' or path like 'v/%';
 

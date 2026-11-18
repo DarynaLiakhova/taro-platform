@@ -105,16 +105,34 @@ test('после отката ученица снова пишет в u/ как 
   assert.notEqual(r.error, null);
 });
 
-test('откат повторяемый и не ломает базу без миграции', async (t) => {
-  const { db, A } = await setup(t);
+test('откат повторяемый', async (t) => {
+  const { db } = await setup(t);
   await db.runFile(ROLLBACK);
   const first = (await db.root('select path, data from docs order by path')).rows;
   await db.runFile(ROLLBACK);
   assert.deepEqual((await db.root('select path, data from docs order by path')).rows, first);
+});
+
+test('откат: u/ без a/ или с owned не массивом получает owned = []', async (t) => {
+  const { db, A } = await setup(t);
+  const N = await db.addUser('n@example.com');
+  const W = await db.addUser('w@example.com');
+  await db.root(`insert into docs(path, owner, data) values ('u/' || $1::text, $1::uuid, '{"name":"N"}')`, [N]);
+  await db.root(`insert into docs(path, owner, data) values ('u/' || $1::text, $1::uuid, '{"owned":"3"}')`, [W]);
+  await db.runFile(ROLLBACK);
+  assert.deepEqual((await db.doc('u/' + N)).data, { name: 'N', owned: [] });
+  assert.deepEqual((await db.doc('u/' + W)).data.owned, []);
+  assert.deepEqual((await db.doc('u/' + A)).data.owned, [1]);
+});
+
+test('откат на базе без миграции ничего не ломает', async (t) => {
   const fresh = await makeDb({ migrate: false });
   t.after(() => fresh.close());
   await fresh.runFile(ROLLBACK);
-  assert.ok(A);
+  assert.deepEqual(await paths(fresh, 'a/%'), []);
+  assert.deepEqual(await paths(fresh, 'v/%'), []);
+  const { rows } = await fresh.root(`select proname from pg_proc where proname = 'has_stage'`);
+  assert.deepEqual(rows, []);
 });
 
 test('сироты: удаляются только a/ без u/, остальные a/ на месте', async (t) => {
