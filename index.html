@@ -7,6 +7,7 @@
 <meta name="format-detection" content="telephone=no">
 <title>Путь Таролога</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="theme.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1583,21 +1584,56 @@ html.pal2 #v-path>.hero.me{margin-top:0}
 @media (max-width:700px){html.pal2 .tabs button{padding:12px 4px!important;font-size:13px!important;flex:1 1 0!important;min-width:0}}
 @media (min-width:701px) and (max-width:1180px){html.pal2 .tabs button{padding:6px 11px;font-size:15px}}
 /* баннер обучения: картинка Лены по бокам, текст на пергаментной табличке по центру (закрывает надпись на картинке) */
-html.pal2 .hero.me{background:#3b1527 url("assets/scene.jpg") no-repeat;background-size:max(100%,1900px) auto;background-position:center calc(100% + max(min(100vw,1920px),1900px) * 161 / 1280);height:270px;box-shadow:inset 0 46px 34px -26px rgba(43,14,24,.85)}
-html.pal2 .hero.me .hero-txt{width:min(580px,92vw);padding:18px 30px 20px;background:linear-gradient(180deg,#fdf3e6,#f6dfc4);border:1.5px solid #c9a050;border-radius:22px;box-shadow:inset 0 0 0 4px #fdf3e6,inset 0 0 0 5px rgba(201,160,80,.55),0 10px 30px rgba(30,8,14,.45)}
-html.pal2 .hero.me .h-title{color:#3a1428}
-html.pal2 .hero.me .h-sub{color:#6c2d2f}
+/* баннер «Анна, продолжим путь» в стиле первого экрана лендинга: картина Лены, текст живой поверх её таблички.
+   Высота та же, что была (270px). Картина масштабируется так, чтобы табличка целиком вошла в баннер */
+html.pal2 .hero.me{--H:510px;height:270px;background:var(--tp-velvet-deep);overflow:hidden;box-shadow:none}
+html.pal2 .hero.me::before{content:"";position:absolute;inset:-30px;background:url("assets/scene-1600.webp") center 35%/cover no-repeat;filter:blur(26px) brightness(.5) saturate(1.1)}
+html.pal2 .hero.me .hero-txt{position:absolute;left:50%;top:calc(var(--H) * -.13);transform:translateX(-50%);width:calc(var(--H) * 1.9365);height:var(--H);display:block;padding:0;gap:0;
+ border:0;border-radius:0;box-shadow:0 0 60px 26px rgba(20,8,12,.45);background:url("assets/scene-2560.webp") 0 0/100% 100% no-repeat;container-type:inline-size;isolation:isolate}
+html.pal2 .hero.me .hero-txt::before{content:none}
+html.pal2 .hero.me .hero-txt>*{position:absolute;left:38.3%;width:23.4%;margin:0;text-align:center}
+html.pal2 .hero.me .h-eye{top:33.6%;font-size:max(9.5px,.95cqw)!important;letter-spacing:.18em;color:#a8763f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pal2 .hero.me .h-title{top:22.4%;font-family:var(--tp-serif);font-style:italic;font-weight:500;font-size:2.45cqw;line-height:1.08;color:var(--tp-ink);text-wrap:balance;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.pal2 .hero.me .h-sub{top:36.6%;font-family:var(--tp-serif);font-style:italic;font-size:max(11px,1.12cqw);line-height:1.3;color:#5a2a33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pal2 .hero.me .h-prog{top:43%;display:flex;gap:.8cqw;font-size:max(10px,.9cqw);color:#6b4a46}
+html.pal2 .hero.me .h-bar{height:4px}
+html.pal2 .hero.me .hbtn{left:41.15%;width:17.75%;top:52.75%;height:6.15%;padding:0!important;font-size:1.4cqw!important;border-radius:.45cqw!important;gap:.6cqw;
+ background:linear-gradient(180deg,#8d2a45,#6a1a33)!important;border:0!important;box-shadow:inset 0 0 0 .08cqw rgba(240,207,160,.35)!important;white-space:nowrap}
+html.pal2 .hero.me .hbtn:hover{filter:brightness(1.15)}
 html.pal2 .stg{aspect-ratio:271/370;background-size:100% 100%}
 html.pal2 .stg .nm{display:none}
 html.pal2 .stg.lock,html.pal2 .stg.lock.sel{filter:drop-shadow(0 12px 18px rgba(0,0,0,.42))}
 html.pal2 .stg.lock.sel{filter:drop-shadow(0 0 2px #f0d49a) drop-shadow(0 0 14px rgba(240,212,154,.5))}
 @media (max-width:760px){html.pal2 .stages{padding-top:32px}}
 html.pal2 .stg.now::after,html.pal2 .stg.pay::after{inset:0;border:0;border-radius:12px;box-shadow:0 0 18px 3px rgba(240,212,154,.55)}
-@media (max-width:760px){html.pal2 .hero.me{height:auto;background-size:210% auto;background-position:center 0;padding:26px 14px}html.pal2 .hero.me .hero-txt{padding:16px 16px 18px}}
+/* телефон: вертикальная картина из лендинга, текст на пергаментной плашке как на мобильном первом экране */
+@media (max-width:760px){
+ html.pal2 .hero.me{height:auto;padding:96px 16px 24px!important;background:var(--tp-velvet-deep) url("assets/portrait-1200.webp") center -64px/100% auto no-repeat!important}
+ html.pal2 .hero.me::before{content:none}
+ html.pal2 .hero.me .hero-txt{position:relative;left:auto;top:auto;transform:none;width:min(100%,360px);height:auto;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:16px 16px 18px;background:linear-gradient(180deg,rgba(253,243,230,.96),rgba(246,223,196,.96));border:1.5px solid var(--tp-gold2);border-radius:20px;
+  box-shadow:inset 0 0 0 4px var(--tp-parch),inset 0 0 0 5px rgba(201,160,80,.55),0 0 40px rgba(240,190,110,.3),0 16px 40px rgba(10,4,6,.55);container-type:normal}
+ html.pal2 .hero.me .hero-txt>*{position:static;width:auto;max-width:100%}
+ html.pal2 .hero.me .h-eye{font-size:10.5px!important}
+ html.pal2 .hero.me .h-title{font-size:26px;-webkit-line-clamp:3}
+ html.pal2 .hero.me .h-sub{font-size:14px;white-space:normal}
+ html.pal2 .hero.me .h-prog{font-size:12px;gap:10px;width:100%}
+ html.pal2 .hero.me .hbtn{width:auto;height:auto;padding:10px 22px!important;font-size:16px!important;border-radius:12px!important;margin-top:6px}
+}
 /* палитра */
-html.pal2{--bg:#1d3f3a;--bg2:#24504a;--surf:#163631;--gold:#d6a866;--gold2:#f2cfa0;--pink:#f1c4cf;--wine:#8e3346}
+html.pal2{--bg:var(--tp-velvet);--bg2:var(--tp-velvet-top);--surf:var(--tp-velvet-deep);--gold:#d6a866;--gold2:#f2cfa0;--pink:#f1c4cf;--wine:#8e3346}
+/* картуш как на плитках картины: «ты здесь», «Карта дня», «Новое», «Мои заметки» (класс .tp-cart из theme.css) */
+html.pal2 :is(.panel,.qc,.newsbar).tp-cart{border-image:none!important;border:1.5px solid var(--tp-gold2)!important;border-radius:22px!important;background:var(--tp-cart-bg)!important;
+ box-shadow:inset 0 0 0 4px var(--tp-parch),inset 0 0 0 5px rgba(201,160,80,.6),0 14px 30px rgba(10,4,6,.42)!important;overflow:visible}
+html.pal2 .panel.tp-cart{--tp-sprig:110px;padding-bottom:84px}
+html.pal2 .qc.tp-cart{--tp-sprig:58px;padding-left:38px;padding-right:40px}
+html.pal2 .newsbar.tp-cart{--tp-sprig:74px;padding:18px 44px 22px}
+html.pal2 .qc.tp-cart i{color:var(--tp-wine2)}
+@media (max-width:760px){html.pal2 .panel.tp-cart{--tp-sprig:84px;padding-bottom:66px}html.pal2 .qc.tp-cart{--tp-sprig:36px;padding-left:16px;padding-right:16px}html.pal2 .newsbar.tp-cart{--tp-sprig:56px;padding:16px 22px 20px}}
 html.pal2 .top{background:linear-gradient(180deg,#7b2f3c,#5b1f2d);border-bottom-color:#d6a866}
 html.pal2 body::before{background:#7b2f3c}
+html.pal2 body{background:var(--tp-star-pattern),linear-gradient(180deg,var(--tp-velvet-top) 0,var(--tp-velvet) 900px,var(--tp-velvet-deep) 100%);background-color:var(--tp-velvet-deep)}
 html.pal2 :is(.rank,.panel,.pcard,.box,.mi,.sp,.lcard,.tbl,.tile,.pg-st,.cert,.exstat,.buy,.steps3>div,.dbox,.newsbar,.tar>div,.jitem,.npanel){--bg:#fdf0e1;--bg2:#f9dfc4;--surf:#f4d2b2;--gold:#a8742a;--line:rgba(91,31,45,.16)}
 html.pal2 .cat.on{background:#f2cfa0;border-color:#f2cfa0;color:#3a1428}
 html.pal2 .ctag{background:#f6d3dc!important;color:#7b2f3c!important;border-color:rgba(123,47,60,.3)!important}
@@ -4126,7 +4162,10 @@ async function transcribeVoice(box,tb,t){
 }
 
 /* превью новой палитры и главного экрана */
-if(window.__PAL2)document.documentElement.classList.add("pal2");
+if(window.__PAL2){document.documentElement.classList.add("pal2");
+ /* рамка-картуш из общей темы на карточках кабинета */
+ const cart=()=>document.querySelectorAll("#v-path .panel,#v-path .qc,#v-path .newsbar").forEach(e=>{e.classList.add("tp-cart");if(!e.querySelector(":scope>.tp-star"))e.insertAdjacentHTML("afterbegin",'<span class="tp-star" aria-hidden="true">✦</span>')});
+ cart();new MutationObserver(cart).observe(document.getElementById("v-path"),{childList:true,subtree:true})}
 (function(){const g=document.getElementById("sceneGo");if(!g)return;
  g.onclick=()=>{const b=document.getElementById("stGo");if(b)b.click()};
  document.querySelectorAll(".stile").forEach(b=>b.onclick=()=>{const v=b.dataset.sv;
