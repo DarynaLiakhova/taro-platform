@@ -6,6 +6,7 @@ const fakeMic = { launchOptions: { args: ['--use-fake-ui-for-media-stream', '--u
 
 module.exports = defineConfig({
   testDir: './tests',
+  testIgnore: 'db/**',
   timeout: 60_000,
   workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],

@@ -3,10 +3,12 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
+    "test:db": "node --test tests/db/",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
     "@playwright/test": "^1.56.0"
   }
 }
