@@ -2331,8 +2331,7 @@ function persist(){if(CLOUD){if(remoteReady)rPush();return}try{localStorage.setI
 
 let role=null,S=null,cur=null,notes=null,spreads=null,got=0;
 let FREE=false; /* true, пока в кабинете аккаунт без оплат */
-const STAFF=["darynaliakhova@gmail.com"]; /* аккаунты без оплат: Дарина */
-const noPay=u=>!!u&&(!!u.free||STAFF.includes(String(u.email||"").toLowerCase()));
+const noPay=u=>!!u&&!!u.free; /* без оплат: free в a/<id> (Дарина), ставит только мастер */
 const isFb=u=>!!u&&(noPay(u)||!!(u.fbUntil&&u.fbUntil>=TODAY));
 const owns=(u,n)=>noPay(u)||n===7||u.owned.includes(n);
 const gotOf=u=>{let g=0;for(let k=1;k<u.cur.stage;k++)g+=L(k)+1;return Math.min(78,g+Math.min(u.cur.lesson-1,L(u.cur.stage)))};
@@ -2403,7 +2402,7 @@ $("payDone").onclick=()=>{
  const d=payDone;payDone=null;if(d)d();else refresh();
 };
 $("payWaitOk").onclick=()=>closeDlg("paydlg");
-/* подтверждённую заявку применяем к ученице ровно один раз (и у Лены, и у ученицы) */
+/* подтверждённую заявку применяем к ученице ровно один раз; в облаке — только у Лены (доступы a/ пишет только мастер) */
 function syncReqs(){let ch=false;
  reqs().forEach(r=>{if(r.st!=="ok")return;const u=DB.users[r.u];if(!u)return;u.appliedReqs=u.appliedReqs||[];
   if(!u.appliedReqs.includes(r.id)){u.appliedReqs.push(r.id);applyPurchase(u,r.item);ch=true}});
@@ -3925,9 +3924,13 @@ const sb={
  del:p=>sbRaw("/rest/v1/docs?path=eq."+enc(p),{method:"DELETE"})
 };
 /* --- раскладка данных по документам --- */
+/* доступы ученицы — в a/<id>: читают обе, пишет только мастер; в u/ те же поля лишь зеркало для старых вкладок */
+const ACCESS_KEYS=["owned","fbUntil","free","sessions","appliedReqs"];
+const accessOf=u=>{u=u||{};return{owned:Array.isArray(u.owned)?u.owned.slice():[],fbUntil:u.fbUntil||null,free:!!u.free,sessions:+u.sessions||0,appliedReqs:Array.isArray(u.appliedReqs)?u.appliedReqs.slice():[]}};
+const accessSet=x=>!!(x.owned.length||x.fbUntil||x.free||x.sessions||x.appliedReqs.length);
 function ownerOf(p,d){
- if(p.startsWith("p/"))return null;
- if(p.startsWith("u/"))return p.slice(2);
+ if(p.startsWith("p/")||p.startsWith("v/"))return null;
+ if(p.startsWith("u/")||p.startsWith("a/"))return p.slice(2);
  if(p.startsWith("s/")||p.startsWith("m/"))return p.slice(2).split("~")[0];
  if(p.startsWith("pay/")||p.startsWith("pr/"))return d.u||ME;
  if(p.startsWith("n/"))return d.to==="master"?(d.go&&d.go.u)||ME:d.to;
@@ -3936,7 +3939,9 @@ function ownerOf(p,d){
 function rSerialize(db){
  const o={};o["p/program"]={program:db.program,links:db.links||null};
  Object.values(db.users).forEach(u=>{
-  const rest=Object.assign({},u);delete rest.spreads;delete rest.pass;o["u/"+rkey(u.id)]=JSON.parse(JSON.stringify(rest));
+  const rest=Object.assign({},u);delete rest.spreads;delete rest.pass;delete rest.free;o["u/"+rkey(u.id)]=JSON.parse(JSON.stringify(rest));
+  /* мастер не создаёт пустых a/ (их потом не перезапишет перенос в SQL), но обновляет уже существующие */
+  const ac=accessOf(u),ap="a/"+rkey(u.id);if(!IS_M||accessSet(ac)||ap in rRemote||ap in rPend)o[ap]=ac;
   (u.spreads||[]).forEach(x=>{
    const b=JSON.parse(JSON.stringify(x)),k=rkey(u.id)+"~"+x.id;b.uid=u.id;
    const put=(f,str)=>{const n=Math.ceil(str.length/RCH);for(let i=0;i<n;i++)o[`m/${k}~${f}~${i}`]={d:str.slice(i*RCH,(i+1)*RCH)};return n};
@@ -3957,6 +3962,8 @@ function rSerialize(db){
 function rDeserialize(m){
  const db={program:(m["p/program"]||{}).program||null,links:(m["p/program"]||{}).links||null,users:{},payments:[],payReqs:[],notifs:[],done:0};
  for(const p in m)if(p.startsWith("u/")){const d=JSON.parse(JSON.stringify(m[p]));d.spreads=[];if(!d.notes)d.notes={};db.users[d.id]=d}
+ /* доступы — только из a/<id> (нет записи — ничего не куплено); a/ без u/ (ученицу удалили) пропускаем */
+ for(const id in db.users){const ac=accessOf(m["a/"+rkey(id)]);ACCESS_KEYS.forEach(k=>db.users[id][k]=ac[k])}
  for(const p in m){const d=m[p];
   if(p.startsWith("s/")){const u=db.users[d.uid];if(!u)continue;const x=JSON.parse(JSON.stringify(d)),k=p.slice(2);delete x.uid;
    for(const f of ["img","voice"]){const n=x[f+"N"];delete x[f+"N"];if(!n)continue;let s="";
@@ -3976,7 +3983,8 @@ function rDeserialize(m){
  db.payments.sort((a,b)=>(a.at||"").localeCompare(b.at||""));
  return db;
 }
-const mayWrite=p=>IS_M||!p.startsWith("p/");
+const mayWrite=p=>IS_M||/^(u|s|m|n|pr)\//.test(p); /* ученица пишет только свои рабочие записи */
+const mayDelete=p=>mayWrite(p)&&!/^(a|v)\//.test(p); /* a/ и v/ из платформы не удаляются */
 
 /* ---- медиа в хранилище Supabase (бакет chat, публичные ссылки со случайным именем) ---- */
 const isSB=v=>typeof v==="string"&&v.startsWith("sb:");
@@ -4007,7 +4015,7 @@ function rPush(){
    else{toast("Голосовое или фото ещё не ушло — нет связи. Отправлю, как только интернет появится");setTimeout(rPush,15000)}});return}
  const m=rSerialize(DB),seen=new Set();
  for(const p in m){if(!mayWrite(p))continue;seen.add(p);const j=stable(m[p]);if(rState[p]!==j){rState[p]=j;rWrite(p,m[p],j)}}
- for(const p of Object.keys(rState))if(mayWrite(p)&&!seen.has(p)){delete rState[p];rWrite(p,null,null)}
+ for(const p of Object.keys(rState))if(mayDelete(p)&&!seen.has(p)){delete rState[p];rWrite(p,null,null)}
 }
 /* два человека пишут в одну переписку: склеиваем сообщения, а не затираем */
 function mergeSpread(server,mine){
@@ -4048,7 +4056,7 @@ function rApply(){
  for(const p in rPend){if(rPend[p].data)m[p]=rPend[p].data;else delete m[p]}
  const nd=rDeserialize(m);if(!nd.program)nd.program=DB.program||defaultProgram();
  rState={};for(const p in m)rState[p]=stable(m[p]);
- DB=nd;if(syncReqs())setTimeout(persist,0);sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
+ DB=nd;if(IS_M&&syncReqs())setTimeout(persist,0);sidN=Math.max(100,...Object.values(DB.users).flatMap(u=>u.spreads.map(s=>s.id)));
  rRebind();
 }
 function rRebind(){
