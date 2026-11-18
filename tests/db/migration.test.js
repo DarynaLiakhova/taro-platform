@@ -23,6 +23,13 @@ const PROGRAM = {
   links: { tg: 'https://t.me/x' },
 };
 
+// Строки проверочного запроса для A и C из setup()
+const COLS = ['name', 'email', 'owned', 'not_paid', 'legacy_free', 'legacy_fb_until', 'legacy_sessions', 'dropped_owned'];
+const ROW_A = { name: 'Анна', email: 'a@example.com', owned: [1, 2], not_paid: [2], legacy_free: false,
+  legacy_fb_until: '2026-12-31', legacy_sessions: 5, dropped_owned: [] };
+const ROW_C = { name: 'Света', email: 'c@example.com', owned: [], not_paid: [], legacy_free: true,
+  legacy_fb_until: null, legacy_sessions: null, dropped_owned: [] };
+
 // «Как сейчас в боевой базе»: A — owned [1,2] и заявки, B — owned ["3"], C — free в u/,
 // Дарина — есть в auth.users, но без u/; программа с видео в ступенях 1 и 3
 async function setup(t) {
@@ -90,8 +97,7 @@ test('free только у Дарины', async (t) => {
   const { rows } = await db.root(`select count(*)::int as n from docs where path like 'a/%' and data->'free' = 'true'`);
   assert.equal(rows[0].n, 1);
   // ученица с u.free — в проверочном запросе
-  assert.deepEqual(report.find(r => r.email === 'c@example.com'),
-    { name: 'Света', email: 'c@example.com', owned: [], not_paid: [], legacy_free: true });
+  assert.deepEqual(report.find(r => r.email === 'c@example.com'), ROW_C);
 });
 
 test('у Дарины с u/ доступы переносятся и добавляется free', async (t) => {
@@ -152,12 +158,80 @@ test('повторный запуск ничего не меняет и не з�
 test('проверочный запрос показывает ученицу с неоплаченной ступенью', async (t) => {
   const { db } = await setup(t);
   const report = await migrate(db);
-  assert.deepEqual(Object.keys(report[0]), ['name', 'email', 'owned', 'not_paid', 'legacy_free']);
-  // A: ступень 1 оплачена (pay/1), ступень 2 — нет; B оплатила курс; C — legacy free
-  assert.deepEqual(report, [
-    { name: 'Анна', email: 'a@example.com', owned: [1, 2], not_paid: [2], legacy_free: false },
-    { name: 'Света', email: 'c@example.com', owned: [], not_paid: [], legacy_free: true },
-  ]);
+  assert.deepEqual(Object.keys(report[0]), COLS);
+  // A: ступень 1 оплачена (pay/1), ступень 2 — нет, плюс fbUntil и sessions из профиля; B оплатила курс; C — legacy free
+  assert.deepEqual(report, [ROW_A, ROW_C]);
+});
+
+test('проверочный запрос: fbUntil, sessions и отброшенные ступени из профиля видны мастеру', async (t) => {
+  const { db } = await setup(t);
+  const F = await db.addUser('f@example.com');
+  const G = await db.addUser('g@example.com');
+  const put = (p, owner, data) => db.root('insert into docs(path, owner, data) values ($1, $2, $3)', [p, owner, data]);
+  // F: ступени оплачены курсом, но в owned был мусор — он отброшен при переносе
+  await put('u/' + F, F, { name: 'Фая', email: 'f@example.com', owned: [1, 'x', 2.5, '3', null], fbUntil: '', sessions: 0 });
+  await put('pay/3', F, { id: 3, u: F, item: { kind: 'course' } });
+  // G: ступеней нет, но в профиле стоял срок обратной связи и консультации
+  await put('u/' + G, G, { name: 'Галя', email: 'g@example.com', owned: [], fbUntil: '2027-01-01', sessions: 2 });
+  const expected = [
+    ROW_A,
+    { name: 'Галя', email: 'g@example.com', owned: [], not_paid: [], legacy_free: false,
+      legacy_fb_until: '2027-01-01', legacy_sessions: 2, dropped_owned: [] },
+    ROW_C,
+    { name: 'Фая', email: 'f@example.com', owned: [1, 3], not_paid: [], legacy_free: false,
+      legacy_fb_until: null, legacy_sessions: null, dropped_owned: ['x', 2.5, null] },
+  ];
+  assert.deepEqual(await migrate(db), expected);
+  // повторный запуск (перенос из профилей пропущен) — проверка по-прежнему работает
+  assert.deepEqual(await migrate(db), expected);
+});
+
+test('повторный запуск после выкладки: подделанный профиль u/ не превращается в доступ', async (t) => {
+  const { db, A } = await setup(t);
+  await migrate(db);
+  // новая ученица после выкладки сама записала в свой профиль «купленные» ступени
+  const E = await db.addUser('e@example.com');
+  const forged = await db.as(E, `insert into docs(path, owner, data) values ('u/' || $1::text, $1::uuid, $2)`,
+    [E, { name: 'Ева', email: 'e@example.com', owned: [1, 2, 3, 4, 5, 6], fbUntil: '2099-01-01', sessions: 99 }]);
+  assert.equal(forged.error, null);
+  const before = await snapshot(db);
+  await migrate(db);
+  assert.equal(await db.doc('a/' + E), null);
+  assert.deepEqual(await snapshot(db), before);
+  const { rows, error } = await db.as(E, 'select public.has_stage(1) as s1, public.has_stage(7) as s7');
+  assert.equal(error, null);
+  assert.deepEqual(rows, [{ s1: false, s7: false }]);
+  assert.deepEqual((await db.doc('a/' + A)).data.owned, [1, 2]);
+});
+
+test('отметка о первом переносе: одна строка, закрыта от учениц и мастера в платформе', async (t) => {
+  const { db, A } = await setup(t);
+  await migrate(db);
+  await migrate(db);
+  const { rows } = await db.root('select name from public.access_migration_runs');
+  assert.deepEqual(rows, [{ name: 'u-to-a' }]);
+  const { rows: rls } = await db.root(`select relrowsecurity from pg_class where oid = 'public.access_migration_runs'::regclass`);
+  assert.equal(rls[0].relrowsecurity, true);
+  for (const sql of ['select * from public.access_migration_runs',
+                     `delete from public.access_migration_runs`,
+                     `insert into public.access_migration_runs(name) values ('x')`]) {
+    assert.notEqual((await db.as(A, sql)).error, null, sql);
+    assert.notEqual((await db.as(null, sql)).error, null, sql);
+  }
+  // и это не запись docs — страница её не видит и не удаляет
+  assert.equal((await db.root(`select count(*)::int as n from docs where path like '%u-to-a%'`)).rows[0].n, 0);
+});
+
+test('урок-строка в программе не ломает перенос видео', async (t) => {
+  const { db } = await setup(t);
+  const prog = structuredClone(PROGRAM);
+  prog.program[0].lessons.push('video', 42);
+  await db.root(`update docs set data = $1 where path = 'p/program'`, [prog]);
+  await migrate(db);
+  const p = (await db.doc('p/program')).data;
+  assert.deepEqual(p.program[0].lessons.slice(2), ['video', 42]);
+  assert.equal('video' in p.program[0].lessons[0], false);
+  assert.deepEqual((await db.doc('v/1')).data, { videos: { l1_1: 'https://v/1_1' } });
 });
 
 test('ссылка, которую некуда перенести, остаётся в p/program; id заявок вида Date.now() не ломаются', async (t) => {

@@ -12,6 +12,10 @@
 --     кого из учениц стоит проверить мастеру.
 -- Нужен уже выполненный setup.sql.
 -- Вставь целиком в SQL Editor → Run. Повторный запуск ничего не ломает.
+-- Доступы из профилей u/ переносятся в a/ только при ПЕРВОМ запуске: после
+-- выкладки ученица может сама вписать в свой профиль «купленные» ступени,
+-- и повторный запуск не должен превращать такую запись в настоящий доступ.
+-- Отметка о первом переносе хранится в служебной таблице access_migration_runs.
 --
 -- ── Как выкатывать (строго по порядку) ───────────────────────────────────────
 --   1) В SQL Editor выполни access-backup.sql — это копия базы на всякий случай.
@@ -24,8 +28,17 @@
 --      подтверждать оплаты. Пока вкладка не обновлена, она работает по-старому:
 --      ученицы не видят видео уроков, а подтверждённая там оплата дойдёт до
 --      ученицы, только когда Лена откроет обновлённую страницу.
---   5) Если что-то пошло не так — выполни access-rollback.sql и откати коммит
---      в main.
+--   5) Если что-то пошло не так — откатывай строго в таком порядке:
+--      а) откати коммит в main и подожди 1–2 минуты, пока сайт (GitHub Pages)
+--         обновится;
+--      б) попроси Лену и учениц обновить страницу или закрыть все вкладки
+--         платформы;
+--      в) только после этого выполни в SQL Editor access-rollback.sql.
+--      Если выполнить access-rollback.sql раньше, открытая новая страница
+--      снова создаст v/ и уберёт ссылки на видео из программы, а потом старая
+--      страница у Лены удалит a/ и v/ — доступы и ссылки потеряются.
+--      Торопиться с access-rollback.sql не нужно: старая страница нормально
+--      работает и на базе после этого файла.
 -- Важно: не выкладывай новую страницу на сайт раньше этого SQL. Если Лена
 -- подтвердит покупку на новой странице до SQL, у этой ученицы не перенесутся
 -- ступени, купленные раньше.
@@ -91,9 +104,21 @@ create policy docs_paths_delete on public.docs as restrictive for delete to auth
 
 -- ── Перенос уже существующих данных ──────────────────────────────────────────
 -- Все шаги повторяемые: второй запуск ничего не меняет и не затирает того,
--- что мастер поправил в a/ и v/ между запусками.
+-- что мастер поправил в a/ и v/ между запусками. Шаг 4 (перенос из профилей
+-- u/, которые ученица может менять сама) выполняется только при первом запуске.
 
--- 4. Доступы ученицы из её профиля u/<id> → a/<id>.
+-- 3а. Служебная таблица с отметками о сделанных разовых шагах. Это не запись
+--     в docs (страница удаляет незнакомые ей записи docs); ученицам и мастеру
+--     в платформе она закрыта — видна только здесь, в SQL Editor.
+create table if not exists public.access_migration_runs (
+  name text primary key,
+  at timestamptz not null default now()
+);
+alter table public.access_migration_runs enable row level security;
+revoke all on public.access_migration_runs from anon, authenticated;
+
+-- 4. Доступы ученицы из её профиля u/<id> → a/<id> — ТОЛЬКО при первом запуске
+--    (пока в access_migration_runs нет строки 'u-to-a'; её ставим сразу после).
 --    Ступени — числа без повторов по возрастанию ("3" из старых данных → 3);
 --    appliedReqs — из профиля плюс все подтверждённые (ok) заявки pr/ этой ученицы.
 --    free из профиля не переносится (такие ученицы видны в проверочном запросе в конце).
@@ -124,7 +149,11 @@ select 'a/' || u.owner::text, u.owner, jsonb_build_object(
         and r.data->>'st' = 'ok' and r.data->>'id' ~ '^\d+$') s), '[]'::jsonb))
 from public.docs u
 where u.owner is not null and u.path = 'u/' || u.owner::text
+  and not exists (select 1 from public.access_migration_runs where name = 'u-to-a')
 on conflict (path) do nothing;
+
+insert into public.access_migration_runs(name) values ('u-to-a')
+on conflict (name) do nothing;
 
 -- 5. Служебный аккаунт darynaliakhova@gmail.com — все ступени открыты (free).
 --    Если a/ уже есть — только добавляем free, остальное не трогаем;
@@ -163,13 +192,14 @@ on conflict (path) do update
 -- 7. Убираем ключ video из уроков в p/program — программу читают все,
 --    поэтому ссылок там быть не должно. Убираем только пустые ссылки и те,
 --    что уже лежат в v/<n> (шаг 6), — так ни одна ссылка не потеряется.
+--    Урок не объект (например, просто строка) не трогаем.
 --    Если убирать нечего — запись не меняется.
 with fixed as (
   select p.path, jsonb_set(p.data, '{program}', coalesce((
     select jsonb_agg(
       case when jsonb_typeof(s->'lessons') = 'array' then jsonb_set(s, '{lessons}', coalesce((
         select jsonb_agg(
-          case when l ? 'video' and (
+          case when jsonb_typeof(l) = 'object' and l ? 'video' and (
                     jsonb_typeof(l->'video') <> 'string'
                  or btrim(l->>'video') = ''
                  or exists (select 1 from public.docs v
@@ -195,15 +225,25 @@ insert into public.docs(path, owner, data)
 select 'v/' || n, null, '{"videos":{}}'::jsonb from generate_series(1, 7) n
 on conflict (path) do nothing;
 
--- 8. Проверка (результат появится внизу SQL Editor): ученицы, у которых открыта
---    ступень без подтверждённой оплаты в pay/ (оплата ступени n или всего курса —
---    он покрывает ступени 1–6), и те, у кого в профиле стояло free: true
---    (free больше не действует — при необходимости мастер откроет ступени сам).
+-- 8. Проверка (результат появится внизу SQL Editor): ученицы, которых стоит
+--    проверить мастеру —
+--    • not_paid: ступень открыта без подтверждённой оплаты в pay/ (оплата
+--      ступени n или всего курса — он покрывает ступени 1–6);
+--    • legacy_free: в профиле стояло free: true (free больше не действует —
+--      при необходимости мастер откроет ступени сам);
+--    • legacy_fb_until, legacy_sessions: в профиле был срок обратной связи или
+--      консультации — они перенесены в a/ из профиля, проверь, что они настоящие;
+--    • dropped_owned: в профиле среди купленных ступеней было что-то не похожее
+--      на номер ступени — это не перенесено.
+--    Поля legacy_… и dropped_owned берутся из профиля u/ в момент запуска.
 select u.data->>'name' as name,
        u.data->>'email' as email,
        a.data->'owned' as owned,
        np.not_paid,
-       coalesce(u.data->'free' = 'true'::jsonb, false) as legacy_free
+       coalesce(u.data->'free' = 'true'::jsonb, false) as legacy_free,
+       lg.legacy_fb_until,
+       lg.legacy_sessions,
+       lg.dropped_owned
 from public.docs a
 left join public.docs u on u.path = 'u/' || a.owner::text
 cross join lateral (
@@ -216,6 +256,20 @@ cross join lateral (
       and (   (pay.data #>> '{item,kind}' = 'stage' and pay.data #>> '{item,n}' = o #>> '{}')
            or (pay.data #>> '{item,kind}' = 'course' and o #>> '{}' in ('1','2','3','4','5','6'))))
 ) np
+cross join lateral (
+  select nullif(nullif(u.data->'fbUntil', 'null'::jsonb), '""'::jsonb) as legacy_fb_until,
+         nullif(nullif(u.data->'sessions', 'null'::jsonb), '0'::jsonb) as legacy_sessions,
+         case when jsonb_typeof(u.data->'owned') = 'array' then coalesce((
+                select jsonb_agg(e order by i)
+                from jsonb_array_elements(u.data->'owned') with ordinality z(e, i)
+                where not coalesce(e #>> '{}' ~ '^\d+$', false)), '[]'::jsonb)
+              when coalesce(u.data->'owned', 'null'::jsonb) = 'null'::jsonb then '[]'::jsonb
+              else jsonb_build_array(u.data->'owned') end as dropped_owned
+) lg
 where a.owner is not null and a.path = 'a/' || a.owner::text
-  and (jsonb_array_length(np.not_paid) > 0 or coalesce(u.data->'free' = 'true'::jsonb, false))
+  and (   jsonb_array_length(np.not_paid) > 0
+       or coalesce(u.data->'free' = 'true'::jsonb, false)
+       or lg.legacy_fb_until is not null
+       or lg.legacy_sessions is not null
+       or jsonb_array_length(lg.dropped_owned) > 0)
 order by name, email;

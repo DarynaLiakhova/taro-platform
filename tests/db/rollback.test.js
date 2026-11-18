@@ -135,6 +135,38 @@ test('откат на базе без миграции ничего не лом�
   assert.deepEqual(rows, []);
 });
 
+test('сироты: a/ с free (служебный аккаунт без профиля) не трогается', async (t) => {
+  const { db, A, B } = await setup(t);
+  const D = await db.addUser('darynaliakhova@gmail.com');
+  const X = await db.addUser('x@example.com');
+  await db.root(`insert into docs(path, owner, data) values ('a/' || $1::text, $1::uuid, '{"owned":[],"free":true}')`, [D]);
+  await db.root(`insert into docs(path, owner, data) values ('a/' || $1::text, $1::uuid, '{"owned":[2]}')`, [X]);
+  const res = await db.runFile(ORPHANS);
+  const listed = res.find(r => r.fields && r.fields.some(f => f.name === 'path'));
+  assert.deepEqual(listed.rows.map(r => r.path), ['a/' + X]);
+  assert.deepEqual(await paths(db, 'a/%'), ['a/' + A, 'a/' + B, 'a/' + D].sort());
+  assert.equal((await db.doc('a/' + D)).data.free, true);
+});
+
+test('откат убирает отметку о переносе: новая миграция снова переносит доступы из u/', async (t) => {
+  const { db, A } = await setup(t);
+  await db.runFile(ROLLBACK);
+  const { rows } = await db.root(`select to_regclass('public.access_migration_runs') as t`);
+  assert.equal(rows[0].t, null);
+  await db.root(`update docs set data = jsonb_set(data, '{owned}', '[1,2]') where path = 'u/' || $1::text`, [A]);
+  await db.runFile('supabase/access-migration.sql');
+  assert.deepEqual((await db.doc('a/' + A)).data.owned, [1, 2]);
+});
+
+test('откат: урок-строка в программе не ломает возврат видео', async (t) => {
+  const { db } = await setup(t);
+  await db.root(`update docs set data = jsonb_set(data, '{program,0,lessons}', data #> '{program,0,lessons}' || '["video", 42]') where path = 'p/program'`);
+  await db.runFile(ROLLBACK);
+  const lessons = (await db.doc('p/program')).data.program[0].lessons;
+  assert.deepEqual(lessons.slice(2), ['video', 42]);
+  assert.equal(lessons[0].video, 'https://v/1_1');
+});
+
 test('сироты: удаляются только a/ без u/, остальные a/ на месте', async (t) => {
   const { db, A, B } = await setup(t);
   const X = await db.addUser('x@example.com');

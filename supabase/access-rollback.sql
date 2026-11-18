@@ -6,8 +6,21 @@
 --     профиль u/<id> (данные из a/ главнее: мастер мог открыть ступень уже после
 --     переноса); поле free из a/ не переносится;
 --   • записи a/ и v/ удаляются;
---   • убираются 4 ограничивающих правила и функции has_stage, student_path_ok.
+--   • убираются 4 ограничивающих правила и функции has_stage, student_path_ok;
+--   • удаляется служебная таблица access_migration_runs (отметка о первом
+--     переносе) — если потом снова выполнить access-migration.sql, доступы
+--     из профилей u/ опять перенесутся в a/, как при первом запуске.
 -- Когда запускать: если после access-migration.sql что-то пошло не так.
+-- Порядок (строго):
+--   1) откати коммит в main и подожди 1–2 минуты, пока сайт (GitHub Pages)
+--      обновится;
+--   2) попроси Лену и учениц обновить страницу или закрыть все вкладки
+--      платформы;
+--   3) только после этого выполни этот файл.
+-- Если выполнить его раньше, открытая новая страница снова создаст v/ и уберёт
+-- ссылки на видео из программы, а потом старая страница у Лены удалит a/ и v/ —
+-- доступы и ссылки потеряются. Торопиться не нужно: старая страница нормально
+-- работает и на базе после access-migration.sql.
 -- Повторный запуск ничего не ломает. Резервная копия не затрагивается.
 -- Вставь целиком в SQL Editor → Run.
 
@@ -17,11 +30,13 @@ with fixed as (
     select jsonb_agg(
       case when jsonb_typeof(s->'lessons') = 'array' then jsonb_set(s, '{lessons}', coalesce((
         select jsonb_agg(
+          case when jsonb_typeof(l) = 'object' then  -- урок не объект (строка и т.п.) не трогаем
           jsonb_set(l, '{video}', to_jsonb(coalesce(
             (select v.data->'videos'->>(l->>'id') from public.docs v
               where v.path = 'v/' || (s->>'n')),
             case when jsonb_typeof(l->'video') = 'string' then l->>'video' end,
             '')))
+          else l end
           order by li)
         from jsonb_array_elements(s->'lessons') with ordinality x(l, li)), '[]'::jsonb))
       else s end
@@ -60,6 +75,10 @@ drop policy if exists docs_paths_update on public.docs;
 drop policy if exists docs_paths_delete on public.docs;
 drop function if exists public.has_stage(int);
 drop function if exists public.student_path_ok(text, uuid, jsonb);
+
+-- 5. Убираем отметку о первом переносе — следующий access-migration.sql
+--    снова перенесёт доступы из профилей u/
+drop table if exists public.access_migration_runs;
 
 -- ── Вариант «полностью вернуть таблицу из резервной копии» ───────────────────
 -- ВНИМАНИЕ: пропадёт ВСЁ, что ученицы и мастер записали после копии
