@@ -22,10 +22,10 @@ test('общая тема подключена: цвета берутся из t
   expect(velvet).toBe('#2a4132');
 });
 
-test('баннер: высота 270 на планшете и ноутбуке, текст и кнопка на месте', async ({ page }) => {
+test('баннер: высота 270–440 по ширине экрана, текст и кнопка на месте', async ({ page }) => {
   const hero = page.locator('#v-path .hero.me');
   if (page.viewportSize().width > 760) {
-    expect((await hero.boundingBox()).height).toBeCloseTo(270, 0);
+    { const h = (await hero.boundingBox()).height; expect(h).toBeGreaterThanOrEqual(269); expect(h).toBeLessThanOrEqual(441); }
   }
   await expect(hero.locator('.h-title')).toContainText('продолжим путь');
   await expect(hero.locator('.hbtn')).toBeVisible();

@@ -1586,7 +1586,7 @@ html.pal2 #v-path>.hero.me{margin-top:0}
 /* баннер обучения: картинка Лены по бокам, текст на пергаментной табличке по центру (закрывает надпись на картинке) */
 /* баннер «Анна, продолжим путь» в стиле первого экрана лендинга: картина Лены, текст живой поверх её таблички.
    Высота та же, что была (270px). Картина масштабируется так, чтобы табличка целиком вошла в баннер */
-html.pal2 .hero.me{--H:510px;height:270px;background:var(--tp-velvet-deep);overflow:hidden;box-shadow:none}
+html.pal2 .hero.me{--hh:clamp(270px,27.37vw,440px);--H:calc(var(--hh) / .53);height:var(--hh);background:var(--tp-velvet-deep);overflow:hidden;box-shadow:none}
 html.pal2 .hero.me::before{content:"";position:absolute;inset:-30px;background:url("assets/scene-1600.webp") center 35%/cover no-repeat;filter:blur(26px) brightness(.5) saturate(1.1)}
 html.pal2 .hero.me .hero-txt{position:absolute;left:50%;top:calc(var(--H) * -.13);transform:translateX(-50%);width:calc(var(--H) * 1.9365);height:var(--H);display:block;padding:0;gap:0;
  border:0;border-radius:0;box-shadow:0 0 60px 26px rgba(20,8,12,.45);background:url("assets/scene-2560.webp") 0 0/100% 100% no-repeat;container-type:inline-size;isolation:isolate}
