@@ -1786,10 +1786,71 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 </section>
 
 <!-- ========== МАСТЕР: ПРОВЕРКА ========== -->
+<!-- ========== МАСТЕР: ПЕРЕПИСКИ (основа) ========== -->
+<style>
+/* ПЕРЕПИСКИ: двухколоночный мессенджер мастера (список слева, чат справа) */
+.mchats-wrap{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:20px;align-items:stretch;--mch-h:calc(100dvh - 134px)}
+.mch-panel{background:linear-gradient(180deg,var(--tp-parch,#fdf3e6),var(--tp-parch2,#f6dfc4));border:1.5px solid var(--tp-gold2,#c9a050);border-radius:18px;color:var(--tp-ink,#3a1428);box-shadow:0 14px 34px rgba(10,4,6,.34)}
+.mchats-list{display:flex;flex-direction:column;height:var(--mch-h);min-height:520px;padding:18px 14px 10px;overflow:hidden}
+.mch-head{display:flex;align-items:baseline;gap:10px;padding:0 6px 8px}
+.mch-head h2{font-family:var(--tp-serif,Georgia,serif);font-weight:500;font-size:23px;margin:0;color:var(--tp-ink,#3a1428)}
+.mch-head small{font-size:13px;color:var(--tp-gold2,#a77b2a);font-weight:600}
+.mch-search{padding:2px 4px 8px}
+.mch-search input{width:100%;box-sizing:border-box;border:1px solid rgba(201,160,80,.5);background:rgba(255,255,255,.5);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:var(--tp-ink,#3a1428)}
+.mch-search input::placeholder{color:#b09a74}
+#chFolder,#chType{margin:0 2px}
+#chType{margin-top:8px}
+.chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
+.chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
+.chatrow:hover{background:rgba(154,111,34,.07)}
+.chatrow.unread{background:rgba(154,111,34,.05)}
+.chatrow.active{background:rgba(138,39,66,.1);box-shadow:inset 3px 0 0 var(--tp-wine2,#93384a)}
+.cr-av{flex:0 0 auto;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--tp-serif,Georgia,serif);font-size:20px;color:#fff3e6;background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f));border:1px solid var(--tp-gold,#d6a866)}
+.cr-main{flex:1;min-width:0;display:grid;gap:3px}
+.cr-top{display:flex;align-items:baseline;gap:8px;min-width:0}
+.cr-name{font-size:15.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;color:var(--tp-ink,#3a1428)}
+.cr-time{font-size:12px;color:#9a876a;white-space:nowrap}
+.cr-bot{display:flex;align-items:center;gap:8px;min-width:0}
+.cr-prev{flex:1;min-width:0;font-size:13.5px;color:#8a7a5c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatrow.unread .cr-prev{color:#4a3a28}
+.cr-kind{flex:0 0 auto;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tp-gold2,#a77b2a);border:1px solid rgba(201,160,80,.6);border-radius:6px;padding:1px 6px}
+.cr-badge{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--tp-wine2,#93384a);color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center}
+.cr-read{flex:0 0 auto;color:#5a9a6a;font-size:13px}
+.cr-wait{flex:0 0 auto;font-size:11px;color:var(--tp-gold2,#a77b2a);border:1px solid rgba(201,160,80,.5);border-radius:999px;padding:2px 8px}
+#chatPane{height:var(--mch-h);min-height:520px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0}
+.chat-empty{margin:auto;text-align:center;max-width:300px;color:#8a7658;padding:30px}
+.chat-empty .ce-ico{font-size:30px;color:var(--tp-gold2,#c9a050)}
+.chat-empty b{display:block;font-family:var(--tp-serif,Georgia,serif);font-size:20px;margin:10px 0 6px;color:var(--tp-ink,#3a1428)}
+.chat-empty p{font-size:14px;line-height:1.5;margin:0}
+/* чат, встроенный в правую колонку (десктоп) */
+#vdlg.embedded{position:static;inset:auto;z-index:auto;background:none;display:block;padding:0;height:100%;width:100%}
+#vdlg.embedded .dbox.tgbox{width:100%!important;height:100%!important;max-height:100%!important;border-radius:0!important;border:0!important}
+@media (max-width:900px){
+ .mchats-wrap{grid-template-columns:1fr}
+ #chatPane{display:none}
+ .mchats-list{height:auto;min-height:0}
+ .chats{overflow:visible}
+}
+</style>
+<section class="view" id="v-mchats" hidden>
+  <div class="mchats-wrap">
+    <aside class="mchats-list mch-panel">
+      <div class="mch-head"><h2>Переписки</h2><small id="chWait"></small></div>
+      <div class="mch-search"><input id="chSearch" type="search" autocomplete="off" placeholder="Поиск по ученицам" aria-label="Поиск по ученицам"></div>
+      <div class="seg chfold" id="chFolder" role="group" aria-label="Папка"><button type="button" data-f="all" aria-pressed="true">Все</button><button type="button" data-f="unread" aria-pressed="false">Непрочитанные <b id="chfUnread"></b></button></div>
+      <div class="seg chtype" id="chType" role="group" aria-label="Тип"><button type="button" data-t="spread" aria-pressed="true">Расклады <b id="chtS"></b></button><button type="button" data-t="question" aria-pressed="false">Вопросы <b id="chtQ"></b></button></div>
+      <div class="chats" id="mchats"></div>
+    </aside>
+    <div class="mch-panel" id="chatPane">
+      <div class="chat-empty" id="chatEmpty"><div class="ce-ico">✦</div><b>Выбери переписку</b><p>Слева — все ученицы. Открой любую, чтобы ответить на её расклады и вопросы.</p></div>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="v-mqueue" hidden>
   <div class="sech">
-    <div><div class="lab"><i></i>Кабинет мастера</div><h2>На <em>проверке</em></h2></div>
-    <p>Расклады и Посвящения от учениц с тарифом обратной связи. Ответ сразу появляется у ученицы в журнале, а засчитанное Посвящение открывает ей следующую ступень.</p>
+    <div><div class="lab"><i></i>Кабинет мастера</div><h2>Расширенный <em>поиск</em></h2></div>
+    <p>Полный список с фильтрами по ученице, типу и датам — чтобы найти конкретный старый разбор. Для ежедневной работы удобнее «Переписки».</p>
   </div>
   <div class="chipsrow" id="mChips"></div>
   <div class="seg qstat" id="qStat" role="group" aria-label="Что показать"><button type="button" data-s="all" aria-pressed="true">Все <b id="qsA"></b></button><button type="button" data-s="wait" aria-pressed="false">Ждут ответа <b id="qsW"></b></button><button type="button" data-s="done" aria-pressed="false">Отвеченные <b id="qsD"></b></button></div>
@@ -2427,13 +2488,13 @@ function showView(v){if(v==="login"&&typeof renderLanding==="function")setTimeou
  document.querySelectorAll(".view").forEach(x=>x.hidden=!(x.id==="v-"+v||(v==="mech"&&x.id==="v-market")));
  window.scrollTo({top:0});document.body.classList.toggle("stage-on",v==="path"||v==="login");
  if(v==="deck")renderDeck();if(v==="journal")renderJournal();if(v==="spreads")renderSp();if(v==="path")renderAll();if(v==="profile")renderProfile();
- if(v==="mqueue")renderQueue();if(v==="mstudents")renderStudents();if(v==="mpay")renderPay();if(v==="mprog")renderProgram();if(v==="mstats")renderStats();
+ if(v==="mchats")renderChats();else unembedChat();if(v==="mqueue")renderQueue();if(v==="mstudents")renderStudents();if(v==="mpay")renderPay();if(v==="mprog")renderProgram();if(v==="mstats")renderStats();
  renderTabs();
 }
 function refresh(){
  const v=curView();
  if(v==="spreads")renderSp();if(v==="path")renderAll();if(v==="profile")renderProfile();if(v==="deck")renderDeck();if(v==="journal")renderJournal();
- if(v==="mqueue")renderQueue();if(v==="mstudents")renderStudents();if(v==="mpay")renderPay();if(v==="mstats")renderStats();
+ if(v==="mchats")renderChats();else unembedChat();if(v==="mqueue")renderQueue();if(v==="mstudents")renderStudents();if(v==="mpay")renderPay();if(v==="mstats")renderStats();
  if(!$("cdlg").hidden)renderStudentCard();
  renderTabs();
 }
@@ -2443,7 +2504,7 @@ function waitingAll(){return Object.values(DB.users).flatMap(u=>u.spreads.filter
 function renderTabs(){
  const top=document.querySelector(".top");top.classList.toggle("out",!role);
  const tabs=role==="master"
-  ?[["mqueue",`Проверка${waitingAll().length?`<span class="badge">${waitingAll().length}</span>`:""}`],["mstudents","Ученицы"],...(FREE?[]:[["mpay",`Оплаты${reqs().filter(r=>r.st==="wait").length?`<span class="badge">${reqs().filter(r=>r.st==="wait").length}</span>`:""}`]]),["mprog","Программа"],["mstats","Статистика"],["mech","Концепт"]]
+  ?[["mchats",`Переписки${chatsBadge()?`<span class="badge">${chatsBadge()}</span>`:""}`],["mstudents","Ученицы"],...(FREE?[]:[["mpay",`Оплаты${reqs().filter(r=>r.st==="wait").length?`<span class="badge">${reqs().filter(r=>r.st==="wait").length}</span>`:""}`]]),["mprog","Программа"],["mstats","Статистика"],["mqueue","Поиск"],["mech","Концепт"]]
   :[...(PAL2?[["home","Мой путь"],["path","Обучение"]]:[["path","Мой путь"]]),["deck",PAL2?"Практика":"Колода"],["spreads",`Расклады${S&&S.spreads.some(x=>x.unreadS)?'<span class="badge">•</span>':""}`],["journal","Журнал"]];
  const map={lesson:"path",exam:"path",welcome:"path",market:"mech",profile:""};
  const cv=map[curView()]||curView();
@@ -2519,7 +2580,7 @@ $("fIn").onsubmit=async e=>{
 $("forgot").onclick=async()=>{if(!CLOUD){toast("В рабочей версии сюда придёт ссылка для смены пароля");return}
  const em=$("inEmail").value.trim().toLowerCase();if(!em){$("inErr").textContent="Впиши почту, и мы пришлём ссылку для нового пароля.";$("inErr").hidden=false;$("inEmail").focus();return}
  try{await sb.recover(em);toast("Ссылка для нового пароля отправлена на почту")}catch(x){toast("Не получилось отправить письмо. Попробуй позже или напиши Лене")}};
-function loginMaster(){touchActive(true);if(!CLOUD)try{localStorage.setItem(LOCAL_SESS,"master")}catch(e){}role="master";S=null;showView("mqueue");const un=myNotifs().filter(n=>!n.read).length;toast(un?`Здравствуй, Лена. Новых уведомлений: ${un}`:"Здравствуй, Лена")}
+function loginMaster(){touchActive(true);if(!CLOUD)try{localStorage.setItem(LOCAL_SESS,"master")}catch(e){}role="master";S=null;showView("mchats");const un=myNotifs().filter(n=>!n.read).length;toast(un?`Здравствуй, Лена. Новых уведомлений: ${un}`:"Здравствуй, Лена")}
 $("fUp").onsubmit=async e=>{
  e.preventDefault();const name=$("upName").value.trim(),em=$("upEmail").value.trim().toLowerCase(),pw=$("upPass").value,err=$("upErr");
  if(!name||!em||!pw){err.textContent="Заполни имя, почту и пароль.";err.hidden=false;return}
@@ -3591,6 +3652,72 @@ const lastAct=x=>x.thread.length?x.thread[x.thread.length-1].at:(x.sentAt||x.at)
 let qStat="all";
 const sentAll=()=>Object.values(DB.users).flatMap(u=>u.spreads.filter(x=>x.sentAt&&!x.mDeletedAt&&!(x.deletedAt&&x.mDismissed)).map(x=>({u,x})));
 const answeredAll=()=>sentAll().filter(i=>!i.x.deletedAt&&(i.x.status==="done"||i.x.status==="returned"));
+/* ===== ПЕРЕПИСКИ (чат на ученицу) — основа. Claude Code дополнит одной лентой на человека ===== */
+let chatsFolder="all",chatsType="spread",chatsQuery="";
+const chTypeOk=x=>chatsType==="question"?x.kind==="question":x.kind!=="question"; /* Расклады = расклад/квест/Посвящение */
+const chatsBadge=()=>{const s=new Set();sentAll().forEach(({u,x})=>{if(x.unreadM)s.add(u.id)});return s.size};
+function chatRows(){
+ const byU=new Map();
+ sentAll().forEach(({u,x})=>{if(!chTypeOk(x))return;if(!byU.has(u.id))byU.set(u.id,{u,items:[]});byU.get(u.id).items.push(x)});
+ return [...byU.values()].map(g=>{
+  const unread=g.items.filter(x=>x.unreadM).length;
+  let last=null,lastT="";g.items.forEach(x=>{const t=lastAct(x);if(t>lastT){lastT=t;last=x}});
+  const lm=last&&last.thread.length?[...last.thread].reverse().find(m=>m.t||m.img||m.voice):null;
+  const wait=g.items.some(x=>x.status==="wait"&&!x.deletedAt);
+  return {u:g.u,items:g.items,unread,lastT,last,lm,wait};
+ });
+}
+function renderChats(){
+ placeChatPane();
+ const sent=sentAll();
+ const uu=pred=>{const s=new Set();sent.forEach(({u,x})=>{if(pred(x)&&x.unreadM)s.add(u.id)});return s.size};
+ const unrS=uu(x=>x.kind!=="question"),unrQ=uu(x=>x.kind==="question");
+ const all=chatRows().filter(r=>!chatsQuery||(r.u.name||"").toLowerCase().includes(chatsQuery));
+ const unread=all.filter(r=>r.unread>0);
+ document.querySelectorAll("#chFolder button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===chatsFolder));
+ document.querySelectorAll("#chType button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===chatsType));
+ const set=(id,v)=>{const el=$(id);if(el)el.textContent=v||""};
+ set("chfUnread",unrS+unrQ);set("chtS",unrS);set("chtQ",unrQ);
+ const cw=$("chWait");if(cw){const w=waitingAll().length;cw.textContent=w?`${w} ${plural(w,"ждёт","ждут","ждут")} ответа`:"все отвечены"}
+ const rows=(chatsFolder==="unread"?unread:all).slice().sort((a,b)=>((b.unread>0)-(a.unread>0))||b.lastT.localeCompare(a.lastT));
+ const box=$("mchats");if(!box)return;
+ const actId=chatU&&!$("vdlg").hidden?String(chatU.id):null;
+ if(!rows.length){box.innerHTML=`<div class="emptyq"><b>${chatsQuery?"Никого не нашли":chatsFolder==="unread"?"Непрочитанных нет":"Здесь пока пусто"}</b>${chatsQuery?"Попробуй другое имя.":chatsFolder==="unread"?"Как только ученица пришлёт новое — переписка поднимется сюда.":chatsType==="question"?"Вопросы учениц по лекциям появятся здесь.":"Расклады, квесты и Посвящения учениц появятся здесь."}</div>`;return}
+ box.innerHTML=rows.map(r=>{
+  const u=r.u,lm=r.lm,mono=((u.name||"?").trim().charAt(0)||"?").toUpperCase();
+  let prev;
+  if(lm)prev=(lm.from==="master"?"Ты: ":"")+(lm.t||(lm.voice?"🎤 голосовое":lm.img?"📷 фото":""));
+  else if(r.last)prev=`прислала ${kindName(r.last)}`;else prev="";
+  const kindTag=r.last&&r.last.kind==="exam"?`<span class="cr-kind">Посвящение</span>`:"";
+  const right=r.unread?`<span class="cr-badge">${r.unread}</span>`:(lm&&lm.from==="master")?`<span class="cr-read">✓✓</span>`:r.wait?`<span class="cr-wait">ждёт</span>`:"";
+  return `<button class="chatrow ${r.unread?"unread":""} ${actId===String(u.id)?"active":""}" data-uid="${u.id}">`+
+   `<span class="cr-av">${esc(mono)}</span>`+
+   `<span class="cr-main"><span class="cr-top"><b class="cr-name">${esc(u.name)}</b><span class="cr-time">${r.lastT?fmt(r.lastT):""}</span></span>`+
+   `<span class="cr-bot">${kindTag}<span class="cr-prev">${esc(prev)}</span>${right}</span></span></button>`;
+ }).join("");
+ box.querySelectorAll("[data-uid]").forEach(b=>b.onclick=()=>openPerson(b.dataset.uid));
+}
+/* Пока открываем самый свежий/непрочитанный разбор ученицы в существующем окне чата.
+   Следующий шаг (Claude Code): одна лента со ВСЕМИ её разборами, как в телеграме;
+   ответ Лены по умолчанию уходит в открытый/последний разбор, без плашки «ответить на». */
+function openPerson(uid){
+ const items=sentAll().filter(i=>i.u.id===uid&&chTypeOk(i.x)).map(i=>i.x);
+ if(!items.length)return;
+ const pick=items.find(x=>x.unreadM)||items.find(x=>x.status==="wait"&&!x.deletedAt)||items.slice().sort((a,b)=>lastAct(b).localeCompare(lastAct(a)))[0];
+ openChat(uid,pick.id,"master");
+}
+document.querySelectorAll("#chFolder button").forEach(b=>b.onclick=()=>{chatsFolder=b.dataset.f;renderChats()});
+document.querySelectorAll("#chType button").forEach(b=>b.onclick=()=>{chatsType=b.dataset.t;renderChats()});
+{const si=$("chSearch");if(si)si.addEventListener("input",()=>{chatsQuery=si.value.trim().toLowerCase();renderChats()});}
+/* встраивание окна чата в правую колонку на десктопе; на узком экране — обычная всплывашка */
+const MCH_WIDE="(min-width:900px)";
+function placeChatPane(){const dlg=$("vdlg"),pane=$("chatPane");if(!dlg||!pane)return;
+ if(curView()==="mchats"&&window.matchMedia(MCH_WIDE).matches){if(dlg.parentElement!==pane)pane.appendChild(dlg);dlg.classList.add("embedded");document.body.classList.add("chats-embed");}
+ else if(dlg.classList.contains("embedded")){if(dlg.parentElement!==document.body)document.body.appendChild(dlg);dlg.classList.remove("embedded");document.body.classList.remove("chats-embed");}
+ syncChatPane();}
+function syncChatPane(){const e=$("chatEmpty"),dlg=$("vdlg");if(e&&dlg)e.hidden=dlg.classList.contains("embedded")&&!dlg.hidden;}
+function unembedChat(){const d=$("vdlg");if(d&&d.classList.contains("embedded")){d.hidden=true;if(d.parentElement!==document.body)document.body.appendChild(d);d.classList.remove("embedded");document.body.classList.remove("chats-embed");chatS=null;}}
+window.addEventListener("resize",()=>{if(curView()==="mchats")placeChatPane()});
 function renderQueue(){
  const W=waitingAll(),D=answeredAll();$("qsW").textContent=W.length||"";$("qsD").textContent=D.length||"";$("qsA").textContent=sentAll().length||"";
  document.querySelectorAll("#qStat button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===qStat));
@@ -3873,7 +4000,7 @@ function renderJournal(){
 }
 $("jSearch").addEventListener("input",renderJournal);
 // ===== диалоги =====
-function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null;if(typeof syncChatPane==="function")syncChatPane();if(typeof renderChats==="function"&&curView()==="mchats"&&$("vdlg").classList.contains("embedded"))renderChats()}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
 ["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg","qdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel").hidden){$("npanel").hidden=true;renderTabs();return}
  for(const id of ["xdlg","qdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
