@@ -3706,7 +3706,7 @@ function renderChats(){
   const u=r.u,lm=r.lm,mono=((u.name||"?").trim().charAt(0)||"?").toUpperCase();
   let prev;
   if(lm)prev=(lm.from==="master"?"Ты: ":"")+(lm.t||(lm.voice?"🎤 голосовое":lm.img?"📷 фото":""));
-  else if(r.last)prev=`прислала ${kindName(r.last)}`;else prev="";
+  else if(r.last)prev=r.last.q||r.last.desc||kindName(r.last);else prev="";
   const kindTag=r.last&&r.last.kind==="exam"?`<span class="cr-kind">Посвящение</span>`:"";
   const right=r.unread?`<span class="cr-badge">${r.unread}</span>`:(lm&&lm.from==="master")?`<span class="cr-read">✓✓</span>`:r.wait?`<span class="cr-wait">ждёт</span>`:"";
   return `<button class="chatrow ${r.unread?"unread":""} ${actId===String(u.id)?"active":""}" data-uid="${u.id}">`+
