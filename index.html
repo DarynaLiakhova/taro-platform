@@ -1800,6 +1800,11 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 .mch-search input::placeholder{color:#b09a74}
 #chFolder,#chType{margin:0 2px}
 #chType{margin-top:8px}
+/* явный тумблер: обе половины читаемые, активная — винная плашка */
+.mchats-list .seg{display:grid;grid-template-columns:1fr 1fr;width:100%;background:rgba(201,160,80,.16);border:1px solid rgba(201,160,80,.45);border-radius:12px;padding:4px;gap:4px;box-sizing:border-box}
+.mchats-list .seg button{border-radius:9px;padding:8px 6px;font-size:13px;font-weight:600;color:#6f4e2c;white-space:nowrap}
+.mchats-list .seg button b{font-weight:700}
+.mchats-list .seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f))!important;color:#fff3e6!important;box-shadow:0 2px 6px rgba(40,8,20,.25)}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
