@@ -1809,10 +1809,10 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 /* тип — компактный сегмент (не на всю ширину) */
 .chtype{display:inline-flex;gap:2px;background:rgba(201,160,80,.16);border:1px solid rgba(201,160,80,.4);border-radius:10px;padding:3px}
 .chtype button{background:none;border:0;border-radius:8px;padding:6px 14px;font:inherit;font-size:12.5px;font-weight:600;color:#6f4e2c;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
-.chtype button b{font-weight:600;font-size:11px;opacity:.7}
+.chtype button b{font-weight:600;font-size:11px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;display:inline-grid;place-items:center;background:rgba(147,56,74,.15);color:var(--tp-wine2,#93384a)}
 .chtype button b:empty{display:none}
 .chtype button[aria-pressed="true"]{background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f));color:#fff3e6}
-.chtype button[aria-pressed="true"] b{opacity:.85;color:#fff3e6}
+.chtype button[aria-pressed="true"] b{background:rgba(255,243,230,.26);color:#fff3e6}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
