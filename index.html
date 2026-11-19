@@ -1798,13 +1798,21 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 .mch-search{padding:2px 4px 8px}
 .mch-search input{width:100%;box-sizing:border-box;border:1px solid rgba(201,160,80,.5);background:rgba(255,255,255,.5);border-radius:10px;padding:9px 12px;font:inherit;font-size:14px;color:var(--tp-ink,#3a1428)}
 .mch-search input::placeholder{color:#b09a74}
-#chFolder,#chType{margin:0 2px}
-#chType{margin-top:8px}
-/* явный тумблер: обе половины читаемые, активная — винная плашка */
-.mchats-list .seg{display:grid;grid-template-columns:1fr 1fr;width:100%;background:rgba(201,160,80,.16);border:1px solid rgba(201,160,80,.45);border-radius:12px;padding:4px;gap:4px;box-sizing:border-box}
-.mchats-list .seg button{border-radius:9px;padding:8px 6px;font-size:13px;font-weight:600;color:#6f4e2c;white-space:nowrap}
-.mchats-list .seg button b{font-weight:700}
-.mchats-list .seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f))!important;color:#fff3e6!important;box-shadow:0 2px 6px rgba(40,8,20,.25)}
+#chFolder{margin:4px 2px 0}#chType{margin:12px 2px 0}
+/* папки — текстовые вкладки с подчёркиванием */
+.chfold{display:flex;gap:18px;border-bottom:1px solid rgba(201,160,80,.35);padding:0 2px}
+.chfold button{background:none;border:0;padding:8px 0 9px;font:inherit;font-size:14px;font-weight:600;color:#8a7a5c;cursor:pointer;position:relative;display:flex;align-items:center;gap:6px}
+.chfold button b{font-weight:600;font-size:11px;background:rgba(147,56,74,.14);color:var(--tp-wine2,#93384a);border-radius:999px;padding:1px 6px}
+.chfold button b:empty{display:none}
+.chfold button[aria-pressed="true"]{color:var(--tp-ink,#3a1428)}
+.chfold button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--tp-wine2,#93384a);border-radius:2px}
+/* тип — компактный сегмент (не на всю ширину) */
+.chtype{display:inline-flex;gap:2px;background:rgba(201,160,80,.16);border:1px solid rgba(201,160,80,.4);border-radius:10px;padding:3px}
+.chtype button{background:none;border:0;border-radius:8px;padding:6px 14px;font:inherit;font-size:12.5px;font-weight:600;color:#6f4e2c;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.chtype button b{font-weight:600;font-size:11px;opacity:.7}
+.chtype button b:empty{display:none}
+.chtype button[aria-pressed="true"]{background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f));color:#fff3e6}
+.chtype button[aria-pressed="true"] b{opacity:.85;color:#fff3e6}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
@@ -1842,8 +1850,8 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
     <aside class="mchats-list mch-panel">
       <div class="mch-head"><h2>Переписки</h2><small id="chWait"></small></div>
       <div class="mch-search"><input id="chSearch" type="search" autocomplete="off" placeholder="Поиск по ученицам" aria-label="Поиск по ученицам"></div>
-      <div class="seg chfold" id="chFolder" role="group" aria-label="Папка"><button type="button" data-f="all" aria-pressed="true">Все</button><button type="button" data-f="unread" aria-pressed="false">Непрочитанные <b id="chfUnread"></b></button></div>
-      <div class="seg chtype" id="chType" role="group" aria-label="Тип"><button type="button" data-t="spread" aria-pressed="true">Расклады <b id="chtS"></b></button><button type="button" data-t="question" aria-pressed="false">Вопросы <b id="chtQ"></b></button></div>
+      <div class="chfold" id="chFolder" role="group" aria-label="Папка"><button type="button" data-f="all" aria-pressed="true">Все</button><button type="button" data-f="unread" aria-pressed="false">Непрочитанные <b id="chfUnread"></b></button></div>
+      <div class="chtype" id="chType" role="group" aria-label="Тип"><button type="button" data-t="spread" aria-pressed="true">Расклады <b id="chtS"></b></button><button type="button" data-t="question" aria-pressed="false">Вопросы <b id="chtQ"></b></button></div>
       <div class="chats" id="mchats"></div>
     </aside>
     <div class="mch-panel" id="chatPane">
