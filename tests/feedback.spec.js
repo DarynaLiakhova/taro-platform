@@ -53,7 +53,8 @@ async function sendState(page) {
 }
 
 async function inLenaQueue(page, question) {
-  await page.evaluate(() => loginMaster());
+  // Лена теперь попадает в «Переписки»; полный список с фильтрами — на вкладке «Поиск» (mqueue)
+  await page.evaluate(() => { loginMaster(); showView('mqueue'); });
   await expect(page.locator('#mq')).toBeVisible();
   await page.waitForTimeout(200);
   return page.locator('#mq', { hasText: question }).count();
