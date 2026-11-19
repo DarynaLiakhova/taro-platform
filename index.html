@@ -1813,6 +1813,13 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 .chtype button b:empty{display:none}
 .chtype button[aria-pressed="true"]{background:linear-gradient(180deg,var(--tp-wine2,#93384a),var(--tp-wine,#6c2d2f));color:#fff3e6}
 .chtype button[aria-pressed="true"] b{background:rgba(255,243,230,.26);color:#fff3e6}
+/* полоска «ещё ждут» в чате: другие разборы ученицы в один клик */
+.tg-more{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 12px;background:#f3e3c7;border-bottom:1px solid rgba(201,160,80,.5)}
+.tg-more .tgm-lab{font-size:12px;color:#9a6f22;font-weight:600;flex:0 0 auto}
+.tg-more .tgm-chip{display:inline-flex;align-items:center;gap:6px;max-width:230px;border:1px solid rgba(201,160,80,.6);background:#fffaf2;color:#3a1428;border-radius:999px;padding:5px 11px;font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-more .tgm-chip:hover{background:#fff}
+.tg-more .tgm-chip.un{border-color:var(--tp-wine2,#93384a)}
+.tg-more .tgm-chip.un::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tp-wine2,#93384a);flex:0 0 auto}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
@@ -3528,6 +3535,10 @@ function renderChat(){
  if(!x.mDeletedAt&&!(me&&x.deletedAt)&&x.thread.some(m=>!m.del&&m.from!=="system"))mi.push(`<button type="button" id="tgSelect">Выбрать сообщения</button>`);
  mi.push(`<button type="button" id="vClose2">Закрыть чат</button>`);
  const other=me?u.name:MASTER.name;
+ /* полоска «ещё ждут»: прочие разборы этой ученицы, чтобы не прятались за открытым */
+ const kindShort=s=>s.kind==="question"?"вопрос":s.kind==="quest"?"квест":s.kind==="exam"?"Посвящение":"расклад";
+ const sibs=me?u.spreads.filter(s=>s!==x&&s.sentAt&&!s.deletedAt&&!s.mDeletedAt&&(s.status==="wait"||s.unreadM)).sort((a,b)=>lastAct(b).localeCompare(lastAct(a))):[];
+ const moreBar=sibs.length?`<div class="tg-more" id="tgMore"><span class="tgm-lab">Ещё ждут (${sibs.length}):</span>${sibs.slice(0,6).map(s=>`<button type="button" class="tgm-chip ${s.unreadM?"un":""}" data-sib="${s.id}" title="${esc(s.q||"")}">${kindShort(s)} · ${esc((s.q||"").replace("Квест: ","").slice(0,30))}</button>`).join("")}</div>`:"";
  $("vBox").className="dbox tgbox";
  $("vBox").innerHTML=`<div class="tg">
   ${selMode?selHead(x):""}
@@ -3536,6 +3547,7 @@ function renderChat(){
    <div class="tg-ti"><b>${esc(other)}</b><small><span class="st ${x.status==="returned"?"wait":x.status}">${stLabel[x.status]}</span> · ${esc(kindName(x))}</small></div>
    <button type="button" class="tg-ic" id="tgMenuBtn" aria-label="Меню" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg></button>
    <div class="tg-menu" id="tgMenu" hidden>${mi.join("")}</div></header>
+  ${!selMode?moreBar:""}
   ${pinBar(x)}${pin}
   <div class="tg-body${selMode?" selmode":""}" id="thread">${html}</div>
   ${selMode?selFoot():foot}</div>`;
@@ -3556,6 +3568,7 @@ function renderChat(){
  $("vBox").oncontextmenu=e=>{if(selMode)return;const b=e.target.closest(".tg-body .msg .bub");if(!b)return;e.preventDefault();openCtx(b.parentNode)};
  $("vBox").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=x.thread[+b.dataset.copy].t;try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}closeCtx()});
  $("vClose").onclick=()=>closeDlg("vdlg");$("vClose2").onclick=()=>closeDlg("vdlg");
+ {const mo=$("tgMore");if(mo)mo.querySelectorAll("[data-sib]").forEach(b=>b.onclick=()=>openChat(u.id,+b.dataset.sib,"master"))}
  {const md=$("mDel");if(md)md.onclick=()=>{if(md.dataset.c!=="1"){md.dataset.c="1";md.textContent="Точно удалить? Нажми ещё раз";md.classList.add("sure");setTimeout(()=>{if(md.isConnected){md.dataset.c="";md.textContent="Удалить навсегда";md.classList.remove("sure")}},5000);return}masterDelete(u,x);closeDlg("vdlg")}}
  mountChatRec(x);
  {const vc=$("vCats");if(vc){const draw=()=>{vc.innerHTML=`<button type="button" class="cat ${!x.cat?"on":""}" data-c="">Без темы</button>`+cats().map(c=>`<button type="button" class="cat ${x.cat===c?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="cat add" id="vCatAdd">+ Своя</button>`;
@@ -3722,7 +3735,8 @@ function renderChats(){
 function openPerson(uid){
  const items=sentAll().filter(i=>i.u.id===uid&&chTypeOk(i.x)).map(i=>i.x);
  if(!items.length)return;
- const pick=items.find(x=>x.unreadM)||items.find(x=>x.status==="wait"&&!x.deletedAt)||items.slice().sort((a,b)=>lastAct(b).localeCompare(lastAct(a)))[0];
+ const byNew=(a,b)=>lastAct(b).localeCompare(lastAct(a));
+ const pick=items.filter(x=>x.unreadM).sort(byNew)[0]||items.filter(x=>x.status==="wait"&&!x.deletedAt).sort(byNew)[0]||items.slice().sort(byNew)[0];
  openChat(uid,pick.id,"master");
 }
 document.querySelectorAll("#chFolder button").forEach(b=>b.onclick=()=>{chatsFolder=b.dataset.f;renderChats()});
