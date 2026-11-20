@@ -1838,6 +1838,18 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 .pc-exam{display:flex;gap:8px;margin-top:9px}
 .pc-eb{border:1px solid rgba(201,160,80,.6);background:rgba(255,255,255,.45);border-radius:8px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:600;color:#6b4a2a;cursor:pointer}
 .pc-eb.pass{background:linear-gradient(180deg,#3f6c52,#2a4132);color:#fff;border-color:#2a4132}
+/* удалённое сообщение — «надгробие» у обоих */
+.bub.del{opacity:.72}
+.del-note{margin:0;font-style:italic;opacity:.75;font-size:13.5px}
+/* действия над сообщением (копировать/удалить) при наведении */
+.tg-body .msg{position:relative}
+.pc-mact{position:absolute;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;pointer-events:none;z-index:2}
+.msg.out .pc-mact{right:100%;margin-right:7px}
+.msg.in .pc-mact{left:100%;margin-left:7px}
+.msg:hover .pc-mact,.pc-mact:focus-within{opacity:1;pointer-events:auto}
+.pc-ma{min-width:26px;height:26px;padding:0 7px;border-radius:999px;border:1px solid rgba(201,160,80,.5);background:rgba(255,250,242,.92);color:#7a5a2a;font-size:13px;line-height:1;cursor:pointer;white-space:nowrap}
+.pc-ma.del{color:#9a3b3b}
+.pc-ma.sure{background:#9a3b3b;color:#fff;border-color:#9a3b3b}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
@@ -3495,7 +3507,7 @@ function renderPersonChat(){
  if(!items.length){closeDlg("vdlg");return}
  if(!items.find(x=>x.id===pActiveSid))pActiveSid=items[items.length-1].id;
  const ev=[];
- items.forEach(x=>{ev.push({t:x.sentAt||x.at,o:0,x});(x.thread||[]).forEach((m,i)=>{if(!m.del)ev.push({t:m.at||x.sentAt||x.at,o:1,x,m,i})})});
+ items.forEach(x=>{ev.push({t:x.sentAt||x.at,o:0,x});(x.thread||[]).forEach((m,i)=>{ev.push({t:m.at||x.sentAt||x.at,o:1,x,m,i})})});
  ev.sort((a,b)=>(a.t||"").localeCompare(b.t||"")||a.o-b.o);
  let html="",day="";
  const dayLine=t=>{const d=dayOf(t);if(d!==day){day=d;return `<div class="tg-day"><span>${dLong(t)}</span></div>`}return ""};
@@ -3511,9 +3523,13 @@ function renderPersonChat(){
     (x.voice&&x.voice.src?voiceMsg({voice:x.voice}):"")+
     `<span class="meta">${hm(x.sentAt||x.at)}</span>`+
     `<button type="button" class="pc-reply" data-reply="${x.id}" aria-label="Ответить на этот разбор">↩</button>${ex}</div></div>`;
-  }else{const m=e.m,out=m.from==="master",only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
+  }else{const m=e.m,out=m.from==="master";
+   if(m.del){html+=`<div class="msg ${out?"m out":"s in"} tail"><div class="bub del"><p class="del-note">Сообщение удалено</p><span class="meta">${hm(m.at)}</span></div></div>`;return}
+   const only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
    const quote=m.reply?`<button type="button" class="pc-quote" data-goto="sp-${m.reply.sid}"><b>${esc(m.reply.kind||"разбор")}</b><span>${esc(m.reply.q||"")}</span></button>`:"";
-   html+=`<div class="msg ${out?"m out":"s in"} tail"><div class="bub${only?" media":""}">${quote}${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}<span class="meta">${hm(m.at)}</span></div></div>`;
+   const mid=e.x.id+":"+e.i;
+   const acts=`<div class="pc-mact">${m.t?`<button type="button" class="pc-ma" data-mcopy="${mid}" aria-label="Копировать">⧉</button>`:""}<button type="button" class="pc-ma del" data-mdel="${mid}" aria-label="Удалить">🗑</button></div>`;
+   html+=`<div class="msg ${out?"m out":"s in"} tail">${acts}<div class="bub${only?" media":""}">${quote}${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}<span class="meta">${hm(m.at)}</span></div></div>`;
   }});
  const other=u.name;
  const replyBar=pReply?`<div class="tg-reply-bar" id="pcReplyBar"><span class="rb-l"></span><div><b>↩ Ответ на ${esc(pReply.kind||"разбор")}</b><small>${esc(pReply.q||"")}</small></div><button type="button" class="tg-x" id="pcReplyX" aria-label="Отменить ответ">×</button></div>`:"";
@@ -3546,6 +3562,13 @@ function renderPersonChat(){
  {const x=$("pcReplyX");if(x)x.onclick=()=>{pReply=null;renderPersonChat();const t=$("cTxt");if(t)t.focus()}}
  tb.querySelectorAll("[data-pass]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.pass,true));
  tb.querySelectorAll("[data-ret]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.ret,false));
+ tb.querySelectorAll("[data-mcopy]").forEach(b=>b.onclick=()=>{const [sid,i]=b.dataset.mcopy.split(":").map(Number);const x=u.spreads.find(s=>s.id===sid),t=x&&x.thread[i]&&x.thread[i].t;if(t){try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}}});
+ tb.querySelectorAll("[data-mdel]").forEach(b=>b.onclick=()=>{
+  if(b.dataset.c!=="1"){b.dataset.c="1";b.classList.add("sure");b.textContent="Удалить?";setTimeout(()=>{if(b.isConnected){b.dataset.c="";b.classList.remove("sure");b.innerHTML="🗑"}},4000);return}
+  const [sid,i]=b.dataset.mdel.split(":").map(Number);const x=u.spreads.find(s=>s.id===sid);if(!x||!x.thread[i])return;
+  const m=x.thread[i];m.del=true;m.u=nowISO();m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;
+  if(m.from==="master")x.unreadS=true;else x.unreadM=true;
+  persist();renderPersonChat();refresh();toast("Сообщение удалено")});
  const activeX=u.spreads.find(s=>s.id===pActiveSid)||items[items.length-1];
  mountChatRec(activeX);
  const s=$("cSend");if(s)s.onclick=()=>pcSend();
@@ -3599,9 +3622,10 @@ function renderChat(){
   ${x.desc?`<div class="o-sec"><small>${x.kind==="question"?(me?"Вопрос ученицы":"Мой вопрос"):me?"Трактовка ученицы":"Моя трактовка"}</small><p>${esc(x.desc)}</p></div>`:""}
   ${x.voice&&x.voice.src?voiceMsg({voice:x.voice}):""}${meta(oAt,false,-0.5,oOut&&!!x.sentAt)}</div></div>`;
  let html="",day=dayOf(oAt);html+=`<div class="tg-day"><span>${dLong(oAt)}</span></div>`+origin;
- const live=x.thread.map((m,i)=>[m,i]).filter(([m])=>!m.del);
+ const live=x.thread.map((m,i)=>[m,i]);
  live.forEach(([m,i],li)=>{
   const d=dayOf(m.at);if(d!==day){day=d;html+=`<div class="tg-day"><span>${dLong(m.at)}</span></div>`}
+  if(m.del){const o=mine(m);html+=`<div class="msg ${m.from==="master"?"m":"s"} ${o?"out":"in"} tail"><div class="bub del"><p class="del-note">Сообщение удалено</p>${meta(m.at,false,i,false)}</div></div>`;return}
   if(m.from==="system"){html+=`<div class="msg sys"><span>${esc(m.t)}</span></div>`;return}
   const out=mine(m),nx=(live[li+1]||[])[0],tail=!nx||nx.from!==m.from||dayOf(nx.at)!==d;
   const open=!x.mDeletedAt&&!(me&&x.deletedAt)&&editMsg==null,canEd=open&&out&&!!m.t,pinned=pinIs(x,m);

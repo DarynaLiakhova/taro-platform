@@ -88,6 +88,21 @@ test.describe('Чат: отправка', () => {
     expect(page.errors).toEqual([]);
   });
 
+  test('удаление сообщения — остаётся пометка «Сообщение удалено»', async ({ page }) => {
+    await boot(page);
+    await masterOpen(page, 'maria', 'spread');
+    await page.fill('#cTxt', 'Удаляемое сообщение');
+    await page.click('#cSend');
+    const msg = page.locator('#thread .msg.m', { hasText: 'Удаляемое сообщение' }).first();
+    await expect(msg).toHaveCount(1);
+    await msg.hover();
+    await msg.locator('[data-mdel]').click();   // подтверждение
+    await msg.locator('[data-mdel]').click();   // удаление
+    await expect(page.locator('#thread .bub.del', { hasText: 'Сообщение удалено' })).toHaveCount(1);
+    await expect(page.locator('#thread .msg.m', { hasText: 'Удаляемое сообщение' })).toHaveCount(0);
+    expect(page.errors).toEqual([]);
+  });
+
   test('голосовое: запись и отправка — в ленте появляется голосовое', async ({ page }) => {
     await boot(page);
     await masterOpen(page, 'maria', 'spread');
