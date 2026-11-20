@@ -1322,7 +1322,7 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 .tg .msg.out .vplay{background:#5fbe58}
 .vplay .i-pause{display:none}.vmsg.playing .i-pause{display:block}.vmsg.playing .i-play{display:none}
 .vw{display:grid;gap:3px;min-width:0}
-.vwave{display:flex;align-items:flex-end;gap:2px;height:20px;--p:0;--c:#c4d6e8;--a:var(--tg-acc,#3390ec)}
+.vwave{display:flex;align-items:flex-end;gap:2px;height:20px;--p:0;--c:#c4d6e8;--a:var(--tg-acc,#3390ec);cursor:pointer;padding:7px 0}
 .tg .msg.out .vwave{--c:#a9d89f;--a:#4fae4e}
 .vwave i{flex:1;max-width:3px;min-width:2px;border-radius:2px;background:var(--c)}
 .vwave i.on{background:var(--a)}
@@ -3254,6 +3254,7 @@ document.addEventListener("click",e=>{
   /* записи нет текста — расшифровываем на сервере (Groq), как в Telegram Premium */
   if(t.classList.contains("none")&&CLOUD&&!tb.classList.contains("busy")){transcribeVoice(box,tb,t);return}
   const o=t.hidden;t.hidden=!o;tb.setAttribute("aria-expanded",o);tb.classList.toggle("on",o);if(o&&box.dataset.vk)TR_OPEN.add(box.dataset.vk);else TR_OPEN.delete(box.dataset.vk);return}
+ const sw=e.target.closest(".vwave");if(sw){vseek(sw,e);return}
  const pb=e.target.closest(".vplay");if(!pb)return;
  const box=pb.closest(".vmsg"),a=box.querySelector("audio"),wv=box.querySelector(".vwave"),dl=box.querySelector(".vdur"),tot=dl.textContent;
  document.querySelectorAll(".vmsg audio").forEach(o=>{if(o!==a&&!o.paused)o.pause()});
@@ -3266,6 +3267,17 @@ document.addEventListener("click",e=>{
   a.addEventListener("ended",()=>{box.classList.remove("playing");[...wv.children].forEach(b=>b.classList.remove("on"));dl.textContent=tot})}
  a.play().catch(()=>toast("Не получилось воспроизвести голосовое"));
 });
+/* перемотка голосового: клик по волне ставит воспроизведение на эту точку */
+function vseek(wv,e){
+ const box=wv.closest(".vmsg");if(!box)return;
+ const a=box.querySelector("audio"),dl=box.querySelector(".vdur");if(!a)return;
+ if(!a.getAttribute("src")&&a.dataset.vk){const src=VSRC.get(a.dataset.vk);if(src)a.src=src}
+ const r=wv.getBoundingClientRect();
+ const cx=e.clientX!=null?e.clientX:((e.touches&&e.touches[0])||{}).clientX||0;
+ const frac=Math.max(0,Math.min(1,(cx-r.left)/(r.width||1)));
+ const apply=()=>{const d=isFinite(a.duration)&&a.duration>0?a.duration:(+a.dataset.dur||0);if(!d)return;a.currentTime=frac*d;const n=Math.round(frac*wv.children.length);[...wv.children].forEach((b,i)=>b.classList.toggle("on",i<n));if(dl)dl.textContent=fmtT(Math.floor(a.currentTime))};
+ if(isFinite(a.duration)&&a.duration>0)apply();else{try{a.load()}catch(_){}a.addEventListener("loadedmetadata",apply,{once:true})}
+}
 const EMO=["😊","😂","🥲","😍","🥰","😘","🤗","🤔","😮","😢","😭","😅","🙏","👍","👎","👏","🙌","💪","❤️","💔","🔥","✨","🌙","☀️","⭐","🌹","🌸","🔮","🃏","🕯️","💫","👀","🤍","💜","😌","😉","🙈","🤞","✅","❗"];
 const MAX_IMGS=5,MAX_VID=50*1024*1024;
 function albumHTML(m){
@@ -4507,7 +4519,7 @@ async function transcribeVoice(box,tb,t){
   const text=(j.text||"").trim();
   v.tr=text||"…";const m=msgByVoice(v);if(m)m.u=nowISO();
   TR_OPEN.add(vk);TR_FRESH.add(vk);setTimeout(()=>TR_FRESH.delete(vk),1500);
-  persist();renderChat();if(!text)toast("В записи не нашлось слов");
+  persist();if(pcMode&&chatU)renderPersonChat();else renderChat();if(!text)toast("В записи не нашлось слов");
  }catch(e){tb.classList.remove("busy");t.classList.remove("wait");
   t.textContent=e&&e.status===404?"Расшифровка ещё не подключена: в Supabase нет функции transcribe.":e&&e.status===429?"Слишком много расшифровок подряд, попробуй через минуту.":e&&e.j&&e.j.error==="no_key"?"В Supabase не добавлен ключ GROQ_API_KEY.":e&&e.status===401?"Нужно заново войти на платформу.":"Не получилось расшифровать. Проверь интернет и попробуй ещё раз."}
 }

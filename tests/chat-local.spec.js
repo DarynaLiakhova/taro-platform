@@ -103,6 +103,23 @@ test.describe('Чат: отправка', () => {
     expect(page.errors).toEqual([]);
   });
 
+  test('голосовое: перемотка по волне меняет позицию', async ({ page }) => {
+    await boot(page);
+    await masterOpen(page, 'maria', 'spread');
+    await page.click('#cMic');
+    await expect(page.locator('#cRec')).toBeVisible();
+    await page.waitForTimeout(1500);
+    await page.click('#cStop');
+    await expect(page.locator('#thread .vmsg')).toHaveCount(1, { timeout: 15000 });
+    const wave = page.locator('#thread .vmsg .vwave').last();
+    const box = await wave.boundingBox();
+    await page.mouse.click(box.x + box.width * 0.7, box.y + box.height / 2);  // перемотка на ~70%
+    await page.waitForTimeout(300);
+    const ct = await page.evaluate(() => +document.querySelector('#thread .vmsg audio').currentTime);
+    expect(ct).toBeGreaterThan(0.3);   // позиция сдвинулась к клику
+    expect(page.errors).toEqual([]);
+  });
+
   test('выбрать несколько сообщений и удалить разом', async ({ page }) => {
     await boot(page);
     await masterOpen(page, 'maria', 'spread');
