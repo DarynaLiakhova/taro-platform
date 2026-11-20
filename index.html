@@ -320,6 +320,9 @@ textarea:focus{outline:none;border-color:var(--gold)}
 .player .ctl .bar{height:3px}
 .player .ctl span{font-size:12px;color:var(--mute)}
 .player .demo{position:absolute;right:16px;top:18px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+/* встроенный плеер Kinescope: iframe заполняет блок, имитация прячется */
+.kplayer{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:inherit;background:#000}
+.player.has-video .pt,.player.has-video .pb,.player.has-video .ctl,.player.has-video .demo{display:none}
 .lseg{margin:24px 0 18px}
 .lbody{max-width:68ch;display:grid;gap:14px}
 .lbody h3{font-size:1.4rem;margin-top:6px}
@@ -2336,6 +2339,8 @@ const rub=n=>Number(n||0).toLocaleString("ru-RU")+" ₽";
 const dayOf=iso=>isoDay(new Date(iso));
 let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2800)}
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
+/* ссылка Kinescope (watch/share/embed/iframe-код) → встраиваемый плеер; app.kinescope.io (панель) не подходит */
+function kinoEmbed(v){if(!v)return null;const m=String(v).trim().match(/https?:\/\/kinescope\.io\/(?:embed\/)?([A-Za-z0-9]{8,})/);return m?"https://kinescope.io/embed/"+m[1]:null;}
 
 // ===== программа по умолчанию =====
 const QUIZ={
@@ -2549,7 +2554,7 @@ $("payClose").onclick=()=>closeDlg("paydlg");
 const curView=()=>{const v=[...document.querySelectorAll(".view")].find(x=>!x.hidden);return v?v.id.slice(2):""};
 const PAL2=!!window.__PAL2;const HOMEV=()=>PAL2?"home":"path";
 const stImg=n=>`assets/stg${n}p.webp`;
-function showView(v){if(v==="login"&&typeof renderLanding==="function")setTimeout(renderLanding,0);if(v!=="login"&&$("authDlg"))$("authDlg").hidden=true;
+function showView(v){if(v!=="lesson"&&typeof stopPlayer==="function")stopPlayer();if(v==="login"&&typeof renderLanding==="function")setTimeout(renderLanding,0);if(v!=="login"&&$("authDlg"))$("authDlg").hidden=true;
  document.querySelectorAll(".view").forEach(x=>x.hidden=!(x.id==="v-"+v||(v==="mech"&&x.id==="v-market")));
  window.scrollTo({top:0});document.body.classList.toggle("stage-on",v==="path"||v==="login");
  if(v==="deck")renderDeck();if(v==="journal")renderJournal();if(v==="spreads")renderSp();if(v==="path")renderAll();if(v==="profile")renderProfile();
@@ -2776,8 +2781,10 @@ function openLesson(sn,li){setTimeout(()=>dRestore(["taskAns"]),0);
  L_stage=sn;L_idx=li;const s=ST(sn),l=s.lessons[li-1],n=L(sn);if(!l)return;
  stopPlayer();pPos=0;$("pBar").style.width="0";$("pTime").textContent=`0:00 / ${l.dur||40}:00`;$("pBtn").textContent="▶";
  $("lCrumb").textContent=`${sn} ступень · ${l.kind==="quest"?"квест":"лекция"} ${li} из ${n}`;$("lTitle").textContent=l.title;$("pTitle").textContent=l.title;
- const vl=$("player").querySelector(".vlink");if(vl)vl.remove();
- const u=safeUrl(l.video);if(u){const a=document.createElement("a");a.className="vlink";a.href=u;a.target="_blank";a.rel="noopener";a.textContent="Открыть видео ↗";$("player").appendChild(a)}
+ $("player").querySelectorAll(".vlink,.kplayer").forEach(el=>el.remove());
+ const emb=kinoEmbed(l.video);
+ if(emb){const f=document.createElement("iframe");f.className="kplayer";f.src=emb;f.title=l.title;f.allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write";f.allowFullscreen=true;f.loading="lazy";$("player").classList.add("has-video");$("player").appendChild(f)}
+ else{$("player").classList.remove("has-video");const u=safeUrl(l.video);if(u){const a=document.createElement("a");a.className="vlink";a.href=u;a.target="_blank";a.rel="noopener";a.textContent="Открыть видео ↗";$("player").appendChild(a)}}
  $("lStage").textContent=`${sn} ступень · ${short(s)}`;
  $("lNotes").innerHTML=notesHTML(l);$("lTask").innerHTML=taskHTML(l);
  setLSeg(l.kind==="quest"?"t":"n");
@@ -2801,7 +2808,7 @@ function openLesson(sn,li){setTimeout(()=>dRestore(["taskAns"]),0);
 function setLSeg(t){document.querySelectorAll("#lSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===t));$("lNotes").hidden=t!=="n";$("lTask").hidden=t!=="t"}
 document.querySelectorAll("#lSeg button").forEach(b=>b.onclick=()=>setLSeg(b.dataset.t));
 $("lBack").onclick=()=>showView("path");
-function stopPlayer(){clearInterval(pTimer);pTimer=null}
+function stopPlayer(){clearInterval(pTimer);pTimer=null;document.querySelectorAll("#player .kplayer").forEach(f=>f.remove())}
 $("pBtn").onclick=()=>{
  const dur=(ST(L_stage).lessons[L_idx-1]||{}).dur||40;
  if(pTimer){stopPlayer();$("pBtn").textContent="▶";return}
