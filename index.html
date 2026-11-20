@@ -2783,7 +2783,7 @@ function openLesson(sn,li){setTimeout(()=>dRestore(["taskAns"]),0);
  $("lCrumb").textContent=`${sn} ступень · ${l.kind==="quest"?"квест":"лекция"} ${li} из ${n}`;$("lTitle").textContent=l.title;$("pTitle").textContent=l.title;
  $("player").querySelectorAll(".vlink,.kplayer").forEach(el=>el.remove());
  const emb=kinoEmbed(l.video);
- if(emb){const f=document.createElement("iframe");f.className="kplayer";f.src=emb;f.title=l.title;f.allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write";f.allowFullscreen=true;f.loading="lazy";$("player").classList.add("has-video");$("player").appendChild(f)}
+ if(emb){const f=document.createElement("iframe");f.className="kplayer";f.src=emb;f.title=l.title;f.allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;";f.allowFullscreen=true;f.loading="lazy";$("player").classList.add("has-video");$("player").appendChild(f)}
  else{$("player").classList.remove("has-video");const u=safeUrl(l.video);if(u){const a=document.createElement("a");a.className="vlink";a.href=u;a.target="_blank";a.rel="noopener";a.textContent="Открыть видео ↗";$("player").appendChild(a)}}
  $("lStage").textContent=`${sn} ступень · ${short(s)}`;
  $("lNotes").innerHTML=notesHTML(l);$("lTask").innerHTML=taskHTML(l);
