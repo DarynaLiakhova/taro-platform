@@ -1841,15 +1841,25 @@ html.pal2 .th-site .vplay,html.pal2 .th-site .tg-row .tg-mic,html.pal2 .th-site 
 /* удалённое сообщение — «надгробие» у обоих */
 .bub.del{opacity:.72}
 .del-note{margin:0;font-style:italic;opacity:.75;font-size:13.5px}
-/* действия над сообщением (копировать/удалить) при наведении */
-.tg-body .msg{position:relative}
-.pc-mact{position:absolute;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;pointer-events:none;z-index:2}
-.msg.out .pc-mact{right:100%;margin-right:7px}
-.msg.in .pc-mact{left:100%;margin-left:7px}
-.msg:hover .pc-mact,.pc-mact:focus-within{opacity:1;pointer-events:auto}
-.pc-ma{min-width:26px;height:26px;padding:0 7px;border-radius:999px;border:1px solid rgba(201,160,80,.5);background:rgba(255,250,242,.92);color:#7a5a2a;font-size:13px;line-height:1;cursor:pointer;white-space:nowrap}
-.pc-ma.del{color:#9a3b3b}
-.pc-ma.sure{background:#9a3b3b;color:#fff;border-color:#9a3b3b}
+/* контекстное меню сообщения — как в телеграме */
+.pc-ctx{position:fixed;z-index:60;min-width:190px;background:#fffaf2;border:1px solid rgba(201,160,80,.5);border-radius:14px;box-shadow:0 14px 34px rgba(10,4,6,.3);padding:6px;display:flex;flex-direction:column}
+.pc-ctx button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;font:inherit;font-size:15px;color:#3a1428;padding:10px 12px;border-radius:9px;cursor:pointer;text-align:left}
+.pc-ctx button:hover{background:rgba(154,111,34,.1)}
+.pc-ctx button.danger{color:#b43b3b}
+.pc-ctx button svg{width:19px;height:19px;flex:0 0 auto;opacity:.85}
+/* режим выбора сообщений */
+.tg-body.selmode .msg[data-mid]{cursor:pointer}
+.tg-body.selmode .msg[data-mid] .bub{cursor:pointer}
+.pc-selc{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid rgba(201,160,80,.7);align-self:center;margin:0 8px}
+.msg.picked .pc-selc{background:var(--tp-wine2,#93384a);border-color:var(--tp-wine2,#93384a);box-shadow:inset 0 0 0 3px #fffaf2}
+.tg-body.selmode .msg.picked .bub{outline:2px solid var(--tp-wine2,#93384a);outline-offset:2px}
+.pc-selbar{display:flex;align-items:center;gap:12px}
+.pc-selx{width:30px;height:30px;border-radius:50%;border:1px solid rgba(201,160,80,.5);background:rgba(255,255,255,.5);font-size:18px;line-height:1;cursor:pointer;color:#6b4a46;flex:0 0 auto}
+.pc-seln{flex:1;font-size:14px;color:#6b4a46}
+.pc-selacts{display:flex;gap:8px}
+.pc-selacts button{border:1px solid rgba(201,160,80,.55);background:rgba(255,255,255,.5);border-radius:9px;padding:8px 14px;font:inherit;font-size:13.5px;font-weight:600;color:#6b4a2a;cursor:pointer}
+.pc-selacts button.danger{color:#b43b3b;border-color:rgba(180,59,59,.5)}
+.pc-selacts button:disabled{opacity:.45;cursor:default}
 .chats{display:flex;flex-direction:column;gap:2px;margin-top:10px;overflow-y:auto;flex:1;padding-right:2px}
 .chatrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(154,111,34,.16);padding:11px 8px;cursor:pointer;font:inherit;color:inherit;border-radius:12px}
 .chatrow:hover{background:rgba(154,111,34,.07)}
@@ -3487,7 +3497,7 @@ function bindSelect(x,u,me){
  ["selDel","selDel2"].forEach(id=>{const b=$(id);if(b)b.onclick=()=>del(b)});
 }
 /* ===== ЕДИНАЯ ЛЕНТА НА УЧЕНИЦУ (мастер, «Переписки») — все разборы карточками по времени, один ввод, ответ как в телеграме ===== */
-let pcMode=false,pReply=null,pActiveSid=null;
+let pcMode=false,pReply=null,pActiveSid=null,pcSelMode=false,pcSel=new Set();
 const PC_SEND='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" fill="currentColor"/></svg>';
 function pcItems(u){return (u.spreads||[]).filter(x=>x.sentAt&&!x.mDeletedAt&&!(x.deletedAt&&x.mDismissed)&&chTypeOk(x)).slice().sort((a,b)=>lastAct(a).localeCompare(lastAct(b)))}
 function pcTitle(x){return x.kind==="question"?(x.lesson?`Вопрос к лекции «${esc(x.lesson.title)}»`:"Вопрос Лене"):esc(x.q||"")}
@@ -3527,9 +3537,8 @@ function renderPersonChat(){
    if(m.del){html+=`<div class="msg ${out?"m out":"s in"} tail"><div class="bub del"><p class="del-note">Сообщение удалено</p><span class="meta">${hm(m.at)}</span></div></div>`;return}
    const only=(m.img||(m.vids&&m.vids.length)||(m.voice&&m.voice.src))&&!m.t;
    const quote=m.reply?`<button type="button" class="pc-quote" data-goto="sp-${m.reply.sid}"><b>${esc(m.reply.kind||"разбор")}</b><span>${esc(m.reply.q||"")}</span></button>`:"";
-   const mid=e.x.id+":"+e.i;
-   const acts=`<div class="pc-mact">${m.t?`<button type="button" class="pc-ma" data-mcopy="${mid}" aria-label="Копировать">⧉</button>`:""}<button type="button" class="pc-ma del" data-mdel="${mid}" aria-label="Удалить">🗑</button></div>`;
-   html+=`<div class="msg ${out?"m out":"s in"} tail">${acts}<div class="bub${only?" media":""}">${quote}${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}<span class="meta">${hm(m.at)}</span></div></div>`;
+   const mid=e.x.id+":"+e.i,picked=pcSel.has(mid);
+   html+=`<div class="msg ${out?"m out":"s in"} tail${picked?" picked":""}" data-mid="${mid}">${pcSelMode?`<span class="pc-selc" aria-hidden="true"></span>`:""}<div class="bub${only?" media":""}">${quote}${albumHTML(m)}${voiceMsg(m)}${m.t?`<p>${esc(m.t)}</p>`:""}<span class="meta">${hm(m.at)}</span></div></div>`;
   }});
  const other=u.name;
  const replyBar=pReply?`<div class="tg-reply-bar" id="pcReplyBar"><span class="rb-l"></span><div><b>↩ Ответ на ${esc(pReply.kind||"разбор")}</b><small>${esc(pReply.q||"")}</small></div><button type="button" class="tg-x" id="pcReplyX" aria-label="Отменить ответ">×</button></div>`:"";
@@ -3549,8 +3558,9 @@ function renderPersonChat(){
    <span class="tg-ava" style="--h:${hueOf(other)}">${esc((other||"?").trim().charAt(0).toUpperCase())}</span>
    <div class="tg-ti"><b>${esc(other)}</b><small>${items.length} ${plural(items.length,"разбор","разбора","разборов")} · ${pcType()}</small></div>
    <button type="button" class="tg-ic" id="pcWho" aria-label="Карточка ученицы"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-4.2 14.4-4.2 16 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></header>
-  <div class="tg-body" id="thread">${html}</div>
-  ${comp}</div>`;
+  <div class="tg-body${pcSelMode?" selmode":""}" id="thread">${html}</div>
+  ${pcSelMode?pcSelBar():comp}
+  <div class="pc-ctx" id="pcCtx" hidden></div></div>`;
  const tb=$("thread");if(atBottom)tb.scrollTop=tb.scrollHeight;else tb.scrollTop=prevTop;
  try{const bi=getComputedStyle(document.body).backgroundImage;if(bi&&bi!=="none"){tb.style.backgroundImage=bi;tb.style.backgroundColor=document.documentElement.classList.contains("pal2")?"#21493f":"#13302c";tb.style.backgroundSize="auto"}}catch(_){}
  tgStick=atBottom;stickChat();
@@ -3562,13 +3572,13 @@ function renderPersonChat(){
  {const x=$("pcReplyX");if(x)x.onclick=()=>{pReply=null;renderPersonChat();const t=$("cTxt");if(t)t.focus()}}
  tb.querySelectorAll("[data-pass]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.pass,true));
  tb.querySelectorAll("[data-ret]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.ret,false));
- tb.querySelectorAll("[data-mcopy]").forEach(b=>b.onclick=()=>{const [sid,i]=b.dataset.mcopy.split(":").map(Number);const x=u.spreads.find(s=>s.id===sid),t=x&&x.thread[i]&&x.thread[i].t;if(t){try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}}});
- tb.querySelectorAll("[data-mdel]").forEach(b=>b.onclick=()=>{
-  if(b.dataset.c!=="1"){b.dataset.c="1";b.classList.add("sure");b.textContent="Удалить?";setTimeout(()=>{if(b.isConnected){b.dataset.c="";b.classList.remove("sure");b.innerHTML="🗑"}},4000);return}
-  const [sid,i]=b.dataset.mdel.split(":").map(Number);const x=u.spreads.find(s=>s.id===sid);if(!x||!x.thread[i])return;
-  const m=x.thread[i];m.del=true;m.u=nowISO();m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;
-  if(m.from==="master")x.unreadS=true;else x.unreadM=true;
-  persist();renderPersonChat();refresh();toast("Сообщение удалено")});
+ tb.querySelectorAll(".msg[data-mid]").forEach(row=>{const bub=row.querySelector(".bub");bub.addEventListener("click",e=>{
+   if(e.target.closest("button,a,img,video,audio,.vmsg,.pc-quote"))return;
+   const mid=row.dataset.mid,p=mid.split(":"),sid=+p[0],i=+p[1];
+   if(pcSelMode){pcSel.has(mid)?pcSel.delete(mid):pcSel.add(mid);renderPersonChat();return}
+   pcCtxOpen(sid,i,bub)})});
+ if(pcSelMode){const c=$("pcSelCancel");if(c)c.onclick=()=>{pcSelMode=false;pcSel.clear();renderPersonChat()};
+  const cp=$("pcSelCopy");if(cp)cp.onclick=pcSelCopy;const dl=$("pcSelDel");if(dl)dl.onclick=pcSelDel}
  const activeX=u.spreads.find(s=>s.id===pActiveSid)||items[items.length-1];
  mountChatRec(activeX);
  const s=$("cSend");if(s)s.onclick=()=>pcSend();
@@ -3602,6 +3612,26 @@ function pcExam(sid,ok){
  else{x.status="returned";x.unreadS=true;DB.done++;notify(u.id,`Лена вернула Посвящение ${x.stage} ступени на доработку`,{type:"spread",u:u.id,sid:x.id});toast("Посвящение возвращено")}
  pReply=null;persist();renderPersonChat();refresh();
 }
+function pcSelBar(){const n=pcSel.size;return `<div class="comp pc-selbar"><button type="button" class="pc-selx" id="pcSelCancel" aria-label="Отмена">×</button><span class="pc-seln">${n?`${n} ${plural(n,"сообщение","сообщения","сообщений")}`:"Выбери сообщения"}</span><div class="pc-selacts"><button type="button" id="pcSelCopy" ${n?"":"disabled"}>Копировать</button><button type="button" class="danger" id="pcSelDel" ${n?"":"disabled"}>Удалить</button></div></div>`}
+function pcCtxClose(){const m=$("pcCtx");if(m)m.hidden=true}
+function pcCtxOpen(sid,i,anchor){
+ const u=chatU,x=u&&u.spreads.find(s=>s.id===sid),m=x&&x.thread[i];if(!m)return;
+ const menu=$("pcCtx");if(!menu)return;
+ menu.innerHTML=`${m.t?`<button type="button" data-act="copy">${IC.copy}Копировать</button>`:""}<button type="button" data-act="sel">${IC.sel}Выбрать</button><button type="button" class="danger" data-act="del">${IC.del}Удалить</button>`;
+ menu.hidden=false;
+ const br=anchor.getBoundingClientRect(),mw=menu.offsetWidth,mh=menu.offsetHeight,out=anchor.closest(".msg").classList.contains("out");
+ let top=br.bottom+6,left=out?br.right-mw:br.left;
+ left=Math.max(8,Math.min(left,window.innerWidth-mw-8));
+ if(top+mh>window.innerHeight-8)top=Math.max(8,br.top-mh-6);
+ menu.style.top=top+"px";menu.style.left=left+"px";
+ const cp=menu.querySelector("[data-act=copy]");if(cp)cp.onclick=()=>{pcCtxClose();if(m.t){try{navigator.clipboard.writeText(m.t).then(()=>toast("Текст скопирован"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}}};
+ menu.querySelector("[data-act=sel]").onclick=()=>{pcCtxClose();pcSelMode=true;pcSel=new Set([sid+":"+i]);renderPersonChat()};
+ menu.querySelector("[data-act=del]").onclick=()=>{pcCtxClose();pcDelOne(sid,i)};
+ setTimeout(()=>{const close=ev=>{if(!ev.target.closest("#pcCtx")){pcCtxClose();document.removeEventListener("pointerdown",close,true)}};document.addEventListener("pointerdown",close,true);const tb=$("thread");if(tb)tb.addEventListener("scroll",pcCtxClose,{passive:true,once:true})},0);
+}
+function pcDelOne(sid,i){const u=chatU,x=u&&u.spreads.find(s=>s.id===sid),m=x&&x.thread[i];if(!m)return;m.del=true;m.u=nowISO();m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;if(m.from==="master")x.unreadS=true;else x.unreadM=true;persist();renderPersonChat();refresh();toast("Сообщение удалено")}
+function pcSelCopy(){const u=chatU,parts=[];[...pcSel].forEach(mid=>{const p=mid.split(":"),x=u.spreads.find(s=>s.id===+p[0]),m=x&&x.thread[+p[1]];if(m&&m.t)parts.push(m.t)});if(parts.length){try{navigator.clipboard.writeText(parts.join("\n")).then(()=>toast("Скопировано"),()=>toast("Не получилось скопировать"))}catch(e){toast("Не получилось скопировать")}}pcSelMode=false;pcSel.clear();renderPersonChat()}
+function pcSelDel(){const u=chatU;let n=0;[...pcSel].forEach(mid=>{const p=mid.split(":"),x=u.spreads.find(s=>s.id===+p[0]),m=x&&x.thread[+p[1]];if(m&&!m.del){m.del=true;m.u=nowISO();m.t="";m.img=null;m.more=null;m.voice=null;m.vids=null;if(m.from==="master")x.unreadS=true;else x.unreadM=true;n++}});pcSelMode=false;pcSel.clear();persist();renderPersonChat();refresh();if(n)toast(`Удалено: ${n}`)}
 function renderChat(){
  const u=chatU,x=chatS,r=chatRole,me=r==="master";
  const tbOld=$("thread"),atBottom=!tbOld||tbOld.scrollHeight-tbOld.scrollTop-tbOld.clientHeight<90,prevTop=tbOld?tbOld.scrollTop:0;
@@ -4174,7 +4204,7 @@ function renderJournal(){
 }
 $("jSearch").addEventListener("input",renderJournal);
 // ===== диалоги =====
-function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null;pcMode=false;pReply=null;if(typeof syncChatPane==="function")syncChatPane();if(typeof renderChats==="function"&&curView()==="mchats"&&$("vdlg").classList.contains("embedded"))renderChats()}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null;pcMode=false;pReply=null;pcSelMode=false;pcSel.clear();if(typeof syncChatPane==="function")syncChatPane();if(typeof renderChats==="function"&&curView()==="mchats"&&$("vdlg").classList.contains("embedded"))renderChats()}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
 ["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg","qdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel").hidden){$("npanel").hidden=true;renderTabs();return}
  for(const id of ["xdlg","qdlg","rdlg","paydlg","ldlg","mpdlg","vdlg","fdlg","dlg","dayDlg","cdlg","authDlg"])if(!$(id).hidden){closeDlg(id);return}});
