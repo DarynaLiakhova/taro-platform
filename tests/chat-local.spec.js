@@ -95,7 +95,7 @@ test.describe('Чат: отправка', () => {
     await page.click('#cSend');
     const msg = page.locator('#thread .msg.m', { hasText: 'Удаляемое сообщение' }).first();
     await expect(msg).toHaveCount(1);
-    await msg.locator('.bub').click();                 // открыть меню сообщения
+    await msg.locator('.bub').click({ button: 'right' });   // правый клик — меню как в телеге
     await expect(page.locator('#pcCtx')).toBeVisible();
     await page.locator('#pcCtx [data-act="del"]').click();
     await expect(page.locator('#thread .bub.del', { hasText: 'Сообщение удалено' })).toHaveCount(1);
@@ -108,9 +108,9 @@ test.describe('Чат: отправка', () => {
     await masterOpen(page, 'maria', 'spread');
     await page.fill('#cTxt', 'Сообщение один'); await page.click('#cSend');
     await page.fill('#cTxt', 'Сообщение два'); await page.click('#cSend');
-    await page.locator('#thread .msg.m', { hasText: 'Сообщение один' }).locator('.bub').click();
+    await page.locator('#thread .msg.m', { hasText: 'Сообщение один' }).locator('.bub').click({ button: 'right' });
     await page.locator('#pcCtx [data-act="sel"]').click();          // «Выбрать»
-    await page.locator('#thread .msg.m', { hasText: 'Сообщение два' }).locator('.bub').click();
+    await page.locator('#thread .msg.m', { hasText: 'Сообщение два' }).locator('.bub').click();  // левый клик — отметка
     await expect(page.locator('.pc-seln')).toContainText('2');
     await page.locator('#pcSelDel').click();
     await expect(page.locator('#thread .bub.del')).toHaveCount(2);

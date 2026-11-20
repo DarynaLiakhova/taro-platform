@@ -3572,11 +3572,11 @@ function renderPersonChat(){
  {const x=$("pcReplyX");if(x)x.onclick=()=>{pReply=null;renderPersonChat();const t=$("cTxt");if(t)t.focus()}}
  tb.querySelectorAll("[data-pass]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.pass,true));
  tb.querySelectorAll("[data-ret]").forEach(b=>b.onclick=()=>pcExam(+b.dataset.ret,false));
- tb.querySelectorAll(".msg[data-mid]").forEach(row=>{const bub=row.querySelector(".bub");bub.addEventListener("click",e=>{
-   if(e.target.closest("button,a,img,video,audio,.vmsg,.pc-quote"))return;
-   const mid=row.dataset.mid,p=mid.split(":"),sid=+p[0],i=+p[1];
-   if(pcSelMode){pcSel.has(mid)?pcSel.delete(mid):pcSel.add(mid);renderPersonChat();return}
-   pcCtxOpen(sid,i,bub)})});
+ tb.querySelectorAll(".msg[data-mid]").forEach(row=>{const bub=row.querySelector(".bub"),mid=row.dataset.mid,p=mid.split(":"),sid=+p[0],i=+p[1];
+   /* правый клик / долгое нажатие — меню как в телеграме (глушим нативное меню браузера) */
+   bub.addEventListener("contextmenu",e=>{if(pcSelMode)return;e.preventDefault();pcCtxOpen(sid,i,bub)});
+   /* левый клик — только отметка в режиме выбора */
+   bub.addEventListener("click",e=>{if(!pcSelMode)return;if(e.target.closest("button,a,img,video,audio,.vmsg,.pc-quote"))return;pcSel.has(mid)?pcSel.delete(mid):pcSel.add(mid);renderPersonChat()})});
  if(pcSelMode){const c=$("pcSelCancel");if(c)c.onclick=()=>{pcSelMode=false;pcSel.clear();renderPersonChat()};
   const cp=$("pcSelCopy");if(cp)cp.onclick=pcSelCopy;const dl=$("pcSelDel");if(dl)dl.onclick=pcSelDel}
  const activeX=u.spreads.find(s=>s.id===pActiveSid)||items[items.length-1];
