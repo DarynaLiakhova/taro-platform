@@ -4402,11 +4402,13 @@ function rApply(){
 }
 function rRebind(){
  if(role==="student"&&S){const u=DB.users[S.id];if(!u)return;S=u;cur=u.cur;notes=u.notes||(u.notes={});spreads=u.spreads;got=gotOf(u);FREE=noPay(u);document.body.classList.toggle("free",FREE)}
- if(chatU){const u=DB.users[chatU.id];chatU=u||null;chatS=u?u.spreads.find(x=>x.id===(chatS&&chatS.id))||null:null;if(!chatS&&!$("vdlg").hidden){$("vdlg").hidden=true}}
+ if(chatU){const u=DB.users[chatU.id];chatU=u||null;
+  if(pcMode){if(!chatU&&!$("vdlg").hidden){$("vdlg").hidden=true;pcMode=false}}
+  else{chatS=u?u.spreads.find(x=>x.id===(chatS&&chatS.id))||null:null;if(!chatS&&!$("vdlg").hidden){$("vdlg").hidden=true}}}
  if(xU)xU=DB.users[xU.id]||null;
  if(!role)return;
  const t=$("cTxt"),tv=t?t.value:null,ss=t?t.selectionStart:0,foc=t&&document.activeElement===t;
- try{refresh();if(!$("vdlg").hidden&&chatS&&!(RC&&RC.active())&&editMsg==null&&!finEdit)renderChat()}catch(e){console.warn(e)}
+ try{refresh();if(!$("vdlg").hidden&&!(RC&&RC.active())){if(pcMode&&chatU)renderPersonChat();else if(chatS&&editMsg==null&&!finEdit)renderChat()}}catch(e){console.warn(e)}
  const t2=$("cTxt");if(t2&&tv!=null){t2.value=tv;if(foc){t2.focus();try{t2.setSelectionRange(ss,ss)}catch(_){}}}
 }
 async function rLoadAll(){
