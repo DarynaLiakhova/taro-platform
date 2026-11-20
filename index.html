@@ -1155,8 +1155,8 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
  /* кнопки, которые не должны переноситься */
  .l-cta .btn{font-size:15px;padding:12px 18px;white-space:nowrap}
  /* окна — как «лист» на весь экран, крестик внутри */
- .dlg{padding:0!important;place-items:end stretch}
- .dlg .dbox{width:100%!important;max-width:none!important;max-height:calc(100dvh - 24px)!important;overflow:auto;border-radius:18px 18px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))!important}
+ .dlg{padding:0!important;place-items:end stretch;top:var(--vvt,0)!important;height:var(--vvh,100dvh)!important;bottom:auto!important}
+ .dlg .dbox{width:100%!important;max-width:none!important;max-height:calc(var(--vvh,100dvh) - 24px)!important;overflow:auto;border-radius:18px 18px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))!important}
  .dlg .dx{position:sticky;top:0;float:right;margin:-6px -4px 0 0;z-index:2;width:36px;height:36px;font-size:22px}
  /* кабинет: подпись ступени не лезет на глаз */
  .hero.me{padding-top:72px!important;background-position:center 0!important}
@@ -1374,8 +1374,8 @@ body :is(.fbox) .cat,.fbox .cat{color:#3a1428;border-color:rgba(176,138,62,.45);
 .tg-join{all:unset;cursor:pointer;text-align:center;color:var(--tg-acc);font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.02em;padding:8px}
 .tg-join:hover{background:#f4f8fd;border-radius:8px}
 @media (max-width:760px){
- .dlg#vdlg{padding:0!important;place-items:stretch}
- .dlg#vdlg .dbox.tgbox{width:100%!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;padding:0!important}
+ .dlg#vdlg{padding:0!important;place-items:stretch;top:var(--vvt,0)!important;height:var(--vvh,100dvh)!important;bottom:auto!important}
+ .dlg#vdlg .dbox.tgbox{width:100%!important;height:var(--vvh,100dvh)!important;max-height:var(--vvh,100dvh)!important;border-radius:0!important;padding:0!important}
  .tg-h{padding-top:calc(8px + env(safe-area-inset-top,0px))}
  .tg .msg{max-width:88%}
 }
@@ -4222,6 +4222,13 @@ function renderJournal(){
 }
 $("jSearch").addEventListener("input",renderJournal);
 // ===== диалоги =====
+/* мобильная клавиатура: окна подстраиваются под видимую область (visualViewport), не перекрывая вопрос/ввод */
+(function(){const vv=window.visualViewport;if(!vv)return;const r=document.documentElement;
+ const fit=()=>{r.style.setProperty('--vvh',Math.round(vv.height)+'px');r.style.setProperty('--vvt',Math.round(vv.offsetTop)+'px')};
+ vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);
+ document.addEventListener('focusin',()=>setTimeout(fit,60));
+ document.addEventListener('focusout',()=>setTimeout(fit,60));
+ fit();})();
 function closeDlg(id){if(id==="authDlg")wantPay=null;if(id==="fdlg")RF.stop(true);if(id==="qdlg"&&typeof RQ!=="undefined")RQ.stop(true);if(id==="vdlg"){finEdit=false;if(RC)RC.stop(true);cDraft={sid:null,voice:null,img:null}}$(id).hidden=true;if(id==="dlg"&&!$("v-journal").hidden)renderJournal();if(id==="dayDlg"&&S)renderStage();if(id==="dlg")openI=null;if(id==="vdlg"){chatS=null;editMsg=null;pcMode=false;pReply=null;pcSelMode=false;pcSel.clear();if(typeof syncChatPane==="function")syncChatPane();if(typeof renderChats==="function"&&curView()==="mchats"&&$("vdlg").classList.contains("embedded"))renderChats()}if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
 ["dlg","fdlg","vdlg","paydlg","cdlg","ldlg","mpdlg","dayDlg","authDlg","xdlg","qdlg"].forEach(id=>$(id).addEventListener("click",e=>{if(e.target.id===id)closeDlg(id)}));
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("npanel").hidden){$("npanel").hidden=true;renderTabs();return}
