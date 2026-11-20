@@ -119,17 +119,14 @@ test.describe('Чат: доставка Лене', () => {
     expect(page.errors).toEqual([]);
   });
 
-  test('два вопроса подряд — второй доступен через «Ещё ждут»', async ({ page }) => {
+  test('два вопроса подряд — оба видны карточками в единой ленте', async ({ page }) => {
     await boot(page);
     await studentAsks(page, 'Вопрос-один про Жрицу?', 3);
     await studentAsks(page, 'Вопрос-два про Луну?', 4);
     await masterOpen(page, 'anna', 'question');
-    // открывается самый свежий (как в превью списка)
-    await expect(page.locator('#vBox')).toContainText('Вопрос-два про Луну?');
-    // первый не потерялся — он в полоске «Ещё ждут»
-    await expect(page.locator('#tgMore')).toContainText('Вопрос-один');
-    await page.locator('#tgMore .tgm-chip', { hasText: 'Вопрос-один' }).click();
-    await expect(page.locator('#vBox')).toContainText('Вопрос-один про Жрицу?');
+    // в единой ленте оба вопроса — отдельными карточками, ни один не прячется
+    await expect(page.locator('#thread .msg.orig', { hasText: 'Вопрос-один про Жрицу?' })).toHaveCount(1);
+    await expect(page.locator('#thread .msg.orig', { hasText: 'Вопрос-два про Луну?' })).toHaveCount(1);
     expect(page.errors).toEqual([]);
   });
 });
